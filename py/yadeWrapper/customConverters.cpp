@@ -40,6 +40,30 @@
 
 using namespace boost::python;
 
+// will be removed later
+#ifdef YADE_WM3
+struct custom_Vector3r_from_seq{
+	custom_Vector3r_from_seq(){
+		 converter::registry::push_back(&convertible,&construct,type_id<Vector3r>());
+	}
+	static void* convertible(PyObject* obj_ptr){
+		 if(!PySequence_Check(obj_ptr) || PySequence_Size(obj_ptr)!=3) return 0;
+		 return obj_ptr;
+	}
+	static void construct(PyObject* obj_ptr, converter::rvalue_from_python_stage1_data* data){
+		 void* storage=((converter::rvalue_from_python_storage<Vector3r>*)(data))->storage.bytes;
+		 new (storage) Vector3r(extract<Real>(PySequence_GetItem(obj_ptr,0)),extract<Real>(PySequence_GetItem(obj_ptr,1)),extract<Real>(PySequence_GetItem(obj_ptr,2)));
+		 data->convertible=storage;
+	}
+};
+
+struct custom_vector3i_to_seq{
+	static PyObject* convert(const Vector3i v3i){
+		python::tuple ret(python::make_tuple(v3i[0],v3i[1],v3i[2]));
+		return incref(ret.ptr());
+	}
+};
+#endif
 
 // move this to the miniEigen wrapper later
 
@@ -117,7 +141,11 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE(_customConverters){
 	// class_<std::vector<int> >("vecInt").def(indexing::container_suite<std::vector<int> >());
 	custom_Se3r_from_seq(); to_python_converter<Se3r,custom_se3_to_tuple>();
-
+	// Vector3i to python (not implemented the other way around yet)
+#ifdef YADE_WM3
+	custom_Vector3r_from_seq(); // Vector3r is wrapped, it is returned as a Vector3 instance; no to-python converter needed
+	custom_vector3i_to_seq(); to_python_converter<Vector3i,custom_vector3i_to_seq>();
+#endif
 	// StrArrayMap (typedef for std::map<std::string,numpy_boost>) → python dictionary
 	//custom_StrArrayMap_to_dict();
 	// register from-python converter and to-python converter

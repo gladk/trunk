@@ -5,7 +5,11 @@
 #pragma once
 
 #include<yade/lib-opengl/OpenGLWrapper.hpp>
-#include<QGLViewer/qglviewer.h>
+#ifndef YADE_LOCAL_QGLVIEWER
+	#include<QGLViewer/qglviewer.h>
+#else
+	#include<yade/lib-QGLViewer/qglviewer.h>
+#endif
 #include<boost/lexical_cast.hpp>
 #include<sstream>
 #include<iomanip>

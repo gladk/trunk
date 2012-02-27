@@ -21,7 +21,7 @@ Vector3r translation_vect_ ( 0.10,0,0 );
 
 void out ( Quaternionr q )
 {
-	AngleAxisr aa(q);
+	AngleAxisr aa(angleAxisFromQuat(q));
 	std::cout << " axis: " <<  aa.axis()[0] << " " << aa.axis()[1] << " " << aa.axis()[2] << ", angle: " << aa.angle() << " | ";
 }
 
@@ -123,7 +123,7 @@ void Law2_ScGeom_CohFrictPhys_ElasticPlastic::go(shared_ptr<InteractionGeometry>
 				delta = delta * currentContactPhysics->twistCreep;
 			}
 
-			AngleAxisr aa(delta); // axis of rotation - this is the Moment direction UNIT vector; // angle represents the power of resistant ELASTIC moment
+			AngleAxisr aa(angleAxisFromQuat(delta)); // axis of rotation - this is the Moment direction UNIT vector; // angle represents the power of resistant ELASTIC moment
 			if (aa.angle() > Mathr::PI) aa.angle() -= Mathr::TWO_PI;   // angle is between 0 and 2*pi, but should be between -pi and pi
 
 			Real angle_twist(aa.angle() * aa.axis().dot(currentContactGeometry->normal));

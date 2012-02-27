@@ -25,16 +25,16 @@ void Bo1_Facet_Aabb::go(	  const shared_ptr<Shape>& cm
 		for (int i=1;i<3;++i)
 		{
 			Vector3r v = O + facetAxisT * vertices[i];
-			aabb->min = aabb->min.cwise().min(v);
-			aabb->max = aabb->max.cwise().max(v);
+			aabb->min = componentMinVector( aabb->min, v);
+			aabb->max = componentMaxVector( aabb->max, v);
 		}
 	} else {
 		Real inf=std::numeric_limits<Real>::infinity();
 		aabb->min=Vector3r(inf,inf,inf); aabb->max=Vector3r(-inf,-inf,-inf);
 		for(int i=0; i<3; i++){
 			Vector3r v=scene->cell->unshearPt(O+facetAxisT*vertices[i]);
-			aabb->min=aabb->min.cwise().min(v);
-			aabb->max=aabb->min.cwise().max(v);
+			aabb->min=componentMinVector(aabb->min,v);
+			aabb->max=componentMaxVector(aabb->max,v);
 		}
 	}
 }

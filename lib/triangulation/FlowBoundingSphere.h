@@ -34,7 +34,7 @@ class FlowBoundingSphere
  		FlowBoundingSphere();
 		
 		int x_min_id, x_max_id, y_min_id, y_max_id, z_min_id, z_max_id;
-		int* boundsIds [6];
+		int boundsIds [6];
 		bool currentTes;
 		bool SLIP_ON_LATERALS;
 		double TOLERANCE;
@@ -45,17 +45,13 @@ class FlowBoundingSphere
 		int Iterations;
 		
 		Boundary boundaries [6];
+		int walls_id[6];
 		short id_offset;
  		Boundary& boundary (int b) {return boundaries[b-id_offset];}
 		
 		void mplot (RTriangulation& Tri, char *filename);
 		void Localize ();
 		void Compute_Permeability();
-		void AddBoundingPlanes();
-		
-		void AddBoundingPlanes(Real center[3], Real Extents[3], int id);
-// 		void AddBoundingPlanes(int y_min_id, int y_max_id, int x_min_id, int x_max_id, int z_min_id, int z_max_id);
-		void AddBoundingPlanes(bool yade); 
 		
 		void DisplayStatistics();
 		void GaussSeidel ( );
@@ -74,7 +70,12 @@ class FlowBoundingSphere
 		Real minPermLength; //min branch length for Poiseuille
 		
 		double P_SUP, P_INF, P_INS;
+		
 		void AddBoundingPlanes ( Tesselation& Tes, double x_Min,double x_Max ,double y_Min,double y_Max,double z_Min,double z_Max );
+		void AddBoundingPlanes(int y_min_id, int y_max_id, int x_min_id, int x_max_id, int z_min_id, int z_max_id);
+		void AddBoundingPlanes();
+		void AddBoundingPlanes(Real center[3], Real Extents[3], int id);
+		
 		void Compute_Action ( );
 		void Compute_Action ( int argc, char *argv[ ], char *envp[ ] );
 		void DisplayStatistics ( RTriangulation& Tri );

@@ -354,7 +354,7 @@ struct FundamentalHandler< Quaternion<RealType> >
 			string * tmpStr = any_cast<string*>(a);
 			Quaternion<RealType> * tmp = any_cast<Quaternion<RealType>*>(ac.getAddress());
 		
-			AngleAxis<RealType> aa(*tmp);
+			AngleAxis<RealType> aa(angleAxisFromQuat(*tmp));
 			aa.axis().normalize();
 
 			*tmpStr =	IOFormatManager::getCustomFundamentalOpeningBracket()	+
@@ -457,7 +457,7 @@ struct FundamentalHandler< Se3<RealType> >
 		
 			VECTOR3_TEMPLATE(RealType) position;
 		
-			AngleAxis<RealType> aa(tmp->orientation);
+			AngleAxis<RealType> aa(angleAxisFromQuat(tmp->orientation));
 			aa.axis().normalize();
 			position = tmp->position;
 		

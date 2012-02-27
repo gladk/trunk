@@ -3,13 +3,14 @@
 # copy this script to a clean directory and run
 set -e -x
 
-RELEASE="0.50rc1" # version we are preparing packages for
+RELEASE="0.50" # version we are preparing packages for
 KEYID=62A21250  # key ID of the creator (password will be asked)
-DISTS="hardy karmic lucid"
+DISTS="karmic lucid" # distributions for which packages will be built and uploaded 
+BASE="/home/vaclav/yade/yade-0.50" # base branch to clean checkout from
 
 TOP=`pwd`
-[ -d yade-$RELEASE.bzr ] || bzr co --lightweight lp:yade yade-$RELEASE.bzr
-rm -rf yade-$RELEASE; cp -r yade-$RELEASE.bzr yade-$RELEASE; rm -rf yade-$RELEASE/.bzr
+[ -d yade-$RELEASE.bzr ] || bzr co --lightweight $BASE yade-$RELEASE.bzr
+rm -rf yade-$RELEASE; cp -r yade-$RELEASE.bzr yade-$RELEASE; rm -rf yade-$RELEASE/.bzr yade-$RELEASE/attic
 tar -c yade-$RELEASE | gzip > yade-${RELEASE}_$RELEASE.orig.tar.gz
 cd yade-$RELEASE
 echo $RELEASE > RELEASE

@@ -49,7 +49,7 @@ env.Install('$PREFIX/lib/yade$SUFFIX/py/yade/tests',[
 # 3rd party modules:
 # ==================
 env.Install('$PREFIX/lib/yade$SUFFIX/py',[
-	env.SharedLibrary('miniEigen',['mathWrap/miniEigen.cpp'],SHLIBPREFIX='',CPPPATH=env['CPPPATH']+['../lib/'],LIBS=env['LIBS']+['core']),
+	env.SharedLibrary('miniEigen',['mathWrap/miniEigen.cpp' if 'wm3' not in env['features'] else 'mathWrap/miniWm3Wrap.cpp'],SHLIBPREFIX='',CPPPATH=env['CPPPATH']+['../lib/'],LIBS=env['LIBS']+['core']),
 ])
 
 if 'YADE_GTS' in env['CPPDEFINES']:

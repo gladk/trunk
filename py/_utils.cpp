@@ -36,8 +36,8 @@ py::tuple aabbExtrema(Real cutoff=0.0, bool centers=false){
 	FOREACH(const shared_ptr<Body>& b, *Omega::instance().getScene()->bodies){
 		shared_ptr<Sphere> s=dynamic_pointer_cast<Sphere>(b->shape); if(!s) continue;
 		Vector3r rrr(s->radius,s->radius,s->radius);
-		minimum=minimum.cwise().min(b->state->pos-(centers?Vector3r::Zero():rrr));
-		maximum=maximum.cwise().max(b->state->pos+(centers?Vector3r::Zero():rrr));
+		minimum=componentMinVector(minimum,Vector3r(b->state->pos-(centers?Vector3r::Zero():rrr)));
+		maximum=componentMaxVector(maximum,Vector3r(b->state->pos+(centers?Vector3r::Zero():rrr)));
 	}
 	Vector3r dim=maximum-minimum;
 	return py::make_tuple(Vector3r(minimum+.5*cutoff*dim),Vector3r(maximum-.5*cutoff*dim));

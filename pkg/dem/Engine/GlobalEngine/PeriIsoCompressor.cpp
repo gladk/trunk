@@ -10,7 +10,11 @@
 
 using namespace std;
 
-YADE_PLUGIN((PeriIsoCompressor)(PeriTriaxController)(Peri3dController))
+YADE_PLUGIN((PeriIsoCompressor)(PeriTriaxController)
+	#ifndef YADE_WM3
+		(Peri3dController)
+	#endif
+)
 
 CREATE_LOGGER(PeriIsoCompressor);
 void PeriIsoCompressor::action(){
@@ -124,14 +128,11 @@ void PeriTriaxController::strainStressStiffUpdate(){
 		//branch vector, FIXME : the first definition generalizes to non-spherical bodies but needs wrapped coords.
 		//    Vector3r branch=(Body::byId(I->getId1())->state->pos-Body::byId(I->getId2())->state->pos);
 		Vector3r branch= gsc->normal* ( gsc->refR1+gsc->refR2 );
-		#if 0
-			// remove this block later
-			// tensorial product f*branch (hand-write the tensor product to prevent matrix instanciation inside the loop by makeTensorProduct)
-			//stressTensor(0,0)+=f[0]*branch[0]; stressTensor(1,0)+=f[1]*branch[0]; stressTensor(2,0)+=f[2]*branch[0];
-			//stressTensor(0,1)+=f[0]*branch[1]; stressTensor(1,1)+=f[1]*branch[1]; stressTensor(2,1)+=f[2]*branch[1];
-			//stressTensor(0,2)+=f[0]*branch[2]; stressTensor(1,2)+=f[1]*branch[2]; stressTensor(2,2)+=f[2]*branch[2];
-		#endif
-		stressTensor+=f*branch.transpose();
+		// tensorial product f*branch (hand-write the tensor product to prevent matrix instanciation inside the loop by makeTensorProduct)
+		stressTensor(0,0)+=f[0]*branch[0]; stressTensor(1,0)+=f[1]*branch[0]; stressTensor(2,0)+=f[2]*branch[0];
+		stressTensor(0,1)+=f[0]*branch[1]; stressTensor(1,1)+=f[1]*branch[1]; stressTensor(2,1)+=f[2]*branch[1];
+		stressTensor(0,2)+=f[0]*branch[2]; stressTensor(1,2)+=f[1]*branch[2]; stressTensor(2,2)+=f[2]*branch[2];
+		//stressTensor+=makeTensorProduct( f, branch );
 		if( !dynCell )
 		{
 			for ( int i=0; i<3; i++ ) sumStiff[i]+=abs ( gsc->normal[i] ) *nsi->kn+ ( 1-abs ( gsc->normal[i] ) ) *nsi->ks;
@@ -248,6 +249,7 @@ void PeriTriaxController::action()
 	}
 }
 
+#ifndef YADE_WM3
 
 CREATE_LOGGER(Peri3dController);
 void Peri3dController::update(){
@@ -370,3 +372,4 @@ void Peri3dController::action(){
 	LOG_TRACE("epsU=\n"<<epsU<<"\neps=\n"<<"\nabs(maxCoeff)="<<mx<<"\nvelGrad=\n"<<velGrad);
 	// TODO: check unbalanced force and run some hook when the goal state is achieved
 }
+#endif

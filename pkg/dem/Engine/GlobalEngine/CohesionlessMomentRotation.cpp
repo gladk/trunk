@@ -114,7 +114,7 @@ void Law2_SCG_MomentPhys_CohesionlessMomentRotation::go(shared_ptr<InteractionGe
 
 	/* Moment Rotation Law */
 	Quaternionr delta( b1->state->ori * phys->initialOrientation1.conjugate() *phys->initialOrientation2 * b2->state->ori.conjugate()); //relative orientation
-	AngleAxisr aa(delta); // axis of rotation - this is the Moment direction UNIT vector; angle represents the power of resistant ELASTIC moment
+	AngleAxisr aa(angleAxisFromQuat(delta)); // axis of rotation - this is the Moment direction UNIT vector; angle represents the power of resistant ELASTIC moment
 	if(aa.angle() > Mathr::PI) aa.angle() -= Mathr::TWO_PI; // angle is between 0 and 2*pi, but should be between -pi and pi 
 	
 	phys->cumulativeRotation = aa.angle();

@@ -46,7 +46,7 @@ class State: public Serializable{
 		//! Return displacement (current-reference position)
 		Vector3r displ() const {return pos-refPos;}
 		//! Return rotation (current-reference orientation, as Vector3r)
-		Vector3r rot() const { Quaternionr relRot=refOri.conjugate()*ori; AngleAxisr aa(relRot); return aa.axis()*aa.angle(); }
+		Vector3r rot() const { Quaternionr relRot=refOri.conjugate()*ori; AngleAxisr aa(angleAxisFromQuat(relRot)); return aa.axis()*aa.angle(); }
 
 		// python access functions: pos and ori are references to inside Se3r and cannot be pointed to directly
 		Vector3r pos_get() const {return pos;}

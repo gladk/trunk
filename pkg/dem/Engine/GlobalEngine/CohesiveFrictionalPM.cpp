@@ -97,7 +97,7 @@ void Law2_ScGeom_CFpmPhys_CohesiveFrictionalPM::go(shared_ptr<InteractionGeometr
 	/* Moment Rotation Law */
 	// NOTE this part could probably be computed in ScGeom to avoid copy/paste multiplication !!!
 	Quaternionr delta( b1->state->ori * phys->initialOrientation1.conjugate() *phys->initialOrientation2 * b2->state->ori.conjugate()); delta.normalize(); //relative orientation
-	AngleAxisr aa(delta); // axis of rotation - this is the Moment direction UNIT vector; angle represents the power of resistant ELASTIC moment
+	AngleAxisr aa(angleAxisFromQuat(delta)); // axis of rotation - this is the Moment direction UNIT vector; angle represents the power of resistant ELASTIC moment
 	if(aa.angle() > Mathr::PI) aa.angle() -= Mathr::TWO_PI; // angle is between 0 and 2*pi, but should be between -pi and pi 
 	  
 	phys->cumulativeRotation = aa.angle();

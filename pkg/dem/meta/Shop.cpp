@@ -170,7 +170,7 @@ Real Shop::unbalancedForce(bool useMaxForce, Scene* _rb){
 	// get maximum force on a body and sum of all forces (for averaging)
 	Real sumF=0,maxF=0,currF; int nb=0;
 	FOREACH(const shared_ptr<Body>& b, *rb->bodies){
-		if(!b->isDynamic()) continue;
+		if(!b->isDynamic) continue;
 		currF=rb->forces.getForce(b->id).norm(); maxF=max(currF,maxF); sumF+=currF; nb++;
 	}
 	Real meanF=sumF/nb;
@@ -190,9 +190,9 @@ Real Shop::kineticEnergy(Scene* _rb){
 	Scene* rb=_rb ? _rb : Omega::instance().getScene().get();
 	Real ret=0.;
 	FOREACH(const shared_ptr<Body>& b, *rb->bodies){
-		if(!b->isDynamic()) continue;
+		if(!b->isDynamic) continue;
 		// ½(mv²+ωIω)
-		ret+=.5*(b->state->mass*b->state->vel.squaredNorm()+b->state->angVel.dot(b->state->inertia.cwise()*b->state->angVel));
+		ret+=.5*(b->state->mass*b->state->vel.squaredNorm()+b->state->angVel.dot(diagMult(b->state->inertia,b->state->angVel)));
 	}
 	return ret;
 }
@@ -318,7 +318,7 @@ shared_ptr<FrictMat> Shop::defaultGranularMat(){
 /*! Create body - sphere. */
 shared_ptr<Body> Shop::sphere(Vector3r center, Real radius, shared_ptr<Material> mat){
 	shared_ptr<Body> body(new Body);
-	body->setDynamic(true);
+	body->isDynamic=true;
 	body->material=mat ? mat : static_pointer_cast<Material>(defaultGranularMat());
 	body->state->pos=center;
 	body->state->mass=4.0/3.0*Mathr::PI*radius*radius*radius*body->material->density;
@@ -331,7 +331,7 @@ shared_ptr<Body> Shop::sphere(Vector3r center, Real radius, shared_ptr<Material>
 /*! Create body - box. */
 shared_ptr<Body> Shop::box(Vector3r center, Vector3r extents, shared_ptr<Material> mat){
 	shared_ptr<Body> body(new Body);
-	body->setDynamic(true);
+	body->isDynamic=true;
 	body->material=mat ? mat : static_pointer_cast<Material>(defaultGranularMat());
 	body->state->pos=center;
 	Real mass=8.0*extents[0]*extents[1]*extents[2]*body->material->density;
@@ -345,7 +345,7 @@ shared_ptr<Body> Shop::box(Vector3r center, Vector3r extents, shared_ptr<Materia
 /*! Create body - tetrahedron. */
 shared_ptr<Body> Shop::tetra(Vector3r v_global[4], shared_ptr<Material> mat){
 	shared_ptr<Body> body(new Body);
-	body->setDynamic(true);
+	body->isDynamic=true;
 	body->material=mat ? mat : static_pointer_cast<Material>(defaultGranularMat());
 	Vector3r centroid=(v_global[0]+v_global[1]+v_global[2]+v_global[3])*.25;
 	Vector3r v[4]; for(int i=0; i<4; i++) v[i]=v_global[i]-centroid;
@@ -366,7 +366,7 @@ void Shop::saveSpheresToFile(string fname){
 	if(!f.good()) throw runtime_error("Unable to open file `"+fname+"'");
 
 	FOREACH(shared_ptr<Body> b, *rootBody->bodies){
-		if (!b->isDynamic()) continue;
+		if (!b->isDynamic) continue;
 		shared_ptr<Sphere>	intSph=dynamic_pointer_cast<Sphere>(b->shape);
 		if(!intSph) continue;
 		const Vector3r& pos=b->state->pos;
@@ -379,7 +379,7 @@ Real Shop::getSpheresVolume(){
 	const shared_ptr<Scene>& rootBody=Omega::instance().getScene();
 	Real vol=0;
 	FOREACH(shared_ptr<Body> b, *rootBody->bodies){
-		if (!b->isDynamic()) continue;
+		if (!b->isDynamic) continue;
 		shared_ptr<Sphere> intSph=YADE_PTR_CAST<Sphere>(b->shape);
 		vol += 4.18879020*pow(intSph->radius,3);
 	}

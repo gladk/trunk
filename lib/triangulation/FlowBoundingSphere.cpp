@@ -1601,7 +1601,7 @@ void FlowBoundingSphere::Initialize_pressures( double P_zero )
 	{cell->info().p() = P_zero;cell->info().dv()=0;}
 
         for (int bound=0; bound<6;bound++) {
-                int& id = *boundsIds[bound];
+                int id = boundsIds[bound];
                 Boundary& bi = boundary(id);
                 if (!bi.flowCondition) {
                         Tesselation::Vector_Cell tmp_cells;
@@ -1987,7 +1987,6 @@ double FlowBoundingSphere::Sample_Permeability(RTriangulation& Tri, double x_Min
 
         char *kk;
         kk = (char*) key.c_str();
-
         return Permeameter(Tri, boundary(y_min_id).value, boundary(y_max_id).value, Section, DeltaY, kk);
 }
 
@@ -1998,6 +1997,7 @@ void FlowBoundingSphere::AddBoundingPlanes(Real center[3], Real Extents[3], int 
         Corner_min = Point(x_min, y_min, z_min);
         Corner_max = Point(x_max, y_max, z_max);
         Real min_coord = min(Extents[0],min(Extents[1],Extents[2]));
+	
         int coord=0;
         if (min_coord==Extents[0]) {
                 coord=0;
@@ -2059,36 +2059,27 @@ void FlowBoundingSphere::AddBoundingPlanes()
 {
 	Tesselation& Tes = T[currentTes];
 	
-	y_min_id = Tes.Max_id() + 1;
-        boundsIds[0]=&y_min_id;
-        y_max_id = Tes.Max_id() + 2;
-        boundsIds[1]=&y_max_id;
-        x_min_id = Tes.Max_id() + 3;
-        boundsIds[2]=&x_min_id;
-        x_max_id = Tes.Max_id() + 4;
-        boundsIds[3]=&x_max_id;
-        z_min_id = Tes.Max_id() + 5;
-        boundsIds[4]=&z_min_id;
-        z_max_id = Tes.Max_id() + 6;
-        boundsIds[5]=&z_max_id;
+	y_min_id = Tes.Max_id() + 1; boundsIds[0]=y_min_id;
+        y_max_id = Tes.Max_id() + 2; boundsIds[1]=y_max_id;
+        x_min_id = Tes.Max_id() + 3; boundsIds[2]=x_min_id;
+        x_max_id = Tes.Max_id() + 4; boundsIds[3]=x_max_id;
+        z_min_id = Tes.Max_id() + 5; boundsIds[4]=z_min_id;
+        z_max_id = Tes.Max_id() + 6; boundsIds[5]=z_max_id;
 	 
 	id_offset = Tes.Max_id() +1;//so that boundaries[vertex->id - offset] gives the ordered boundaries (also see function Boundary& boundary(int b))
 	
-	AddBoundingPlanes(true);
+	AddBoundingPlanes(y_min_id, y_max_id, x_min_id, x_max_id, z_min_id, z_max_id);
 }
 
-void FlowBoundingSphere::AddBoundingPlanes(bool yade)
+void FlowBoundingSphere::AddBoundingPlanes(int bottom_id, int top_id, int left_id, int right_id, int front_id, int back_id)
 {
         Tesselation& Tes = T[currentTes];
         Corner_min = Point(x_min, y_min, z_min);
         Corner_max = Point(x_max, y_max, z_max);
-
-        boundsIds[0]= &y_min_id;
-        boundsIds[1]= &y_max_id;
-        boundsIds[2]= &x_min_id;
-        boundsIds[3]= &x_max_id;
-        boundsIds[4]= &z_min_id;
-        boundsIds[5]= &z_max_id;
+	
+	y_min_id = bottom_id;y_max_id = top_id;x_min_id = left_id;x_max_id = right_id;z_min_id = front_id;z_max_id = back_id;
+	
+        boundsIds[0]= y_min_id;boundsIds[1]= y_max_id;boundsIds[2]= x_min_id;boundsIds[3]= x_max_id;boundsIds[4]= z_min_id;boundsIds[5]= z_max_id;
 
         Tes.insert(0.5*(Corner_min.x() +Corner_max.x()), Corner_min.y()-FAR*(Corner_max.x()-Corner_min.x()), 0.5*(Corner_max.z()-Corner_min.z()), FAR*(Corner_max.x()-Corner_min.x()), y_min_id, true);
         boundaries[y_min_id-id_offset].p = Corner_min;

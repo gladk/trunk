@@ -1,0 +1,51 @@
+Contents of this directory is a copy of upstream from http://artis.imag.fr/Software/QGLViewer/, as of
+
+2008-06-29 http://artis.imag.fr/Members/Gilles.Debunne/QGLViewer/src/libQGLViewer-2.3.0.tar.gz
+
+SConscript file is mostly cut&paste from the original .pro file. Since the qt3 tool in scons doesn't properly
+handle files named like VRenderInterace.Qt3.ui (multiple suffixes), two offending files are symlinked to 
+
+ VRenderInterface_Qt3.ui
+ ImageInterface_Qt3.ui
+
+and the following change is needed then:
+
+--- saveSnapshot.cpp	(revision 1277)
++++ saveSnapshot.cpp	(working copy)
+@@ -32,7 +32,7 @@
+ #  include <qcheckbox.h>
+ #  include <qcombobox.h>
+ #  if QT_VERSION >= 0x030000
+-#   include "VRenderInterface.Qt3.h"
++#   include "VRenderInterface_Qt3.h"
+ #  else
+ #   include "VRenderInterface.Qt2.h"
+ #  endif
+@@ -46,7 +46,7 @@
+ # include <qspinbox.h>
+ # include <qcheckbox.h>
+ # if QT_VERSION >= 0x030000
+-#  include "ImageInterface.Qt3.h"
++#  include "ImageInterface_Qt3.h"
+ # else
+ #  include "ImageInterface.Qt2.h"
+ # endif
+
+Further, to avoid Qt gratuitously #defining DEBUG, apply this patch to the header:
+
+--- qglviewer.h.~orig~	2008-06-29 23:04:16.000000000 +0200
++++ qglviewer.h	2008-07-18 08:46:13.000000000 +0200
+@@ -1229,4 +1229,8 @@
+ 	bool updateGLOK_;
+ };
+ 
++#ifdef DEBUG
++	#undef DEBUG
++#endif
++
+ #endif // QGLVIEWER_QGLVIEWER_H
+
+
+This has to be kept in mind when synchronizing with upstream.
+
+Václav Šmilauer <eudoxos@arcig.cz>

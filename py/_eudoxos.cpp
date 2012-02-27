@@ -58,7 +58,7 @@ Vector3r tuple2vec(const py::tuple& t){return Vector3r(py::extract<double>(t[0])
  * to particles subject to axial compaction to speed up the process. */
 void velocityTowardsAxis(const Vector3r& axisPoint, const Vector3r& axisDirection, Real timeToAxis, Real subtractDist=0., Real perturbation=0.1){
 	FOREACH(const shared_ptr<Body>&b, *(Omega::instance().getScene()->bodies)){
-		if(!b->isDynamic()) continue;
+		if(!b->isDynamic) continue;
 		const Vector3r& x0=b->state->pos;
 		const Vector3r& x1=axisPoint;
 		const Vector3r x2=axisPoint+axisDirection;
@@ -152,7 +152,7 @@ struct SpiralInteractionLocator2d{
 			if(!ge || !ph) continue;
 			Real r,h,theta;
 			boost::tie(r,h,theta)=Shop::spiralProject(ge->contactPoint,dH_dTheta,axis,NaN,theta0);
-			lo=lo.cwise().min(Vector2r(r,h)); hi=hi.cwise().max(Vector2r(r,h));
+			lo=componentMinVector(lo,Vector2r(r,h)); hi=componentMaxVector(hi,Vector2r(r,h));
 			minD0=min(minD0,ge->refLength); maxD0=max(maxD0,ge->refLength);
 			minTheta=min(minTheta,theta); maxTheta=max(maxTheta,theta);
 			intrs.push_back(FlatInteraction(r,h,theta,i));

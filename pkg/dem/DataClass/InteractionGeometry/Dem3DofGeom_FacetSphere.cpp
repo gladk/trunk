@@ -130,7 +130,7 @@ bool Ig2_Facet_Sphere_Dem3DofGeom::go(const shared_ptr<Shape>& cm1, const shared
 				#ifdef FACET_TOPO
 					if(noVertexContact && facet->edgeAdjIds[edgeMax]!=Body::ID_NONE){
 						// find angle between our normal and the facet's normal (still local coords)
-						Quaternionr q; q.Align(facet->nf,normal); AngleAxisr aa(q);
+						Quaternionr q; q.Align(facet->nf,normal); AngleAxisr aa(angleAxisFromQuat(q));
 						assert(aa.angle()>=0 && aa.angle()<=Mathr::PI);
 						if(edgeNormals[edgeMax].Dot(aa.axis())<0) aa.angle()*=-1.;
 						bool negFace=normal.Dot(facet->nf)<0; // contact in on the negative facet's face

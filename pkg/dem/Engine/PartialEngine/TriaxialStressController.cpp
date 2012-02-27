@@ -99,7 +99,7 @@ void TriaxialStressController::action()
 		{
 			if((*bi)->isClump()) continue;
 			const shared_ptr<Body>& b = *bi;
-			if ( b->isDynamic() )
+			if ( b->isDynamic )
 			{
 				const shared_ptr<Sphere>& sphere =
 						YADE_PTR_CAST<Sphere> ( b->shape );
@@ -211,7 +211,7 @@ void TriaxialStressController::controlInternalStress ( Real multiplier )
 	BodyContainer::iterator biEnd = scene->bodies->end();
 	for ( ; bi!=biEnd ; ++bi )
 	{
-		if ( ( *bi )->isDynamic() )
+		if ( ( *bi )->isDynamic )
 		{
 			( static_cast<Sphere*> ( ( *bi )->shape.get() ) )->radius *= multiplier;
 				(*bi)->state->mass*=pow(multiplier,3);
@@ -225,9 +225,9 @@ void TriaxialStressController::controlInternalStress ( Real multiplier )
 	{
 		if ((*ii)->isReal()) {
 			ScGeom* contact = static_cast<ScGeom*>((*ii)->interactionGeometry.get());
-			if ((*(scene->bodies))[(*ii)->getId1()]->isDynamic())
+			if ((*(scene->bodies))[(*ii)->getId1()]->isDynamic)
 				contact->radius1 = static_cast<Sphere*>((* (scene->bodies))[(*ii)->getId1()]->shape.get())->radius;
-			if ((* (scene->bodies))[(*ii)->getId2()]->isDynamic())
+			if ((* (scene->bodies))[(*ii)->getId2()]->isDynamic)
 				contact->radius2 = static_cast<Sphere*>((* (scene->bodies))[(*ii)->getId2()]->shape.get())->radius;
 			const shared_ptr<FrictPhys>& contactPhysics = YADE_PTR_CAST<FrictPhys>((*ii)->interactionPhysics);
 			contactPhysics->kn*=multiplier; contactPhysics->ks*=multiplier;
@@ -270,7 +270,7 @@ Real TriaxialStressController::ComputeUnbalancedForce( bool maxUnbalanced)
 		BodyContainer::iterator biEnd = bodies->end();
 		Real f;
 		for(  ; bi!=biEnd ; ++bi ) {
-			if ((*bi)->isDynamic()) {
+			if ((*bi)->isDynamic) {
 				f=getForce(scene,(*bi)->getId()).norm();
 				MeanUnbalanced += f;
 				if (f!=0) ++nBodies;
@@ -283,7 +283,7 @@ Real TriaxialStressController::ComputeUnbalancedForce( bool maxUnbalanced)
 		Real MaxUnbalanced=0;
 		BodyContainer::iterator bi    = bodies->begin();
 		BodyContainer::iterator biEnd = bodies->end();
-		for(  ; bi!=biEnd ; ++bi ) if ((*bi)->isDynamic())
+		for(  ; bi!=biEnd ; ++bi ) if ((*bi)->isDynamic)
 				MaxUnbalanced = std::max(getForce(scene,(*bi)->getId()).norm(),MaxUnbalanced);
 		if (MeanForce != 0) MaxUnbalanced = MaxUnbalanced/MeanForce;
 		return MaxUnbalanced;

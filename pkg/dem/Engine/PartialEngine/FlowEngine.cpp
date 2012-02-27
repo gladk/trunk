@@ -28,7 +28,8 @@ FlowEngine::~FlowEngine()
 
 void FlowEngine::action ( )
 {
-	if (!flow) {flow = shared_ptr<CGT::FlowBoundingSphere> (new CGT::FlowBoundingSphere);first=true;Update_Triangulation=false;}
+	if (!flow) 
+	{flow = shared_ptr<CGT::FlowBoundingSphere> (new CGT::FlowBoundingSphere);first=true;Update_Triangulation=false;}
 	if ( !isActivated ) return;
 	else
 	{
@@ -73,7 +74,8 @@ void FlowEngine::action ( )
 // 				flow->MGPost(flow->T[flow->currentTes].Triangulation());
 
 				flow->ComputeTetrahedralForces();
-			
+//				flow->Compute_Forces();
+				
 				timingDeltas->checkpoint("Compute_Forces");
 
 			///End Compute flow and forces
@@ -117,7 +119,7 @@ void FlowEngine::action ( )
 				if ( Update_Triangulation ) { Build_Triangulation( );}
 				
 				timingDeltas->checkpoint("Storing Max Pressure");
-
+				
 				first=false;
 		}
 	}
@@ -171,7 +173,7 @@ void FlowEngine::Build_Triangulation (double P_zero)
 	flow->T[flow->currentTes].Compute();
 	
 	flow->Localize ();
-	flow->DisplayStatistics ();	
+	flow->DisplayStatistics ();
 
 	flow->meanK_LIMIT = meanK_correction;
 	flow->meanK_STAT = meanK_opt;
@@ -196,7 +198,6 @@ void FlowEngine::Build_Triangulation (double P_zero)
 		Update_Triangulation=!Update_Triangulation;
 		Oedometer_Boundary_Conditions();
 	}
-
 	Initialize_volumes ( );
 }
 
@@ -225,19 +226,13 @@ void FlowEngine::AddBoundary ()
 			flow->y_max = max ( flow->y_max, center[1]-wall_thickness);
 			flow->z_min = min ( flow->z_min, center[2]+wall_thickness);
 			flow->z_max = max ( flow->z_max, center[2]-wall_thickness);
+
 		}
 	}
 	
 	flow->id_offset = flow->T[flow->currentTes].max_id+1;
 
-	flow->y_min_id=triaxialCompressionEngine->wall_bottom_id;
-	flow->y_max_id=triaxialCompressionEngine->wall_top_id;
-	flow->x_max_id=triaxialCompressionEngine->wall_right_id;
-	flow->x_min_id=triaxialCompressionEngine->wall_left_id;
-	flow->z_min_id=triaxialCompressionEngine->wall_back_id;
-	flow->z_max_id=triaxialCompressionEngine->wall_front_id;
-
-	flow->AddBoundingPlanes(true);
+	flow->AddBoundingPlanes( triaxialCompressionEngine->wall_bottom_id, triaxialCompressionEngine->wall_top_id, triaxialCompressionEngine->wall_left_id, triaxialCompressionEngine->wall_right_id, triaxialCompressionEngine->wall_front_id, triaxialCompressionEngine->wall_back_id );
 }
 
 void FlowEngine::Triangulate ()
@@ -345,7 +340,7 @@ Real FlowEngine::Volume_cell_single_fictious ( CGT::Cell_handle cell)
 		}
 		else
 		{
-			b = cell->vertex ( y )->info().id()-flow->id_offset;
+			b = cell->vertex ( y )->info().id();
 			const shared_ptr<Body>& wll = Body::byId ( b , scene );
 			for ( int i=0;i<3;i++ ) Wall_point[i] = flow->boundaries[b].p[i];
 	Wall_point[flow->boundaries[b].coordinate] = wll->state->pos[flow->boundaries[b].coordinate]+(flow->boundaries[b].normal[flow->boundaries[b].coordinate])*wall_thickness;
@@ -367,13 +362,11 @@ Real FlowEngine::Volume_cell_single_fictious ( CGT::Cell_handle cell)
 
 Real FlowEngine::Volume_cell_double_fictious ( CGT::Cell_handle cell)
 {
+// 	Real array_quattro[3] = {0, 0, 0};
+
 	Real A[3]={0, 0, 0}, AS[3]={0, 0, 0}, AT[3]={0, 0, 0};
 	Real B[3]={0, 0, 0}, BS[3]={0, 0, 0}, BT[3]={0, 0, 0};
-	Real C[3]={0, 0, 0}, CS[3]={0, 0, 0}, CT[3]={0, 0, 0};	
-
-	//Real A[3], AS[3], AT[3];
-	//Real B[3], BS[3], BT[3];
-	//Real C[3], CS[3], CT[3];
+	Real C[3]={0, 0, 0}, CS[3]={0, 0, 0}, CT[3]={0, 0, 0};
 	int b[2];
 
 	Real Wall_point[2][3];
@@ -384,7 +377,7 @@ Real FlowEngine::Volume_cell_double_fictious ( CGT::Cell_handle cell)
 	{
 		if ( cell->vertex ( g )->info().isFictious )
 		{
-			b[j] = cell->vertex ( g )->info().id()-flow->id_offset;
+			b[j] = cell->vertex ( g )->info().id();
 			const shared_ptr<Body>& wll = Body::byId ( b[j] , scene );
 			for ( int i=0;i<3;i++ ) Wall_point[j][i] = flow->boundaries[b[j]].p[i];
 			Wall_point[j][flow->boundaries[b[j]].coordinate] = wll->state->pos[flow->boundaries[b[j]].coordinate] +(flow->boundaries[b[j]].normal[flow->boundaries[b[j]].coordinate])*wall_thickness;
@@ -423,8 +416,7 @@ Real FlowEngine::Volume_cell_double_fictious ( CGT::Cell_handle cell)
 
 Real FlowEngine::Volume_cell_triple_fictious ( CGT::Cell_handle cell)
 {
-	Real A[3]={0, 0, 0}, AS[3]={0, 0, 0}, AT[3]={0, 0, 0}, AW[3]={0, 0, 0};	
-//Real A[3], AS[3], AT[3], AW[3];
+	Real A[3]={0, 0, 0}, AS[3]={0, 0, 0}, AT[3]={0, 0, 0}, AW[3]={0, 0, 0};
 // 	CGT::Boundary b[3];
 	int b[3];
 	Real Wall_point[3][3];
@@ -434,7 +426,7 @@ Real FlowEngine::Volume_cell_triple_fictious ( CGT::Cell_handle cell)
 	{
 		if ( cell->vertex ( g )->info().isFictious )
 		{
-			b[j] = cell->vertex ( g )->info().id()-flow->id_offset;
+			b[j] = cell->vertex ( g )->info().id();
 			const shared_ptr<Body>& wll = Body::byId ( b[j] , scene );
 			for ( int i=0;i<3;i++ ) Wall_point[j][i] = flow->boundaries[b[j]].p[i];
 			Wall_point[j][flow->boundaries[b[j]].coordinate] = wll->state->pos[flow->boundaries[b[j]].coordinate]+(flow->boundaries[b[j]].normal[flow->boundaries[b[j]].coordinate])*wall_thickness;

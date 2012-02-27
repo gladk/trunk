@@ -139,7 +139,7 @@ opts.AddVariables(
 	BoolVariable('optimize','Turn on heavy optimizations',defOptions['optimize']),
 	ListVariable('exclude','Yade components that will not be built','none',names=['gui','extra','common','dem','lattice','snow']),
 	EnumVariable('PGO','Whether to "gen"erate or "use" Profile-Guided Optimization','',['','gen','use'],{'no':'','0':'','false':''},1),
-	ListVariable('features','Optional features that are turned on','log4cxx,opengl,gts,openmp,vtk',names=['opengl','log4cxx','cgal','openmp','gts','vtk','python','gl2ps','never_use_this_one']),
+	ListVariable('features','Optional features that are turned on','log4cxx,opengl,gts,openmp,vtk',names=['opengl','log4cxx','cgal','openmp','gts','vtk','python','wm3','gl2ps','boost-serialization','never_use_this_one']),
 	('jobs','Number of jobs to run at the same time (same as -j, but saved)',2,None,int),
 	#('extraModules', 'Extra directories with their own SConscript files (must be in-tree) (whitespace separated)',None,None,Split),
 	('buildPrefix','Where to create build-[version][variant] directory for intermediary files','..'),
@@ -158,6 +158,7 @@ opts.AddVariables(
 	('SHCCFLAGS','Additional compiler flags for linking (for plugins).',None,None,Split),
 	BoolVariable('QUAD_PRECISION','typedef Real as long double (=quad)',0),
 	BoolVariable('brief',"Don't show commands being run, only what files are being compiled/linked/installed",True),
+	#BoolVariable('useLocalQGLViewer','use in-tree QGLViewer library instead of the one installed in system',1),
 )
 opts.Update(env)
 
@@ -215,6 +216,8 @@ env['buildDir']=buildDir
 # these MUST be first so that builddir's headers are read before any locally installed ones
 buildInc='$buildDir/include/yade-$version'
 env.Append(CPPPATH=[buildInc])
+if 'wm3' in env['features']: env.Append(CPPPATH=[buildInc+'/yade/lib-miniWm3'])
+#if env['useLocalQGLViewer']: env.Append(CPPPATH=[buildInc+'/yade/lib-QGLViewer'])
 
 env.SConsignFile(buildDir+'/scons-signatures')
 
@@ -361,9 +364,12 @@ if not env.GetOption('clean'):
 		ok=conf.CheckQt(env['QTDIR'])
 		if not ok: featureNotOK('opengl','Building with OpenGL implies qt3 interface, which was not found, although OpenGL was.')
 		env.Tool('qt'); env.Replace(QT_LIB='qt-mt')
-		ok=conf.CheckLibWithHeader(['qglviewer'],'QGLViewer/qglviewer.h','c++','QGLViewer();',autoadd=0)
-		if not ok: featureNotOK('opengl','Building with OpenGL implies the QGLViewer library installed (libqglviewer-qt3-dev package in debian/ubuntu)')
-		env['QGLVIEWER_LIB']='qglviewer-qt3';
+		if conf.CheckLibWithHeader(['qglviewer'],'QGLViewer/qglviewer.h','c++','QGLViewer();',autoadd=0):
+			env['QGLVIEWER_LIB']='qglviewer-qt3';
+		else:
+			print"(OK, local version will be used instead)"
+			env['QGLVIEWER_LIB']='yade-QGLViewer';
+			env.Append(CPPDEFINES=['YADE_LOCAL_QGLVIEWER'])
 	if 'vtk' in env['features']:
 		ok=conf.CheckLibWithHeader(['vtkCommon'],'vtkInstantiator.h','c++','vtkInstantiator::New();',autoadd=1)
 		env.Append(LIBS='vtkHybrid')
@@ -382,11 +388,10 @@ if not env.GetOption('clean'):
 		ok=conf.CheckLibWithHeader('CGAL','CGAL/Exact_predicates_inexact_constructions_kernel.h','c++','CGAL::Exact_predicates_inexact_constructions_kernel::Point_3();')
 		env.Append(CXXFLAGS='-frounding-math') # required by cgal, otherwise we get assertion failure at startup
 		if not ok: featureNotOK('cgal')
-	env.Append(LIBS='yade-support')
+	if 'wm3' in env['features']: env.Append(LIBS='miniWm3',CPPDEFINES=['MINIWM3'])
+	else: env.Append(LIBS='yade-support')
 
 	env.Append(CPPDEFINES=['YADE_'+f.upper().replace('-','_') for f in env['features']])
-	# temporary, until #ifdefs removed from the code
-	env.Append(CPPDEFINES=['YADE_BOOST_SERIALIZATION','YADE_SERIALIZE_USING_BOOST'])
 
 	env=conf.Finish()
 

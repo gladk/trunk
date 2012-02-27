@@ -130,7 +130,7 @@ void KinemCNLEngine::computeAlpha()
 	{
 		cout << "WARNING !!! your lateral boxes have not the same orientation, you're not in the case of a box imagined for creating these engines" << endl;
 	}
-	AngleAxisr aa(orientationLeftBox);
+	AngleAxisr aa(angleAxisFromQuat(orientationLeftBox));
 	alpha=Mathr::PI/2.0-aa.angle();		// right if the initial orientation of the body (on the beginning of the simulation) is q =(1,0,0,0) = FromAxisAngle((0,0,1),0)
 }
 

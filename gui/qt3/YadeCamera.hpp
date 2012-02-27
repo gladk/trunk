@@ -6,8 +6,11 @@
 *************************************************************************/
 
 #pragma once
-
-#include<QGLViewer/qglviewer.h>
+#ifndef YADE_LOCAL_QGLVIEWER
+	#include<QGLViewer/qglviewer.h>
+#else
+	#include<yade/lib-QGLViewer/qglviewer.h>
+#endif
 #include<iostream>
 
 

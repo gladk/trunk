@@ -164,7 +164,7 @@ void SimpleShear::createSphere(shared_ptr<Body>& body, Vector3r position, Real r
 // 	shared_ptr<SphereModel> gSphere(new SphereModel);
 	shared_ptr<Sphere> iSphere(new Sphere);
 	
-	body->setDynamic(true);
+	body->isDynamic			= true;
 	body->state->pos		=position;
 	body->state->ori		=Quaternionr::Identity();
 	body->state->vel		=Vector3r(0,0,0);
@@ -206,7 +206,7 @@ void SimpleShear::createBox(shared_ptr<Body>& body, Vector3r position, Vector3r 
 // 	shared_ptr<BoxModel> gBox(new BoxModel);
 	shared_ptr<Box> iBox(new Box);
 
-	body->setDynamic(false);
+	body->isDynamic			= false;
 	
 	body->state->angVel		= Vector3r(0,0,0);
 	body->state->vel		= Vector3r(0,0,0);

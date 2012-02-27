@@ -239,7 +239,7 @@ void TriaxialCompressionEngine::setContactProperties(Real frictionDegree)
 	shared_ptr<BodyContainer>& bodies = scene->bodies;
 	FOREACH(const shared_ptr<Body>& b,*scene->bodies){
 		if(b->isClump()) continue;
-		if (b->isDynamic())
+		if (b->isDynamic)
 		YADE_PTR_CAST<FrictMat> (b->material)->frictionAngle = frictionDegree * Mathr::PI/180.0;
 	}
 	FOREACH(const shared_ptr<Interaction>& ii, *scene->interactions){

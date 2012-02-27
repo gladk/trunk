@@ -36,7 +36,7 @@ BodyCallback::FuncPtr SumBodyForcesCb::stepInit(){
 	return &SumBodyForcesCb::go;
 }
 void SumBodyForcesCb::go(BodyCallback* _self, Body* b){
-	if(!b->isDynamic()) return;
+	if(!b->isDynamic) return;
 	SumBodyForcesCb* self=static_cast<SumBodyForcesCb*>(_self);
 #ifdef YADE_OPENMP
 	cerr<<"["<<omp_get_thread_num()<<",#"<<b->id<<",scene="<<self->scene<<"]";

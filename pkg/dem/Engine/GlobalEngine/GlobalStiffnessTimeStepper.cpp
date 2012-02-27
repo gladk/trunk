@@ -74,7 +74,7 @@ void GlobalStiffnessTimeStepper::computeTimeStep(Scene* ncb)
 	for(  ; bi!=biEnd ; ++bi )
 	{
 		shared_ptr<Body> b = *bi;
-		if (b->isDynamic()) findTimeStepFromBody(b, ncb);
+		if (b->isDynamic) findTimeStepFromBody(b, ncb);
 	}
 		
 	if(computedSomething)

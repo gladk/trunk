@@ -286,7 +286,7 @@ void CohesiveTriaxialTest::createSphere(shared_ptr<Body>& body, Vector3r positio
 	Quaternionr q(Mathr::SymmetricRandom(),Mathr::SymmetricRandom(),Mathr::SymmetricRandom(),Mathr::SymmetricRandom());
 	q.normalize();
 	
-	body->setDynamic(dynamic);
+	body->isDynamic			= dynamic;
 	
 	body->state->angVel		= Vector3r(0,0,0);
 	body->state->vel		= Vector3r(0,0,0);
@@ -327,7 +327,7 @@ void CohesiveTriaxialTest::createBox(shared_ptr<Body>& body, Vector3r position, 
 
 	shared_ptr<Box> iBox(new Box);
 	
-	body->setDynamic(false);
+	body->isDynamic			= false;
 	
 	body->state->angVel		= Vector3r(0,0,0);
 	body->state->vel		= Vector3r(0,0,0);

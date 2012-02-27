@@ -196,7 +196,7 @@ void VTKRecorder::action(){
 		if (recActive[REC_SPHERES]){
 			const Sphere* sphere = dynamic_cast<Sphere*>(b->shape.get()); 
 			if (sphere){
-				if(skipNondynamic && !b->isDynamic()) continue;
+				if(skipNondynamic && !b->isDynamic) continue;
 				vtkIdType pid[1];
 				const Vector3r& pos = b->state->pos;
 				pid[0] = spheresPos->InsertNextPoint(pos[0], pos[1], pos[2]);

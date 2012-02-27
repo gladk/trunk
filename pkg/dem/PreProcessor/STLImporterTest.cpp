@@ -94,7 +94,7 @@ bool STLImporterTest::generate()
 	{
 	    shared_ptr<Body> b(new Body(body_id_t(0),1));
     
-	    b->setDynamic(false);
+	    b->isDynamic		= false;
 	    
 	    // physical parameters
 	    shared_ptr<BodyMacroParameters> physics(new BodyMacroParameters);
@@ -158,7 +158,7 @@ void STLImporterTest::createSphere(shared_ptr<Body>& body, int i, int j, int k)
 	
 	Real radius 			= (Mathr::IntervalRandom(minRadius,maxRadius));
 	
-	body->setDynamic(true);
+	body->isDynamic			= true;
 	
 	physics->angularVelocity	= Vector3r(0,0,0);
 	physics->velocity		= Vector3r(0,0,0);
@@ -250,7 +250,7 @@ void STLImporterTest::createActors(shared_ptr<Scene>& rootBody)
 
 void STLImporterTest::positionRootBody(shared_ptr<Scene>& rootBody) 
 {
-	rootBody->setDynamic(false);
+	rootBody->isDynamic		= false;
 	
 	shared_ptr<ParticleParameters> physics(new ParticleParameters); // FIXME : fix indexable class PhysicalParameters
 	physics->se3				= Se3r(Vector3r(0,0,0),Quaternionr::Identity());

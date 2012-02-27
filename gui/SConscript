@@ -21,10 +21,10 @@ if 'opengl' in env['features']:
 			LIBS=[# 'PythonUI',
 				'yade-serialization-qt',
 				linkPlugins(['GravityEngines','OpenGLRenderingEngine']),
-				'qglviewer-qt3'],
+				'$QGLVIEWER_LIB'],
 			CPPPATH=env['CPPPATH']+['qt3']
 		),
-		env.SharedLibrary('SnapshotEngine',['qt3/SnapshotEngine.cpp'],LIBS=env['LIBS']+['QtGUI','qglviewer-qt3']+linkPlugins(['PeriodicEngines']),CPPPATH=env['CPPPATH']+['qt3']),
+		env.SharedLibrary('SnapshotEngine',['qt3/SnapshotEngine.cpp'],LIBS=env['LIBS']+['QtGUI','$QGLVIEWER_LIB']+linkPlugins(['PeriodicEngines']),CPPPATH=env['CPPPATH']+['qt3']),
 	])
 
 	env.Install('$PREFIX/lib/yade$SUFFIX/py/yade',[

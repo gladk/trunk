@@ -24,7 +24,7 @@ Real computeOBB(const std::vector<Vector3r>& pts, const Matrix3r& rot, Vector3r&
 	Vector3r mn(inf,inf,inf), mx(-inf,-inf,-inf);
 	FOREACH(const Vector3r& pt, pts){
 		Vector3r ptT=rot*pt;
-		mn=mn.cwise().min(ptT); mx=mx.cwise().max(ptT);
+		mn=componentMinVector(mn,ptT); mx=componentMaxVector(mx,ptT);
 	}
 	halfSize=.5*(mx-mn);
 	center=.5*(mn+mx);

@@ -70,6 +70,7 @@ class PeriTriaxController: public BoundaryController{
 	DECLARE_LOGGER;
 };
 REGISTER_SERIALIZABLE(PeriTriaxController);
+#ifndef YADE_WM3
 
 #include<Eigen/SVD>
 class Peri3dController: public BoundaryController{
@@ -96,3 +97,4 @@ class Peri3dController: public BoundaryController{
 };
 REGISTER_SERIALIZABLE(Peri3dController);
 
+#endif

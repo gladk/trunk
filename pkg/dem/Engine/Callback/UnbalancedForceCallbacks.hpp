@@ -23,6 +23,6 @@ class SumBodyForcesCb: public BodyCallback{
 		OpenMPAccumulator<Real,&SumIntrForcesCb::Real0> force;
 		static void go(BodyCallback*,Body*);
 		virtual BodyCallback::FuncPtr stepInit();
-	YADE_CLASS_BASE_DOC(SumBodyForcesCb,BodyCallback,"Callback summing magnitudes of resultant forces over :yref:`dynamic<Body::dynamic>` bodies.");
+	YADE_CLASS_BASE_DOC(SumBodyForcesCb,BodyCallback,"Callback summing magnitudes of resultant forces over :yref:`dynamic<Body::isDynamic>` bodies.");
 };
 REGISTER_SERIALIZABLE(SumBodyForcesCb);

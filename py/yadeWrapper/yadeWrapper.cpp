@@ -22,6 +22,7 @@
 #include<boost/version.hpp>
 
 #include<yade/lib-base/Logging.hpp>
+#include<yade/lib-serialization-xml/XMLFormatManager.hpp>
 #include<yade/lib-pyutil/gil.hpp>
 #include<yade/lib-pyutil/raw_constructor.hpp>
 #include<yade/lib-pyutil/doc_opts.hpp>
@@ -118,7 +119,7 @@ class pyBodyContainer{
 		// create and add clump itself
 		shared_ptr<Clump> clump=shared_ptr<Clump>(new Clump());
 		shared_ptr<Body> clumpAsBody=static_pointer_cast<Body>(clump);
-		clump->setDynamic(true);
+		clump->isDynamic=true;
 		proxee->insert(clumpAsBody);
 		// add clump members to the clump
 		FOREACH(body_id_t id, ids) clump->add(id);

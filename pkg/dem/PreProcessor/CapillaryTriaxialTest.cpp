@@ -299,7 +299,7 @@ void CapillaryTriaxialTest::createSphere(shared_ptr<Body>& body, Vector3r positi
 	q.normalize();
 //	q.FromAxisAngle( Vector3r(0,0,1),0);
 	
-	body->setDynamic(dynamic);
+	body->isDynamic			= dynamic;
 	
 	body->state->angVel		= Vector3r(0,0,0);
 	body->state->vel		= Vector3r(0,0,0);
@@ -339,7 +339,7 @@ void CapillaryTriaxialTest::createBox(shared_ptr<Body>& body, Vector3r position,
 	shared_ptr<Aabb> aabb(new Aabb);
 	shared_ptr<Box> iBox(new Box);
 	
-	body->setDynamic(false);
+	body->isDynamic			= false;
 	
 	body->state->angVel		= Vector3r(0,0,0);
 	body->state->vel		= Vector3r(0,0,0);

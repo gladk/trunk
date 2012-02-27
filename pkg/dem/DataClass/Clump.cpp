@@ -27,7 +27,7 @@ void ClumpMemberMover::action(){
 			static_cast<Clump*>(b.get())->moveMembers();
 		}
 	}
-	//if(!clump->isDynamic()) return; // perhaps clump that has been desactivated?!
+	//if(!clump->isDynamic) return; // perhaps clump that has been desactivated?!
 }
 #endif
 
@@ -51,7 +51,7 @@ void Clump::add(body_id_t subId){
 
 	// begin actual setup
 	subBody->clumpId=getId();
-	subBody->setDynamic(false);
+	subBody->isDynamic=false;
 	// for now, push just unitialized se3; will be updated by updateProperties
 	members[subId]=Se3r();
 
@@ -68,7 +68,7 @@ void Clump::del(body_id_t subId){
 	// restore body's internal parameters;
 	shared_ptr<Body> subBody=Body::byId(subId);
 	subBody->clumpId=Body::ID_NONE;
-	subBody->setDynamic(true);
+	subBody->isDynamic=true;
 	LOG_DEBUG("Removed body #"<<subId<<" from clump #"<<getId());
 }
 
@@ -203,7 +203,7 @@ void Clump::updateProperties(bool intersecting){
 	TRVAR1(M);
 	TRWM3MAT(Ig);
 	TRWM3VEC(Sg);
-	if(M==0){ state->mass=0; state->inertia=Vector3r(0,0,0); setDynamic(false); return; }
+	if(M==0){ state->mass=0; state->inertia=Vector3r(0,0,0); isDynamic=false; return; }
 
 	state->pos=Sg/M; // clump's centroid
 	// this will calculate translation only, since rotation is zero

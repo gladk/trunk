@@ -38,7 +38,7 @@ std::string Vector3r_str(const Vector3r & self){ return std::string("Vector3(")+
 std::string Vector3i_str(const Vector3i & self){ return std::string("Vector3i(")+boost::lexical_cast<std::string>(self[0])+","+boost::lexical_cast<std::string>(self[1])+","+boost::lexical_cast<std::string>(self[2])+")";}
 std::string Vector2r_str(const Vector2r & self){ return std::string("Vector2(")+boost::lexical_cast<std::string>(self[0])+","+boost::lexical_cast<std::string>(self[1])+")";}
 std::string Vector2i_str(const Vector2i & self){ return std::string("Vector2i(")+boost::lexical_cast<std::string>(self[0])+","+boost::lexical_cast<std::string>(self[1])+")";}
-std::string Quaternionr_str(const Quaternionr & self){ AngleAxisr aa(self); return std::string("Quaternion((")+boost::lexical_cast<std::string>(aa.axis()[0])+","+boost::lexical_cast<std::string>(aa.axis()[1])+","+boost::lexical_cast<std::string>(aa.axis()[2])+"),"+boost::lexical_cast<std::string>(aa.angle())+")";}
+std::string Quaternionr_str(const Quaternionr & self){ AngleAxisr aa(angleAxisFromQuat(self)); return std::string("Quaternion((")+boost::lexical_cast<std::string>(aa.axis()[0])+","+boost::lexical_cast<std::string>(aa.axis()[1])+","+boost::lexical_cast<std::string>(aa.axis()[2])+"),"+boost::lexical_cast<std::string>(aa.angle())+")";}
 std::string Matrix3r_str(const Matrix3r & self){ std::ostringstream oss; oss<<"Matrix3("; for(int i=0; i<3; i++) for(int j=0; j<3; j++) oss<<self(i,j)<<((i==2 && j==2)?")":",")<<((i<2 && j==2)?" ":""); return oss.str(); }
 
 int Vector3r_len(){return 3;}
@@ -112,8 +112,10 @@ static Vector3r Vector3r_cross(const Vector3r& self, const Vector3r& v){ return 
 static Vector3i Vector3i_cross(const Vector3i& self, const Vector3i& v){ return self.cross(v); }
 static bool Quaternionr__eq__(const Quaternionr& q1, const Quaternionr& q2){ return q1==q2; }
 static bool Quaternionr__neq__(const Quaternionr& q1, const Quaternionr& q2){ return q1!=q2; }
-#include<Eigen/SVD>
-static bp::tuple Matrix3r_polarDecomposition(const Matrix3r& self){ Matrix3r unitary,positive; Eigen::SVD<Matrix3r>(self).computeUnitaryPositive(&unitary,&positive); return bp::make_tuple(unitary,positive); }
+#ifndef YADE_WM3
+	#include<Eigen/SVD>
+	static bp::tuple Matrix3r_polarDecomposition(const Matrix3r& self){ Matrix3r unitary,positive; Eigen::SVD<Matrix3r>(self).computeUnitaryPositive(&unitary,&positive); return bp::make_tuple(unitary,positive); }
+#endif
 
 #define WM3_COMPAT
 
@@ -232,7 +234,9 @@ BOOST_PYTHON_MODULE(miniEigen){
 		.def("determinant",&Matrix3r::determinant)
 		.def("inverse",&Matrix3r_inverse)
 		.def("transpose",&Matrix3r_transpose)
-		.def("polarDecomposition",&Matrix3r_polarDecomposition)
+		#ifndef YADE_WM3
+			.def("polarDecomposition",&Matrix3r_polarDecomposition)
+		#endif
 
 		//
 		.def("__neg__",&Matrix3r__neg__)

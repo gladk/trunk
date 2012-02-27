@@ -24,7 +24,7 @@ Dem3DofGeom_SphereSphere::~Dem3DofGeom_SphereSphere(){}
  */
 Vector3r Dem3DofGeom_SphereSphere::unrollSpherePtToPlane(const Quaternionr& fromXtoPtOri, const Real& radius, const Vector3r& planeNormal){
 	Quaternionr normal2pt; normal2pt.setFromTwoVectors(planeNormal,fromXtoPtOri*Vector3r::UnitX());
-	AngleAxisr aa(normal2pt);
+	AngleAxisr aa(angleAxisFromQuat(normal2pt));
 	return (aa.angle()*radius) /* length */ *(aa.axis().cross(planeNormal)) /* direction: both are unit vectors */;
 }
 
@@ -114,7 +114,7 @@ Vector3r Dem6DofGeom_SphereSphere::relRotVector() const{
 	// FIXME: this is not correct, as it assumes normal will not change (?)
 	Quaternionr relOri12=ori1.conjugate()*ori2;
 	Quaternionr oriDiff=initRelOri12.conjugate()*relOri12;
-	AngleAxisr aa(oriDiff);
+	AngleAxisr aa(angleAxisFromQuat(oriDiff));
 	if(aa.angle()>Mathr::PI)aa.angle()-=Mathr::TWO_PI;
 	// cerr<<axis<<";"<<angle<<";"<<ori1<<";"<<ori2<<";"<<oriDiff<<endl;
 	return aa.angle()*aa.axis();

@@ -17,14 +17,14 @@ void UniaxialStrainer::init(){
 	assert(negIds.size()>0);
 	posCoords.clear(); negCoords.clear();
 	FOREACH(body_id_t id,posIds){ const shared_ptr<Body>& b=Body::byId(id,scene); posCoords.push_back(b->state->pos[axis]);
-		if(blockDisplacements && blockRotations) b->state->blockedDOFs=State::DOF_ALL;
+		if(blockDisplacements && blockRotations) b->isDynamic=false;
 		else{
 			if(!blockDisplacements) b->state->blockedDOFs=State::axisDOF(axis); else b->state->blockedDOFs=State::DOF_XYZ;
 			if(blockRotations) b->state->blockedDOFs|=State::DOF_RXRYRZ;
 		}
 	}
 	FOREACH(body_id_t id,negIds){ const shared_ptr<Body>& b=Body::byId(id,scene); negCoords.push_back(b->state->pos[axis]);
-		if(blockDisplacements && blockRotations) b->state->blockedDOFs=State::DOF_ALL;
+		if(blockDisplacements && blockRotations) b->isDynamic=false;
 		else{
 			if(!blockDisplacements) b->state->blockedDOFs=State::axisDOF(axis); else b->state->blockedDOFs=State::DOF_XYZ;
 			if(blockRotations) b->state->blockedDOFs|=State::DOF_RXRYRZ;

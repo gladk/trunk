@@ -279,7 +279,7 @@ Real Law2_Dem3DofGeom_CpmPhys_Cpm::yieldSigmaTMagnitude(Real sigmaN, Real omega,
 			glPushMatrix();
 				glTranslatev(midPt);
 				Quaternionr q; q.setFromTwoVectors(Vector3r::UnitZ(),geom->normal);
-				AngleAxisr aa(q);
+				AngleAxisr aa(angleAxisFromQuat(q));
 				glRotatef(aa.angle()*Mathr::RAD_TO_DEG,aa.axis()[0],aa.axis()[1],aa.axis()[2]);
 				glBegin(GL_POLYGON);
 					glColor3v(lineColor); 
@@ -367,7 +367,7 @@ void CpmStateUpdater::update(Scene* _scene){
 			}
 		}
 		else { state->normDmg=0; state->normEpsPl=0;}
-		B->shape->color=Vector3r(state->normDmg,1-state->normDmg,B->isDynamic()?0:1);
+		B->shape->color=Vector3r(state->normDmg,1-state->normDmg,B->isDynamic?0:1);
 		nAvgRelResidual+=0.5*state->numBrokenCohesive; // add half or broken interactions, other body has the other half
 	}
 	avgRelResidual/=nAvgRelResidual;

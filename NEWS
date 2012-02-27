@@ -15,8 +15,9 @@ vim:syntax=changelog
 		- separated State and (possibly shared) Material for bodies
 		- InsertionSortCollider handles both periodic and aperiodic simulations now
 		- Cell can undergo arbitrary linear transformation during simulation
+		- New controllers for periodic boundary conditions
 		- VTKRecorder saves to VTK-compatible XML files; allows to use Paraview for post-processing
-		- NewtonIntegrator features integration of rotation of non-spherical bodies
+		- NewtonIntegrator features integration of rotation of aspherical bodies
 		- callback functionality for interaction and body loop (InteractionDispatchers and NewtonIntegrator) (not yet fully done)
 		- body and interaction containers devirtualized (https://blueprints.launchpad.net/yade/+spec/devirtualize-containers)
 

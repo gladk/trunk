@@ -174,7 +174,7 @@ void Law2_ScGeom_NormalInelasticityPhys_NormalInelasticity::go(shared_ptr<Intera
 			Quaternionr delta( de1->se3.orientation * currentContactPhysics->initialOrientation1.conjugate() *
 		                           currentContactPhysics->initialOrientation2 * de2->se3.orientation.conjugate());
 
-			AngleAxisr aa(delta); // aa.axis() of rotation - this is the Moment direction UNIT vector; angle represents the power of resistant ELASTIC moment
+			AngleAxisr aa(angleAxisFromQuat(delta)); // aa.axis() of rotation - this is the Moment direction UNIT vector; angle represents the power of resistant ELASTIC moment
 			if(angle > Mathr::PI) angle -= Mathr::TWO_PI; // angle is between 0 and 2*pi, but should be between -pi and pi 
 
 	//This indentation is a rewrite of original equations (the two commented lines), should work exactly the same.

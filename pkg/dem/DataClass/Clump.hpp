@@ -13,7 +13,7 @@
 /*! Body representing clump (rigid aggregate) composed by other existing bodies.
 
 	Clump is one of bodies that reside in rootBody->bodies.
-	When an existing body is added to ::Clump, it's ::Body::dynamic flag is set to false
+	When an existing body is added to ::Clump, it's ::Body::isDynamic flag is set to false
 	(it is still subscribed to all its engines, to make it possible to remove it from the clump again).
 	All forces acting on Clump::members are made to act on the clump itself, which will ensure that they
 	influence all Clump::members as if the clump were a rigid particle.
@@ -37,7 +37,7 @@
 	-# Apply forces acting on members to the clump instead (done in NewtonsForceLaw, NewtonsMomentumLaw) - uses world coordinates to calculate effect on the clump's centroid
 	-# Integrate position and orientation of the clump
 		- LeapFrogPositionIntegrator and LeapFrogOrientationIntegrator move clump as whole
-			- clump members are skipped, since they have Body::dynamic==false. 
+			- clump members are skipped, since they have Body::isDynamic==false. 
 		- ClumpMemberMover is an engine that updates positions of the clump memebers in each timestep (calls Clump::moveSubBodies internally)
 
 	Some more information can be found http://beta.arcig.cz/~eudoxos/phd/index.cgi/YaDe/HighLevelClumps
@@ -76,7 +76,7 @@ class Clump: public Body {
 	
 	YADE_CLASS_BASE_DOC_ATTRS_CTOR(Clump,Body,"Rigid aggregate of bodies",
 		((memberMap,members,,"Ids and relative positions+orientations of members of the clump (should not be accessed directly)")),
-		/*ctor*/setDynamic(true); /* possible source of crash is setDynamic manipulates Body::State! */
+		/*ctor*/isDynamic=true;
 	);
 	DECLARE_LOGGER;
 };

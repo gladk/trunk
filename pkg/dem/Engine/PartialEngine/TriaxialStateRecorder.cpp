@@ -50,7 +50,7 @@ void TriaxialStateRecorder::action ()
 	for ( ; bi!=biEnd; ++bi ){
 		if((*bi)->isClump()) continue;
 		const shared_ptr<Body>& b = *bi;
-		if ( b->isDynamic() ){
+		if ( b->isDynamic ){
 			//Sorry, the next string was commented, because it gave a Warning "unused variable v". Anton Gladky
 			//const Vector3r& v = b->state->vel;
 			Vs += 1.3333333*Mathr::PI*pow ( YADE_PTR_CAST<Sphere>( b->shape)->radius, 3 );}

@@ -10,7 +10,46 @@ def yadeStaticOrSharedLib(*args,**kw):
 
 if 'opengl' in env['features']:
 	yadeStaticOrSharedLib('yade-serialization-qt',['serialization-qt/QtGUIGenerator.cpp'],LIBS=['yade-support'])
-	yadeStaticOrSharedLib('yade-opengl',env.Combine('yade-opengl.cpp',['opengl/FpsTracker.cpp','opengl/GLTextLabel.cpp','opengl/GLWindow.cpp','opengl/GLWindowsManager.cpp','opengl/GLUtils.cpp']),LIBS=env['LIBS']+['glut','GL','qglviewer-qt3']),
+	yadeStaticOrSharedLib('yade-opengl',env.Combine('yade-opengl.cpp',['opengl/FpsTracker.cpp','opengl/GLTextLabel.cpp','opengl/GLWindow.cpp','opengl/GLWindowsManager.cpp','opengl/GLUtils.cpp']),LIBS=env['LIBS']+['glut','GL','$QGLVIEWER_LIB']),
+	if 'YADE_LOCAL_QGLVIEWER' in env['CPPDEFINES']:
+		yadeStaticOrSharedLib('yade-QGLViewer',Split('''
+			QGLViewer/VRenderInterface_Qt3.ui
+			QGLViewer/ImageInterface_Qt3.ui
+			QGLViewer/qglviewer.cpp 
+			QGLViewer/camera.cpp 
+			QGLViewer/manipulatedFrame.cpp 
+			QGLViewer/manipulatedCameraFrame.cpp 
+			QGLViewer/frame.cpp 
+			QGLViewer/saveSnapshot.cpp 
+			QGLViewer/constraint.cpp 
+			QGLViewer/keyFrameInterpolator.cpp 
+			QGLViewer/mouseGrabber.cpp 
+			QGLViewer/quaternion.cpp 
+			QGLViewer/vec.cpp
+			QGLViewer/VRender/BackFaceCullingOptimizer.cpp 
+			QGLViewer/VRender/BSPSortMethod.cpp 
+			QGLViewer/VRender/EPSExporter.cpp 
+			QGLViewer/VRender/Exporter.cpp 
+			QGLViewer/VRender/FIGExporter.cpp 
+			QGLViewer/VRender/gpc.cpp 
+			QGLViewer/VRender/ParserGL.cpp 
+			QGLViewer/VRender/Primitive.cpp 
+			QGLViewer/VRender/PrimitivePositioning.cpp 
+			QGLViewer/VRender/TopologicalSortMethod.cpp 
+			QGLViewer/VRender/VisibilityOptimizer.cpp 
+			QGLViewer/VRender/Vector2.cpp 
+			QGLViewer/VRender/Vector3.cpp 
+			QGLViewer/VRender/NVector3.cpp 
+			QGLViewer/VRender/VRender.cpp
+			'''),
+			# we want to REALLY optimize this, even in debug builds of yade; and suppress all warnings also
+			CXXFLAGS=[x for x in env['CXXFLAGS'] if x not in ['-ggdb3','-g','-pg'] ]+['-O3','-g0','-w'],
+			# HACK: uic generates files in the buildDir, but gcc is invoked on files in the original dir;
+			# since the generated header is #include'd "...", it looks for it in the original dir
+			# no idea why this _does_ work with gui/qt3. Go figure.
+			CPPPATH=env['CPPPATH']+['${TARGET.dir}'],
+			LIBS=env['LIBS']+['GLU','GL']
+		)
 
 yadeStaticOrSharedLib('yade-support',[
 	env.Combine('yade-support.cpp',['base/Math.cpp']+
@@ -24,3 +63,15 @@ yadeStaticOrSharedLib('yade-support',[
 		+(Split('triangulation/KinematicLocalisationAnalyser.cpp triangulation/Operations.cpp triangulation/RegularTriangulation.cpp triangulation/Timer.cpp triangulation/basicVTKwritter.cpp triangulation/FlowBoundingSphere.cpp triangulation/Deformation.cpp triangulation/Empilement.cpp triangulation/stdafx.cpp triangulation/Tenseur3.cpp triangulation/Tesselation.cpp triangulation/TriaxialState.cpp') if 'cgal' in env['features'] else [])),
 	],LIBS=['dl','m']+[],CXXFLAGS=env['CXXFLAGS']+['-fPIC']
 )
+#)
+#######################
+###### 3rd party libs
+#######################
+
+if 'wm3' in env['features']:
+	yadeStaticOrSharedLib('miniWm3',
+		env.Combine('miniWm3.cpp',['miniWm3/Wm3Math.cpp','miniWm3/Wm3Matrix3.cpp','miniWm3/Wm3Quaternion.cpp','miniWm3/Wm3Vector3.cpp','miniWm3/Wm3Vector2.cpp','miniWm3/Wm3Memory.cpp','miniWm3/Wm3String.cpp','miniWm3/Wm3System.cpp']),
+		# miniWm3 cannot link with itself, filter it out.
+		LIBS=filter(lambda l: l!='miniWm3',env['LIBS']),
+		# miniWm3 will be always optimized and without debugging info, even in debug builds; suppress all warnings
+		CXXFLAGS=env['CXXFLAGS']+['-O3','-g0','-w'])

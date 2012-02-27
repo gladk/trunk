@@ -269,7 +269,7 @@ void GLViewer::keyPressEvent(QKeyEvent *e)
 		// make all bodies visible
 		else centerScene();
 	}
-	else if(e->key()==Qt::Key_D &&(e->state() & AltButton)){ body_id_t id; if((id=Omega::instance().getScene()->selectedBody)>=0){ const shared_ptr<Body>& b=Body::byId(id); b->setDynamic(!b->isDynamic()); LOG_INFO("Body #"<<id<<" now "<<(b->isDynamic()?"":"NOT")<<" dynamic"); } }
+	else if(e->key()==Qt::Key_D &&(e->state() & AltButton)){ body_id_t id; if((id=Omega::instance().getScene()->selectedBody)>=0){ const shared_ptr<Body>& b=Body::byId(id); b->isDynamic=!b->isDynamic; LOG_INFO("Body #"<<id<<" now "<<(b->isDynamic?"":"NOT")<<" dynamic"); } }
 	else if(e->key()==Qt::Key_D) {timeDispMask+=1; if(timeDispMask>(TIME_REAL|TIME_VIRT|TIME_ITER))timeDispMask=0; }
 	else if(e->key()==Qt::Key_G) {bool anyDrawn=drawGridXYZ[0]||drawGridXYZ[1]||drawGridXYZ[2]; for(int i=0; i<3; i++)drawGridXYZ[i]=!anyDrawn; }
 	else if (e->key()==Qt::Key_M && selectedName() >= 0){
@@ -402,8 +402,8 @@ void GLViewer::centerScene(){
 			Real inf=std::numeric_limits<Real>::infinity();
 			min=Vector3r(inf,inf,inf); max=Vector3r(-inf,-inf,-inf);
 			FOREACH(const shared_ptr<Body>& b, *rb->bodies){
-				max=max.cwise().max(b->state->pos);
-				min=min.cwise().min(b->state->pos);
+				max=componentMaxVector(max,b->state->pos);
+				min=componentMinVector(min,b->state->pos);
 			}
 		} else {LOG_DEBUG("Using rootBody's Aabb");}
 	} else {
@@ -526,7 +526,9 @@ void GLViewer::postSelection(const QPoint& point)
 // if so, then set isDynamic of previous selection, to old value
 void GLViewer::endSelection(const QPoint &point){
 	manipulatedClipPlane=-1;
+	//int old = selectedName();
 	QGLViewer::endSelection(point);
+	// if(old != -1 && old!=selectedName() && (*(Omega::instance().getScene()->bodies)).exists(old)) Body::byId(old)->isDynamic = wasDynamic;
 }
 
 qglviewer::Vec GLViewer::displayedSceneCenter(){
@@ -606,7 +608,7 @@ void GLViewer::postDraw(){
 			if(!renderer->clipPlaneActive[planeId] && planeId!=manipulatedClipPlane) continue;
 			glPushMatrix();
 				const Se3r& se3=renderer->clipPlaneSe3[planeId];
-				AngleAxisr aa(se3.orientation);	
+				AngleAxisr aa(angleAxisFromQuat(se3.orientation));	
 				glTranslatef(se3.position[0],se3.position[1],se3.position[2]);
 				glRotated(aa.angle()*Mathr::RAD_TO_DEG,aa.axis()[0],aa.axis()[1],aa.axis()[2]);
 				Real cff=1;

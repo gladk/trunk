@@ -45,15 +45,6 @@ class Body: public Serializable{
 		bool isClumpMember() const {return clumpId!=ID_NONE && id!=clumpId;}
 		//! Whether this body is standalone (neither Clump, nor member of a Clump)
 		bool isStandalone() const {return clumpId==ID_NONE;}
-		//! Whether this body has all DOFs blocked
-		// temporary versions
-		bool isDynamic() const {return dynamic;}
-		void setDynamic(bool dyn){ dynamic=dyn; }
-		#if 0
-			// future versions: make sure state is not NULL when called
-			bool isDynamic() const { return state->blockedDOFs!=State::DOF_ALL; }
-			setDynamic(bool dyn) { state->blockedDOFs=State::DOF_ALL; }
-		#endif
 		/*! Hook for clump to update position of members when user-forced reposition and redraw (through GUI) occurs.
 		 * This is useful only in cases when engines that do that in every iteration are not active - i.e. when the simulation is paused.
 		 * (otherwise, GLViewer would depend on Clump and therefore Clump would have to go to core...) */
@@ -73,7 +64,7 @@ class Body: public Serializable{
 	YADE_CLASS_BASE_DOC_ATTRS_CTOR_PY(Body,Serializable,"A particle, basic element of simulation; interacts with other bodies.",
 		((body_id_t,id,Body::ID_NONE,"[will be overridden]"))
 		((int,groupMask,1,"Bitmask for determining interactions."))
-		((bool,dynamic,true,"Whether this body will be moved by forces."))
+		((bool,isDynamic,true,"Whether this body will be moved by forces."))
 
 		((shared_ptr<Material>,material,,":yref:`Material` instance associated with this body."))
 		((shared_ptr<State>,state,new State,"Physical :yref:`state<State>`."))
@@ -86,7 +77,7 @@ class Body: public Serializable{
 		.def_readonly("id",&Body::id,"Unique id of this body") // overwrites automatic def_readwrite("id",...) earlier
 		.def_readonly("clumpId",&Body::clumpId,"Id of clump this body makes part of; invalid number if not part of clump; see :yref:`Body::isStandalone`, :yref:`Body::isClump`, :yref:`Body::isClumpMember` properties. \n\n This property is not meant to be modified directly from Python, use :yref:`O.bodies.appendClumped<BodyContainer.appendClumped>` instead.")
 		.def_readwrite("mat",&Body::material,"Shorthand for :yref:`Body::material`")
-		.add_property("isDynamic",&Body::isDynamic,"Deprecated synonym for :yref:`Body::dynamic`")
+		.def_readwrite("dynamic",&Body::isDynamic,"Shorthand for :yref:`Body::isDynamic`")
 		.def_readwrite("mask",&Body::groupMask,"Shorthand for :yref:`Body::groupMask`")
 		.add_property("isStandalone",&Body::isStandalone,"True if this body is neither clump, nor clump member; false otherwise.")
 		.add_property("isClumpMember",&Body::isClumpMember,"True if this body is clump member, false otherwise.")

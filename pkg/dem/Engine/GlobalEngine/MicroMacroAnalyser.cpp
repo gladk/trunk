@@ -119,7 +119,7 @@ CGT::TriaxialState& MicroMacroAnalyser::makeState(unsigned int state, const char
 	for (; bi!=biEnd ; ++bi) {
 		const body_id_t Idg = (*bi)->getId();
 		TS.grains[Idg].id = Idg;
-		if (!(*bi)->isDynamic()) {
+		if (!(*bi)->isDynamic) {
 			TS.grains[Idg].isSphere = false; fictiousVtx.push_back(Idg);}
 		else {//then it is a sphere (not a wall)
 			++Ng;
@@ -130,7 +130,7 @@ CGT::TriaxialState& MicroMacroAnalyser::makeState(unsigned int state, const char
 
 			TS.grains[Idg].sphere = CGT::Sphere(CGT::Point(pos[0],pos[1],pos[2]),rad);
 //    TS.grains[Idg].translation = trans;
-			AngleAxisr aa((*bi)->state->ori);
+			AngleAxisr aa(angleAxisFromQuat((*bi)->state->ori));
 			Vector3r rotVec=aa.axis()*aa.angle();
 			TS.grains[Idg].rotation = CGT::Vecteur(rotVec[0],rotVec[1],rotVec[2]);
 			TS.box.base = CGT::Point(min(TS.box.base.x(), pos.x()-rad),

@@ -66,7 +66,7 @@ void build_triangulation_with_ids(const shared_ptr<BodyContainer>& bodies, Tesse
 	body_id_t MaxId=0;
 	TW.mean_radius = 0;
 	for (; bi!=biEnd ; ++bi) {
-		if ((*bi)->isDynamic()) { //then it is a sphere (not a wall) FIXME : need test if isSphere
+		if ((*bi)->isDynamic) { //then it is a sphere (not a wall) FIXME : need test if isSphere
 			const Sphere* s = YADE_CAST<Sphere*> ((*bi)->shape.get());
 			const Vector3r& pos = (*bi)->state->pos;
 			const Real rad = s->radius;

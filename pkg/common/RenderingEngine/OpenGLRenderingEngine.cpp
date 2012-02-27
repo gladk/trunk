@@ -81,7 +81,7 @@ void OpenGLRenderingEngine::renderWithNames(const shared_ptr<Scene>& _scene){
 		if(!b || !b->shape) continue;
 		glPushMatrix();
 		const Se3r& se3=b->state->se3;
-		AngleAxisr aa(se3.orientation);
+		AngleAxisr aa(angleAxisFromQuat(se3.orientation));
 		glTranslatef(se3.position[0],se3.position[1],se3.position[2]);
 		glRotatef(aa.angle()*Mathr::RAD_TO_DEG,aa.axis()[0],aa.axis()[1],aa.axis()[2]);
 		//if(b->shape->getClassName() != "LineSegment"){ // FIXME: a body needs to say: I am selectable ?!?!
@@ -115,11 +115,11 @@ void OpenGLRenderingEngine::setBodiesDispInfo(){
 		if(!(scaleDisplacements||scaleRotations||scene->isPeriodic)){ bodyDisp[id].pos=pos; bodyDisp[id].ori=ori; continue; }
 		// apply scaling
 		bodyDisp[id].pos=cellPos; // point of reference (inside the cell for periodic)
-		if(scaleDisplacements) bodyDisp[id].pos+=dispScale.cwise()*Vector3r(pos-refPos); // add scaled translation to the point of reference
+		if(scaleDisplacements) bodyDisp[id].pos+=diagMult(dispScale,Vector3r(pos-refPos)); // add scaled translation to the point of reference
 		if(!scaleRotations) bodyDisp[id].ori=ori;
 		else{
 			Quaternionr relRot=refOri.conjugate()*ori;
-			AngleAxisr aa(relRot);
+			AngleAxisr aa(angleAxisFromQuat(relRot));
 			aa.angle()*=rotScale;
 			bodyDisp[id].ori=refOri*Quaternionr(aa);
 		}
@@ -132,7 +132,7 @@ void OpenGLRenderingEngine::drawPeriodicCell(){
 	glColor3v(Vector3r(1,1,0));
 	glPushMatrix();
 		Vector3r size=scene->cell->getSize();
-		if(dispScale!=Vector3r::Ones()) size+=dispScale.cwise()*Vector3r(size-scene->cell->refSize);
+		if(dispScale!=Vector3r::Ones()) size+=diagMult(dispScale,Vector3r(size-scene->cell->refSize));
 		glTranslatev(scene->cell->shearPt(.5*size)); // shear center (moves when sheared)
 		glMultMatrixd(scene->cell->getGlShearTrsfMatrix());
 		glScalev(size);
@@ -327,7 +327,7 @@ void OpenGLRenderingEngine::renderShape()
 		Quaternionr ori=bodyDisp[b->getId()].ori;
 		if(!b->shape || !((b->getGroupMask()&mask) || b->getGroupMask()==0)) continue;
 		glPushMatrix();
-			AngleAxisr aa(ori);	
+			AngleAxisr aa(angleAxisFromQuat(ori));	
 			glTranslatef(pos[0],pos[1],pos[2]);
 			glRotatef(aa.angle()*Mathr::RAD_TO_DEG,aa.axis()[0],aa.axis()[1],aa.axis()[2]);
 			if(current_selection==b->getId() || b->shape->highlight){

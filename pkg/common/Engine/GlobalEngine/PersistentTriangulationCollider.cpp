@@ -52,7 +52,7 @@ void PersistentTriangulationCollider::action ()
 		BodyContainer::iterator biEnd = bodies->end();
 		for ( ; bi!=biEnd ; ++bi )
 		{
-			if ( ( *bi )->isDynamic() )
+			if ( ( *bi )->isDynamic )
 			{//means "is it a sphere (not a wall)"
 				const Sphere* s = YADE_CAST<Sphere*> ( ( *bi )->shape.get() );
 				Tes->insert ( (*bi)->state->pos[0],(*bi)->state->pos[1],(*bi)->state->pos[2], s->radius, ( *bi )->getId() );
@@ -71,7 +71,7 @@ void PersistentTriangulationCollider::action ()
 //   BodyContainer::iterator biEnd = bodies->end();
 //   for ( ; bi!=biEnd ; ++bi )
 //   {
-//    if ( ( *bi )->isDynamic() )
+//    if ( ( *bi )->isDynamic )
 //    {//means "is it a sphere (not a wall)"
 //     const Sphere* s = YADE_CAST<Sphere*> ( ( *bi )->shape.get() );
 //     const RigidBodyParameters* p = YADE_CAST<RigidBodyParameters*> ( ( *bi )->physicalParameters.get() );

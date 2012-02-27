@@ -220,7 +220,7 @@ void TriaxialTest::createSphere(shared_ptr<Body>& body, Vector3r position, Real 
 	shared_ptr<Aabb> aabb(new Aabb);
 	shared_ptr<Sphere> iSphere(new Sphere);
 	
-	body->setDynamic(dynamic);	
+	body->isDynamic			= dynamic;	
 	body->state->mass		= 4.0/3.0*Mathr::PI*radius*radius*radius*density;
 	body->state->inertia		= Vector3r( 	2.0/5.0*body->state->mass*radius*radius,
 							2.0/5.0*body->state->mass*radius*radius,
@@ -243,7 +243,7 @@ void TriaxialTest::createSphere(shared_ptr<Body>& body, Vector3r position, Real 
 void TriaxialTest::createBox(shared_ptr<Body>& body, Vector3r position, Vector3r extents, bool wire)
 {
 	body = shared_ptr<Body>(new Body(body_id_t(0),2));
-	body->setDynamic(false);
+	body->isDynamic			= false;
 	shared_ptr<Aabb> aabb(new Aabb);
 	aabb->diffuseColor		= Vector3r(1,0,0);
 	body->bound		= aabb;

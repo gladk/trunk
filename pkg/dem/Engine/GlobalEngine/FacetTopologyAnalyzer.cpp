@@ -127,7 +127,7 @@ void FacetTopologyAnalyzer::action(){
 			Vector3r n1g=b1->state->ori*f1->nf, n2g=b2->state->ori*f2->nf;
 			//TRVAR2(n1g,n2g);
 			Vector3r contEdge1g=b1->state->ori*(f1->vertices[(ei+1)%3]-f1->vertices[ei]); // vector of the edge of contact in global coords
-			Quaternionr q12; q12.setFromTwoVectors(n1g,(invNormals?-1.:1.)*n2g); AngleAxisr aa12(q12); Real halfAngle=.5*aa12.angle();
+			Quaternionr q12; q12.setFromTwoVectors(n1g,(invNormals?-1.:1.)*n2g); AngleAxisr aa12(angleAxisFromQuat(q12)); Real halfAngle=.5*aa12.angle();
 			assert(halfAngle>=0 && halfAngle<=Mathr::HALF_PI);
 			if(aa12.axis().dot(contEdge1g)<0 /* convex contact from the side of +n1 */ ) halfAngle*=-1.;
 			f1->edgeAdjHalfAngle[ei]=halfAngle;
