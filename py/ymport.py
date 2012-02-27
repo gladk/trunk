@@ -184,7 +184,7 @@ def gengeoFile(fileName="file.geo",shift=Vector3.Zero,scale=1.0,orientation=Quat
 				is passed to :yref:`yade.utils.sphere`
 	:Returns: list of spheres.
 	
-	LSMGenGeo library allows to create pack of spheres
+	LSMGenGeo library allows one to create pack of spheres
 	with given [Rmin:Rmax] with null stress inside the specimen.
 	Can be useful for Mining Rock simulation.
 	
@@ -220,7 +220,7 @@ def gengeo(mntable,shift=Vector3.Zero,scale=1.0,**kw):
 		`**kw`: (unused keyword arguments)
 				is passed to :yref:`yade.utils.sphere`
 	
-	LSMGenGeo library allows to create pack of spheres
+	LSMGenGeo library allows one to create pack of spheres
 	with given [Rmin:Rmax] with null stress inside the specimen.
 	Can be useful for Mining Rock simulation.
 	

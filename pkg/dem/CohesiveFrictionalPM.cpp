@@ -22,7 +22,7 @@ void Law2_ScGeom_CFpmPhys_CohesiveFrictionalPM::go(shared_ptr<IGeom>& ig, shared
 	Real Dtensile=phys->FnMax/phys->kn;
 	Real Dsoftening = phys->strengthSoftening*Dtensile; 
 	
-	/*to set the equilibrium distance between all cohesive elements when they first meet -> allows to work with initial stress-free assembly*/
+	/*to set the equilibrium distance between all cohesive elements when they first meet -> allows one to work with initial stress-free assembly*/
 	if ( contact->isFresh(scene) ) { phys->initD = displN; phys->normalForce = Vector3r::Zero(); phys->shearForce = Vector3r::Zero();}
 	Real D = displN - phys->initD; // interparticular distance is computed depending on the equilibrium distance
 

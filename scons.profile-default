@@ -1,7 +1,0 @@
-PREFIX = '/home/gladk/dem/yade/cleanComp060/build'
-exclude = 'none'
-features = 'gts,log4cxx,opengl,openmp,qt4,vtk'
-chunkSize = 3
-version = 'cleanComp060'
-CXXFLAGS = []
-SHCCFLAGS = ['-fPIC']

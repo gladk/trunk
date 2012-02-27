@@ -152,6 +152,7 @@ class ForceContainer{
 		/*! Reset all data, also reset summary forces/torques and mark the container clean. */
 		// perhaps should be private and friend Scene or whatever the only caller should be
 		void reset(long iter){
+			syncSizesOfContainers();
 			for(int thread=0; thread<nThreads; thread++){
 				memset(&_forceData [thread][0],0,sizeof(Vector3r)*sizeOfThreads[thread]);
 				memset(&_torqueData[thread][0],0,sizeof(Vector3r)*sizeOfThreads[thread]);

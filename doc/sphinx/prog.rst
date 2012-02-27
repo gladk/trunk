@@ -1660,7 +1660,7 @@ In c++, the code looks like this (for :yref:`CpmMat`):
 	   /* ... */
 	};
 
-This allows to construct :yref:`Body` objects from functions such as :yref:`yade.utils.sphere` only by knowing the requires :yref:`Material` type, enforcing the expectation of the model implementor.
+This allows one to construct :yref:`Body` objects from functions such as :yref:`yade.utils.sphere` only by knowing the requires :yref:`Material` type, enforcing the expectation of the model implementor.
 
 
 Runtime structure

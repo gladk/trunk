@@ -356,7 +356,7 @@ def facetCylinder(center,radius,height,orientation=Quaternion.Identity,segmentsN
 	:param Quaternion orientation: orientation of the cylinder; the reference orientation has axis along the $+x$ axis.
 	:param int segmentsNumber: number of edges on the cylinder surface (>=5)
 	:param bitmask wallMask: determines which walls will be created, in the order up (1), down (2), side (4). The numbers are ANDed; the default 7 means to create all walls
-	:param (θmin,Θmax) angleRange: allows to create only part of cylinder by specifying range of angles; if ``None``, (0,2*pi) is assumed.
+	:param (θmin,Θmax) angleRange: allows one to create only part of cylinder by specifying range of angles; if ``None``, (0,2*pi) is assumed.
 	:param bool closeGap: close range skipped in angleRange with triangular facets at cylinder bases.
 	:param **kw: (unused keyword arguments) passed to utils.facet;
 	"""

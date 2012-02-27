@@ -126,7 +126,7 @@ they will be written by the people who are authors of those changes.
 	* lib/serialization-qt/FundamentalHandler.tpp: Hopefully all
 	xml-parser-offensive characters are escaped at string serialization,
 	and unescaped at deserialization. We use standard SGML escapes (newline=&br;
-	tab=&tab; <=&lt;) and so on now. This allows to save
+	tab=&tab; <=&lt;) and so on now. This allows one to save
 	XML-as-string in the xml itself (used for DisplayParameters).
 
 	* gui/qt3/GLViewer.cpp: GLViewer now properly saves what XYZ planes
@@ -854,12 +854,12 @@ r.1010
   - 'C' key centers scene on selected body
   - 'D' sets the 'isDynamic' flag of selected body. (select it twice to unset this flag).
   - Finally 3D lattice works with torsion and bending. There is bending stiffness, and torsion stiffness.
-  - flag that allows to enable/disable calculating of torsion in lattice
+  - flag that allows one to enable/disable calculating of torsion in lattice
   - LatticeExample FileGenerator can now generate a 3D tetrahedral regular grid. (before there was only orthogonal grid)
 
 r.1008
   - Omega throws when loading bad simulation file
-  - NullGUI allows to call a FileGenerator
+  - NullGUI allows one to call a FileGenerator
   - Lattice 3D is working with bending stiffness. Now I must add torsional stiffness.
   - also renamed: ./yade-scripts/renameClassFirst volatileInteractions transientInteractions
   - added GLDrawStateFunctor. So now it is possible to see bodies' velocity, acceleration, angularVelocity, angularAcceleration. And other State attributes of a body.

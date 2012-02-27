@@ -24,7 +24,7 @@ class KinemCNDEngine : public KinemSimpleShearBox
 	protected :
 
 		YADE_CLASS_BASE_DOC_ATTRS_CTOR(KinemCNDEngine,KinemSimpleShearBox,
-			"To apply a Constant Normal Displacement (CND) shear for a parallelogram box\n\n \tThis engine, designed for simulations implying a simple shear box (:yref:`SimpleShear` Preprocessor or scripts/simpleShear.py), allows to perform a constant normal displacement shear, by translating horizontally the upper plate, while the lateral ones rotate so that they always keep contact with the lower and upper walls.",
+			"To apply a Constant Normal Displacement (CND) shear for a parallelogram box\n\n \tThis engine, designed for simulations implying a simple shear box (:yref:`SimpleShear` Preprocessor or scripts/simpleShear.py), allows one to perform a constant normal displacement shear, by translating horizontally the upper plate, while the lateral ones rotate so that they always keep contact with the lower and upper walls.",
 			((Real,shearSpeed,0.0,,"the speed at which the shear is performed : speed of the upper plate [m/s]"))
 			((Real,gammalim,0.0,,"the value of the tangential displacement at wich the displacement is stopped [m]"))
 			((Real,gamma,0.0,,"the current value of the tangential displacement"))

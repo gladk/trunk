@@ -394,6 +394,7 @@ void CpmStateUpdater::update(Scene* _scene){
 	assert(bodyStats[0].nCohLinks==0); // should be initialized by dfault ctor
 	avgRelResidual=0; Real nAvgRelResidual=0;
 	FOREACH(const shared_ptr<Interaction>& I, *scene->interactions){
+		if(!I) continue;
 		if(!I->isReal()) continue;
 		shared_ptr<CpmPhys> phys=dynamic_pointer_cast<CpmPhys>(I->phys);
 		if(!phys) continue;
@@ -421,6 +422,7 @@ void CpmStateUpdater::update(Scene* _scene){
 		nAvgRelResidual+=1;
 	}
 	FOREACH(shared_ptr<Body> B, *scene->bodies){
+		if (!B) continue;
 		const Body::id_t& id=B->getId();
 		// add damaged contacts that have already been deleted
 		CpmState* state=dynamic_cast<CpmState*>(B->state.get());

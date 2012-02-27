@@ -14,7 +14,7 @@ YADE_PLUGIN((ForceEngine)(InterpolatingDirectedForceEngine));
 
 void ForceEngine::action(){
 	FOREACH(Body::id_t id, ids){
-		assert(scene->bodies->exists(id));
+		if (!(scene->bodies->exists(id))) continue;
 		scene->forces.addForce(id,force);
 	}
 }

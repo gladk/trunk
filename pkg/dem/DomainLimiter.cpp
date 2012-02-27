@@ -226,11 +226,11 @@ void GlExtra_LawTester::render(){
 
 	// switch to local coordinates
 	glTranslatev(tester->contPt);
-	#if EIGEN_MAJOR_VERSION<20              //Eigen3 definition, while it is not realized
- 		glMultMatrixd(Eigen::Transform3d(tester->trsf).data());
-        #else
- 		glMultMatrixd(Eigen::Affine3d(tester->trsf).data());
-        #endif
+	#if EIGEN_WORLD_VERSION==2
+		glMultMatrixd(Eigen::Transform3d(tester->trsf).data());
+	#elif EIGEN_WORLD_VERSION==3
+		glMultMatrixd(Eigen::Affine3d(tester->trsf).data());
+	#endif
 
 
 	glDisable(GL_LIGHTING); 

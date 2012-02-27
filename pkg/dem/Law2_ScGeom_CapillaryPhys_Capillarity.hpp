@@ -22,7 +22,7 @@
 #include <string>
 
 /**
-This law allows to take into account capillary forces/effects between spheres coming from the presence of interparticular liquid bridges (menisci).
+This law allows one to take into account capillary forces/effects between spheres coming from the presence of interparticular liquid bridges (menisci).
 refs:
 - (french, lot of documentation) L. Scholtes, PhD thesis -> http://tel.archives-ouvertes.fr/tel-00363961/en/
 - (english, less...) L. Scholtes et al. Micromechanics of granular materials with capillary effects. International Journal of Engineering Science 2009,(47)1, 64-75 
@@ -94,7 +94,7 @@ class Law2_ScGeom_CapillaryPhys_Capillarity : public GlobalEngine
 		void postLoad(Law2_ScGeom_CapillaryPhys_Capillarity&);
 
 		
-	YADE_CLASS_BASE_DOC_ATTRS(Law2_ScGeom_CapillaryPhys_Capillarity,GlobalEngine,"This law allows to take into account capillary forces/effects between spheres coming from the presence of interparticular liquid bridges (menisci).\n\n refs:\n\n#. in french [Scholtes2009d]_ (lot of documentation) \n#. in english [Scholtes2009b]_ (less documentation), pg. 64-75.\n\nThe law needs ascii files M(r=i) with i=R1/R2 to work (see https://yade-dem.org/index.php/CapillaryTriaxialTest). These ASCII files contain a set of results from the resolution of the Laplace-Young equation for different configurations of the interacting geometry.\n\nThe control parameter is the capillary pressure (or suction) Uc = ugas - Uliquid. Liquid bridges properties (volume V, extent over interacting grains delta1 and delta2) are computed as a result of the defined capillary pressure and of the interacting geometry (spheres radii and interparticular distance).",
+	YADE_CLASS_BASE_DOC_ATTRS(Law2_ScGeom_CapillaryPhys_Capillarity,GlobalEngine,"This law allows one to take into account capillary forces/effects between spheres coming from the presence of interparticular liquid bridges (menisci).\n\n refs:\n\n#. in french [Scholtes2009d]_ (lot of documentation) \n#. in english [Scholtes2009b]_ (less documentation), pg. 64-75.\n\nThe law needs ascii files M(r=i) with i=R1/R2 to work (see https://yade-dem.org/index.php/CapillaryTriaxialTest). These ASCII files contain a set of results from the resolution of the Laplace-Young equation for different configurations of the interacting geometry.\n\nThe control parameter is the capillary pressure (or suction) Uc = ugas - Uliquid. Liquid bridges properties (volume V, extent over interacting grains delta1 and delta2) are computed as a result of the defined capillary pressure and of the interacting geometry (spheres radii and interparticular distance).",
 	((Real,CapillaryPressure,0.,,"Value of the capillary pressure Uc defines as Uc=Ugas-Uliquid"))
 	((bool,fusionDetection,false,,"If true potential menisci overlaps are checked"))
 	((bool,binaryFusion,true,,"If true, capillary forces are set to zero as soon as, at least, 1 overlap (menisci fusion) is detected"))

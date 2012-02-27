@@ -64,9 +64,9 @@ void Gl1_NormPhys::go(const shared_ptr<IPhys>& ip, const shared_ptr<Interaction>
 		glTranslatef(p1[0],p1[1],p1[2]);
 		Quaternionr q(Quaternionr().setFromTwoVectors(Vector3r(0,0,1),relPos/dist /* normalized */));
 		// using Transform with OpenGL: http://eigen.tuxfamily.org/dox/TutorialGeometry.html
-		#if EIGEN_MAJOR_VERSION<20              //Eigen3 definition, while it is not realized
+		#if EIGEN_WORLD_VERSION==2
 			glMultMatrixd(Eigen::Transform3d(q).data());
-		#else
+		#elif EIGEN_WORLD_VERSION==3
 			glMultMatrixd(Eigen::Affine3d(q).data());
 		#endif
 		glColor3v(color);
