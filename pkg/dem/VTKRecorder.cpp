@@ -200,6 +200,8 @@ void VTKRecorder::action(){
 		FOREACH(const shared_ptr<Interaction>& I, *scene->interactions){
 			if(!I->isReal()) continue;
 			if(skipFacetIntr){
+				if(!(Body::byId(I->getId1()))) continue;
+				if(!(Body::byId(I->getId2()))) continue;
 				if(!(dynamic_cast<Sphere*>(Body::byId(I->getId1())->shape.get()))) continue;
 				if(!(dynamic_cast<Sphere*>(Body::byId(I->getId2())->shape.get()))) continue;
 			}

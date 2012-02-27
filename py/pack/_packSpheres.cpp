@@ -20,7 +20,7 @@ BOOST_PYTHON_MODULE(_packSpheres){
 		.def("psd",&SpherePack::psd,(python::arg("bins")=10,python::arg("mass")=false),"Return `particle size distribution <http://en.wikipedia.org/wiki/Particle_size_distribution>`__ of the packing.\n:param int bins: number of bins between minimum and maximum diameter\n:param mass: Compute relative mass rather than relative particle count for each bin. Corresponds to :yref:`distributeMass parameter for makeCloud<yade.pack.SpherePack.makeCloud>`.\n:returns: tuple of ``(cumm,edges)``, where ``cumm`` are cummulative fractions for respective diameters  and ``edges`` are those diameter values. Dimension of both arrays is equal to ``bins+1``.")
 		// new psd
 		.def("particleSD",&SpherePack::particleSD,(python::arg("minCorner"),python::arg("maxCorner"),python::arg("rMean"),python::arg("periodic")=false,python::arg("name"),python::arg("numSph"),python::arg("radii")=vector<Real>(),python::arg("passing")=vector<Real>(),python::arg("passingIsNotPercentageButCount")=false),"Create random packing enclosed in box given by minCorner and maxCorner, containing numSph spheres. Returns number of created spheres, which can be < num if the packing is too tight. The computation is done according to the given psd.")
-		.def("makeClumpCloud",&SpherePack::makeClumpCloud,(python::arg("minCorner"),python::arg("maxCorner"),python::arg("clumps"),python::arg("periodic")=false,python::arg("num")=-1),"Create random loose packing of clumps within box given by *minCorner* and *maxCorner*. Clumps are selected with equal probability. At most *num* clumps will be positioned if *num* is positive; otherwise, as many clumps as possible will be put in space, until maximum number of attemps to place a new clump randomly is attained.")
+		.def("makeClumpCloud",&SpherePack::makeClumpCloud,(python::arg("minCorner"),python::arg("maxCorner"),python::arg("clumps"),python::arg("periodic")=false,python::arg("num")=-1),"Create random loose packing of clumps within box given by *minCorner* and *maxCorner*. Clumps are selected with equal probability. At most *num* clumps will be positioned if *num* is positive; otherwise, as many clumps as possible will be put in space, until maximum number of attempts to place a new clump randomly is attained.")
 		//
 		.def("aabb",&SpherePack::aabb_py,"Get axis-aligned bounding box coordinates, as 2 3-tuples.")
 		.def("dim",&SpherePack::dim,"Return dimensions of the packing in terms of aabb(), as a 3-tuple.")
@@ -37,7 +37,7 @@ BOOST_PYTHON_MODULE(_packSpheres){
 		.def("__len__",&SpherePack::len,"Get number of spheres in the packing")
 		.def("__getitem__",&SpherePack::getitem,"Get entry at given index, as tuple of center and radius.")
 		.def("__iter__",&SpherePack::getIterator,"Return iterator over spheres.")
-		.def_readwrite("psdScaleExponent",&SpherePack::psdScaleExponent,"Exponent used to scale cummulative distribution function values so that standard uniform distribution is mapped to uniform mass distribution. Theoretically, this value is 3, but that usually overfavors small particles. The dafault value is 2.5.")
+		.def_readwrite("psdScaleExponent",&SpherePack::psdScaleExponent,"Exponent used to scale cummulative distribution function values so that standard uniform distribution is mapped to uniform mass distribution. Theoretically, this value is 3, but that usually overfavors small particles. The default value is 2.5.")
 		;
 	python::class_<SpherePack::_iterator>("SpherePackIterator",python::init<SpherePack::_iterator&>())
 		.def("__iter__",&SpherePack::_iterator::iter)

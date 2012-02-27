@@ -32,9 +32,9 @@ class GlobalStiffnessTimeStepper;
 		
 	2/ The class TriaxialStateRecorder is used to write to a file the history of stresses and strains.
 	
-	3/ TriaxialTest is currently using GlobalStiffnessTimeStepper to compute an appropriate dt for the numerical scheme. The TriaxialTest is the only preprocessor using these classes in Yade because they have been developped AFTER most of preprocessor examples, BUT they can be used in principle in any situation and they have nothing specifically related to the triaxial test.
+	3/ TriaxialTest is currently using GlobalStiffnessTimeStepper to compute an appropriate dt for the numerical scheme. The TriaxialTest is the only preprocessor using these classes in Yade because they have been developed AFTER most of preprocessor examples, BUT they can be used in principle in any situation and they have nothing specifically related to the triaxial test.
 	
-	@note TriaxialStressController::ComputeUnbalancedForce(...) returns a value that can be usefull for evaluating the stability of the packing. It is defined as (mean force on particles)/(mean contact force), so that it tends to 0 in a stable packing. This parameter is checked by TriaxialCompressionEngine to switch from one stage of the simulation to the next one (e.g. stop isotropic confinment and start axial loading)
+	@note TriaxialStressController::ComputeUnbalancedForce(...) returns a value that can be useful for evaluating the stability of the packing. It is defined as (mean force on particles)/(mean contact force), so that it tends to 0 in a stable packing. This parameter is checked by TriaxialCompressionEngine to switch from one stage of the simulation to the next one (e.g. stop isotropic confinment and start axial loading)
 
 	@note Compaction is done (1) by moving rigid boxes or (2) by increasing the sizes of the particles (decided using the option "internalCompaction" : true => size increase). Both algorithm needs numerical parameters to prevent instabilities. For instance, with method (1) maxWallVelocity is the maximum wall velocity, with method (2) finalMaxMultiplier is the max value of the multiplier applied on sizes at each iteration (always something like 1.00001). 
 	
@@ -80,7 +80,7 @@ class TriaxialTest : public FileGenerator
 		((Vector3r,upperCorner,Vector3r(1,1,1),,"Upper corner of the box."))
 		((string,importFilename,"",,"File with positions and sizes of spheres."))
 		((string,Key,"",,"A code that is added to output filenames."))
-		((string,fixedBoxDims,"",,"string that contains some subset (max. 2) of {'x','y','z'} ; containes axes will have box dimension hardcoded, even if box is scaled as mean_radius is prescribed: scaling will be applied on the rest."))
+		((string,fixedBoxDims,"",,"string that contains some subset (max. 2) of {'x','y','z'} ; contains axes will have box dimension hardcoded, even if box is scaled as mean_radius is prescribed: scaling will be applied on the rest."))
 		((string,WallStressRecordFile,"./WallStresses"+Key,,""))					
 		((bool,internalCompaction,false,,"flag for choosing between moving boundaries or increasing particles sizes during the compaction stage."))
 		((bool,biaxial2dTest,false,,"FIXME : what is that?"))
@@ -99,7 +99,7 @@ class TriaxialTest : public FileGenerator
 		((Real,sphereYoungModulus,15000000.0,,"Stiffness of spheres."))
 		((Real,sphereKsDivKn,0.5,,"Ratio of shear vs. normal contact stiffness for spheres."))
 		((Real,sphereFrictionDeg,18.0,,"Friction angle [°] of spheres assigned just before triaxial testing."))
-		((Real,compactionFrictionDeg,sphereFrictionDeg,,"Friction angle [°] of spheres during compaction (different values result in different porosities)]. This value is overriden by :yref:`TriaxialTest::sphereFrictionDeg` before triaxial testing."))
+		((Real,compactionFrictionDeg,sphereFrictionDeg,,"Friction angle [°] of spheres during compaction (different values result in different porosities)]. This value is overridden by :yref:`TriaxialTest::sphereFrictionDeg` before triaxial testing."))
 		((Real,boxYoungModulus,15000000.0,,"Stiffness of boxes."))
 		((Real,maxWallVelocity,10,,"max velocity of boundaries. Usually useless, but can help stabilizing the system in some cases."))
 		((Real,boxKsDivKn,0.5,,"Ratio of shear vs. normal contact stiffness for boxes."))

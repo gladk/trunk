@@ -51,7 +51,7 @@ enum{ll_TRACE,ll_DEBUG,ll_INFO,ll_WARN,ll_ERROR,ll_FATAL};
 #endif
 
 BOOST_PYTHON_MODULE(log){
-	python::scope().attr("__doc__") = "Acess and manipulation of log4cxx loggers.";
+	python::scope().attr("__doc__") = "Access and manipulation of log4cxx loggers.";
 
 	YADE_SET_DOCSTRING_OPTS;
 

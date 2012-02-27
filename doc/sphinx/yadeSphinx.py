@@ -177,7 +177,7 @@ def makeBaseClassesClickable(f,writer):
 			out.append(m.group(1)+bbb+m.group(3)+'\n')
 		changed=True
 	if changed:
-		shutil.move(f,f+'~')
+		shutil.move(f,f+'_')
 		ff=open(f,'w')
 		for l in out:
 			ff.write(l)
@@ -216,5 +216,8 @@ for w in ['html','latex']: #['html','latex']:
 	sys.argv=['sphinx-build','-a','-E','-b','%s'%writer,'-d',outDir+'/doctrees','.',outDir+'/%s'%writer]
 	sphinx.main(sys.argv)
 	makeBaseClassesClickable((outDir+'/html/yade.wrapper.html' if writer=='html' else outDir+'/latex/Yade.tex'),writer)
+	if (os.path.exists('/usr/share/javascript/jquery/jquery.js')): #Check, whether jquery.js installed in system
+		os.system('rm '+ outDir+'/html/_static/jquery.js')
+		os.system('ln -s /usr/share/javascript/jquery/jquery.js '+ outDir+'/html/_static/jquery.js')
 
 sys.exit()

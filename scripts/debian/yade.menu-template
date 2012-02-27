@@ -1,0 +1,8 @@
+?package(yade@_VERSION@):\
+	needs="X11"\
+	section="Applications/Science/Physics"\
+	title="Yade (@VERSION@)"\
+	command="/usr/bin/yade@_VERSION@"\
+	icon="/usr/share/pixmaps/yade@_VERSION@_32x32.xpm"\
+	icon16x16="/usr/share/pixmaps/yade@_VERSION@_16x16.xpm"\
+	icon32x32="/usr/share/pixmaps/yade@_VERSION@_32x32.xpm"

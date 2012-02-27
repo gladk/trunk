@@ -33,7 +33,7 @@ public:
     /// By default it is a surface. To make its a volume set volumeSection=true
     bool volumeSection;
 
-	/// @brief Max attemps to place sphere.
+	/// @brief Max attempts to place sphere.
 	/// If placing the sphere in certain random position would cause an overlap with any other physical body in the model, SpheresFactory will try to find another position. Default 20 attempts allow.
 	int maxAttempts; 
 

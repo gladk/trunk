@@ -1,0 +1,76 @@
+#!/usr/bin/make -f
+
+export VERSION=$(shell cat VERSION)
+export _VERSION=-${VERSION}
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	touch configure-stamp
+build: build-stamp
+
+build-stamp: configure-stamp 
+	dh_testdir
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	## eudoxos: FIXME: scons skips config when cleaning and doesn't know where it built anything
+	dh_testdir
+	# scons clean
+	## remove builddirs and installation directories
+	rm -rf debian/build-* `find debian/ -name 'yade-*' -type d`
+	rm -rf doc/sphinx/_build
+	rm -rf tags
+	dh_clean 
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_installdirs
+	## files VERSION and _VERSION contain snapshot version without/with leading '-' respectively (like svn1113 and -svn1113)
+	#debug build
+	# remove the profile, if existing, to have clean config
+	rm -f scons.profile-deb
+	# the last argument specified that we only want files in lib installed -- common files (the executable) are already in the optimized package
+	NO_SCONS_GET_RECENT= scons profile=deb buildPrefix=debian runtimePREFIX=/usr version=${VERSION} brief=0 chunkSize=5 jobs=1 features=openmp,vtk,gts,opengl,qt4 PREFIX=debian/yade${_VERSION}-dbg/usr variant='' optimize=0 march= debug=1 debian/yade${_VERSION}-dbg/usr/lib
+	#optimized build
+	NO_SCONS_GET_RECENT= scons profile=deb PREFIX=debian/yade${_VERSION}/usr variant='' optimize=1 debug=0
+	cd doc/sphinx; PYTHONPATH=. YADE_PREFIX=../../debian/yade${_VERSION}/usr/ ../../debian/yade${_VERSION}/usr/bin/yade${_VERSION} yadeSphinx.py; cd _build/latex; xelatex Yade.tex; xelatex Yade.tex; xelatex Yade.tex; cd ../..;
+	# generate manpages
+	YADE_PREFIX=debian/yade${_VERSION}/usr debian/yade${_VERSION}/usr/bin/yade${_VERSION} --generate-manpage yade${_VERSION}.1
+	YADE_PREFIX=debian/yade${_VERSION}/usr debian/yade${_VERSION}/usr/bin/yade${_VERSION}-batch --generate-manpage yade${_VERSION}-batch.1
+
+check: install
+	dh_testdir
+	dh_testroot
+	YADE_PREFIX=debian/yade${_VERSION}/usr debian/yade${_VERSION}/usr/bin/yade${_VERSION} --test
+	YADE_PREFIX=debian/yade${_VERSION}-dbg/usr debian/yade${_VERSION}/usr/bin/yade${_VERSION} --debug --test
+
+binary-indep: build install 
+
+binary-arch: build install check
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs ChangeLog
+	dh_pysupport
+	dh_installdocs
+	dh_install
+	dh_installexamples
+	dh_installmenu
+	dh_installman -p yade${_VERSION} yade${_VERSION}.1 yade${_VERSION}-batch.1
+	dh_link
+	dh_strip --exclude=yade${_VERSION}-dbg   # don't strip the debug package
+	dh_compress --all -X.py -X.stl -X.gts -X.geo -X.mesh -X.msh -X.pdf -X.png -X.svg -X.txt -X.js -X.inv
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

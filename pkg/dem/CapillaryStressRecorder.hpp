@@ -22,7 +22,7 @@ class CapillaryStressRecorder : public Recorder
 	public :
 		virtual void action();
 		
-	YADE_CLASS_BASE_DOC_ATTRS_CTOR(CapillaryStressRecorder,Recorder,"Records informations from capillary meniscii on samples submitted to triaxial compressions. -> New formalism needs to be tested!!!",,initRun=true;);
+	YADE_CLASS_BASE_DOC_ATTRS_CTOR(CapillaryStressRecorder,Recorder,"Records information from capillary meniscii on samples submitted to triaxial compressions. -> New formalism needs to be tested!!!",,initRun=true;);
 	DECLARE_LOGGER;
 
 };

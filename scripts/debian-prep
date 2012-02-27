@@ -2,6 +2,8 @@
 # encoding: utf-8
 import sys,os.path,re,shutil,time
 DISTRIBUTION=sys.argv[1] if len(sys.argv)>1 else 'unstable'
+
+shutil.copytree('scripts/debian','./debian')
 if os.path.exists('RELEASE'):
 	VERSION=file('RELEASE').readline().strip()
 	UPDATE=(file('UPDATE').readline().strip() if os.path.exists('UPDATE') else '')
@@ -34,13 +36,18 @@ def copyReplace(f1,f2):
 		ff2.write(re.sub(r'@([^@]*)@',lambda m: str(eval(m.group(1))),l))
 for f1,f2 in [
 	('yade.postinst-template','yade-%s.postinst'%VERSION),
-	('yade-dbg.postinst-template','yade-%s-dbg.postinst'%VERSION),
-	('yade.prerm-template','yade-%s.prerm'%VERSION),
-	('yade-dbg.prerm-template','yade-%s-dbg.prerm'%VERSION),
-	('yade.menu-template','yade-%s.menu'%VERSION),
 	('yade.desktop-template','yade-%s.desktop'%VERSION),
+	('yade.docs-template','yade-%s.docs'%VERSION),
+	('yade.examples-template','yade-%s.examples'%VERSION),
+	('yade.install-template','yade-%s.install'%VERSION),
+	('yade.menu-template','yade-%s.menu'%VERSION),
+	('yade-doc.doc-base-template','yade-%s-doc.doc-base'%VERSION),
+	('yade-doc.docs-template','yade-%s-doc.docs'%VERSION),
 	('control-template','control')]:
 		copyReplace('debian/'+f1,'debian/'+f2)
+os.system('cp debian/yade16x16.xpm debian/yade-%s_16x16.xpm'%VERSION)
+os.system('cp debian/yade32x32.xpm debian/yade-%s_32x32.xpm'%VERSION)
+
 
 # package is yade-0.50, but with UPDATE .1, it is version 0.50.1
 

@@ -14,6 +14,6 @@ yadeStaticOrSharedLib('yade-support',[
 	env.Combine('yade-support.cpp',['base/Math.cpp']+
 		['factory/ClassFactory.cpp','factory/DynLibManager.cpp','multimethods/Indexable.cpp','serialization/Serializable.cpp','pyutil/gil.cpp']
 		# compile TesselationWrapper only if cgal is enabled
-		+(Split('triangulation/KinematicLocalisationAnalyser.cpp triangulation/Operations.cpp triangulation/RegularTriangulation.cpp triangulation/Timer.cpp triangulation/basicVTKwritter.cpp triangulation/FlowBoundingSphere.cpp triangulation/Network.cpp triangulation/Deformation.cpp triangulation/Empilement.cpp triangulation/stdafx.cpp triangulation/Tenseur3.cpp triangulation/Tesselation.cpp triangulation/TriaxialState.cpp') if 'cgal' in env['features'] else [])),
-	],LIBS=['dl','m']+[],CXXFLAGS=env['CXXFLAGS']+['-fPIC']
+		+(Split('triangulation/KinematicLocalisationAnalyser.cpp triangulation/Operations.cpp triangulation/RegularTriangulation.cpp triangulation/Timer.cpp triangulation/basicVTKwritter.cpp triangulation/FlowBoundingSphere.cpp triangulation/Network.cpp triangulation/Deformation.cpp triangulation/Empilement.cpp triangulation/stdafx.cpp triangulation/Tenseur3.cpp triangulation/Tesselation.cpp triangulation/TriaxialState.cpp') if 'cgal' in env['features'] else []))+(['opengl/GLUtils.cpp'] if 'opengl' in env['features'] else []),
+	],LIBS=['dl','m']+[l for l in env['LIBS'] if l!='yade-support']+(['glut','GL','GLU'] if 'opengl' in env['features'] else []),CXXFLAGS=env['CXXFLAGS']+['-fPIC']
 )

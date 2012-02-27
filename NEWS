@@ -1,12 +1,174 @@
-0.60 is a stable release of Yade; packages for Ubuntu 10.04 and 10.10 are available from https://launchpad.net/~yade-pkg/+archive/stable
+vim:syntax=changelog
 
-Compared to the older 0.50, it features:
+2009-04-20 Václav Šmilauer <eudoxos@arcig.cz> revision around bzr2150
 
-* use boost::serialization (faster, more reliable), use eigen instead of Wm3 (better supported, more flexible)
-* qt4-based interface with on-the-fly inspection and editing of all internal variables
-* support compilation with clang++
-* live plots
-* periodic boundary conditions are much better tested now
-* batch web interface substantially enhanced (including plots, logs, ...)
-* extended attribute flags (readonly, noSave, hidden, ...)
-* added --rebuild, --debug and --test options
+	* RELEASE: 0.5
+		- https://launchpad.net/yade/+milestone/0.5
+
+	* overall:
+		- yade main is now a python script, the c++ part is imported
+		- many classes renamed for the sake of consistency, while mostly keeping backward compatibility for scripts
+		- all classes (deriving from Serializable) are automatically exposed in python via automatically constructed wrappers, with full attribute access (https://bugs.launchpad.net/yade/+bug/544857)
+		- lot of old code removed (to be found in attic/)
+
+	* functionality:
+		- separated State and (possibly shared) Material for bodies
+		- InsertionSortCollider handles both periodic and aperiodic simulations now
+		- Cell can undergo arbitrary linear transformation during simulation
+		- VTKRecorder saves to VTK-compatible XML files; allows to use Paraview for post-processing
+		- NewtonIntegrator features integration of rotation of non-spherical bodies
+		- callback functionality for interaction and body loop (InteractionDispatchers and NewtonIntegrator) (not yet fully done)
+		- body and interaction containers devirtualized (https://blueprints.launchpad.net/yade/+spec/devirtualize-containers)
+
+	* documentation:
+		- New website https://www.yade-dem.org
+		- Sphinx documentation https://www.yade-dem.org/sphinx/, containing both hand-written and automatically generated documentation
+		- All classes and attributes visible from python are documented now
+		- Drop doxygen documentation
+
+
+2009-08-31 Václav Šmilauer <eudoxos@arcig.cz> revision around bzr1740
+
+	* RELEASE: 0.20.0
+
+	* overall: 
+		- fix many crashers, including synchronization with openGL, GUI and python
+		- generate documentation for both python and c++ classes/functions automatically (http://yade.wikia.com/wiki/Reference_documentation)
+		- move away from SVN repository at berlios.de to bzr at http://www.launchpad.net/yade; bug tracking and other launchpad features are being used; mailing lists migrated to launchpad
+
+	* functionality enhancements (apart from performance-oriented changes):
+		- Facets (arbitrary triangulation elements) interacting with spheres, allowing to triangulate any surface
+		- support for GTS-compatible triangulated surfaces both as predicates and facet-triangulated simulation elements
+		- non-incremental sphere-sphere and sphere-facet contact geometry classes (Dem3DofGeom)
+		- ConstitutiveLawDispatcher, for having multiple constitutive laws operating on different interactions
+		- schedule to run multiple jobs at time, with different parameters (yade-multi, http://yade.wikia.com/wiki/ScriptParametricStudy)
+		- added PhysicalParameters::blockedDOFs
+		- periodic boundary conditions
+		- interaction logic cleaned up
+		- sphere packing generators (orthogonal, hexagonal, loose random, triaxially compacted; periodic coming soon)
+		- geometry predicates to clip packing, including boolean operations on predicates
+		- infrastructure for regression tests
+
+	* performance:
+		- consistent openMP support throughout the code (InteractionDispatchers, NewtonsDampedLaw, BexContainer) (http://yade.wikia.com/wiki/Performance_Tuning#openMP)
+		- InsertionSortCollider (PersistentSAPCollide removed) (http://yade.wikia.com/wiki/Colliders_performace)
+		- InteractionDispatchers that reduce number of loops over interactions to one (http://yade.wikia.com/wiki/Performance_Tuning#InteractionDispatchers)
+		- new fast container for interactions (InteractionVecMap) (http://yade.wikia.com/wiki/Performance_Tuning#Containers)
+		- caching dispatchers, avoiding repetitive multivirtual call resolution (http://yade.wikia.com/wiki/Performance_Tuning#Dispatcher_cache)
+		- runtime profiling information (http://yade.wikia.com/wiki/Speed_profiling_using_TimingInfo_and_TimingDeltas_classes)
+		- avoid running collision detection at every step (http://yade.wikia.com/wiki/Insertion_Sort_Collider_Stride)
+		- vector and quaternion classes are wrapped in python automatically (faster, avoids hand-written wrappers)
+		- removed many python proxy classes, resulting in big speedup of python (e.g. 40 × for some operations)
+
+	* building:
+		- yade can be optionally with one single plugin containing all packages. Speeds up full compilation considerably and reduces binary size several times.
+		- files in pkg/* are picked up automatically by the build system, including linking flags
+		- do not install headers, only plugins
+		- fix debian-package builds and document the procedure (http://yade.wikia.com/wiki/DebianPackages), special package for docs
+		- fix all (or most) compile-time warnings
+		- create new top-level py/ directory for python
+
+	* python:
+		- use natural syntax for class instance construction with attributes
+		- run telnet server to make yade accessible while running (from localhost only)
+		- save any python variables within the XML file, which will be resurrected next time (utils.saveVars, utils.loadVars)
+		- support saving simulation to memory temporarily
+		- functions from creating video from simulation (via snapshots, either during simulation or in the player)
+
+	* Documentation:
+		- Structurized content added http://yade.wikia.com/wiki/Structurized_content
+		- FAQ start to implement http://yade.wikia.com/wiki/FAQ
+
+
+2008-08-20 Janek Kozicki <cosurgi@gmail.com> revision 1579
+
+	* RELEASE: 0.12.1
+	
+		- several python interface improvements
+		- add code for plotting histogram of interaction directions
+		- added buttons for looking from different directions
+		- new contact algorithm for facets
+		- added python script for making videos
+		- added a TCP server on port 9000 with python console in it
+		- new dependency on python-numpy package, which allows faster math in python
+		- added a script for parametric studies
+
+
+2008-08-20 Janek Kozicki <cosurgi@gmail.com> revision 1486
+
+	* RELEASE: 0.12
+
+	* User interface:
+
+		- Refactored Qt3 interface: MDI with simulation running
+		  asynchronously, with python console
+
+		- Python wrapper and console with the ability to control most
+		  simulation aspects (including creating simulations,
+		  modifying, inspecting, running, recording data), some parts
+		  of the UI (setting view, configuring renderer); see
+		  scripts/simple-scene.py to get started
+		  (http://yade.wikia.com/wiki/SimpleSceneTutorial)
+
+		- Much enhanced simulation recorder and player, saving
+		  optionally to a single file (sqlite database), the ability to
+		  create video from simulation with one command (may be done
+		  offscreen as well): scripts/simple-scene-player.py,
+		  http://yade.wikia.com/wiki/New:Making_videos
+
+	* Graphical Viewer:
+
+		- up to 3 clipping planes in the GLViewer, can be manipulated,
+		  bound to each other, activated/deactivated
+
+		- saving view to view configurations inside MetaBody (Alt+7 --
+		  Alt+9), can be loaded later (from python as well)
+
+		- displacement and rotation scaling in GLViewer, using
+		  PhysicalParameters::refSe3
+
+	* Simulation features:
+
+		- New moment rotation law, fully tested and working
+
+		- All simulation aspects (dt, iteration, virtual time) are now
+		  inside MetaBody, i.e. are restored exactly as they were from
+		  .xml
+
+		- Much improved triaxial test
+
+		- Lattice model can now simulate concrete with steel fibres
+	
+	* New, experimental features:
+
+		- Selectively block any of 6 DOFs ( translation and rotation)
+		  for individual bodies (PhysicalParameters::blockedDOFs - not
+		  documented, not conveniently accessible from python
+		  yet)
+
+		- Plotting interface based on pylab see example in
+		  scripts/simple-scene-graph.py
+
+		- Sega's facets and vertices with stl import (for example
+		  import shapes from blender)
+	
+	* Serialization:
+
+		- Transparent support for compressed .xml.gz and .xml.bz2
+		  files; dropped support for binary format
+
+		- The (de)serializer now (un)escapes all control characters,
+		  using the &charname; format, arbitrary string values can be
+		  de/serialized now, including parentheses, quotations marks,
+		  newlines, tabs, <>.
+
+	* Compilation / Development:
+
+		- Compilation profiles allow separate option sets for scons;
+		  simultaneous compilation of multiple profiles is supported
+		  via the profile=a,b,c
+		
+		- QGLViewer source is now in our tree, no need to install it
+		  separately
+
+

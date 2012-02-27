@@ -1,0 +1,42 @@
+Format: http://dep.debian.net/deps/dep5/
+Upstream-Name: yade
+Source: https://launchpad.net/yade
+
+Files: *
+Copyright: 2004-2011 Yade developers <yade-dev@lists.launchpad.net>
+           Václav Šmilauer <eudoxos@arcig.cz>
+           Olivier Galizzi <olivier.galizzi@imag.fr>
+           Janek Kozicki <janek@kozicki.pl>
+           Bruno Chareyre <bruno.chareyre@hmg.inpg.fr>
+           Anton Gladky <gladky.anton@gmail.com>
+           Sergei Dorofeenko <dorofeenko@icp.ac.ru>
+           Jerome Duriez <duriez@geo.hmg.inpg.fr>
+           Vincent Richefeu <richefeu@gmail.com>
+           Chiara Modenese <c.modenese@gmail.com>
+           Boon Chiaweng <booncw@hotmail.com>
+           Emanuele Catalano <catalano@hmg.inpg.fr>
+           Luc Scholtes <lscholtes63@gmail.com>
+           Jan Stránský <_honzik@centrum.cz>
+           Luc Sibille <luc.sibille@univ-nantes.fr>
+           Feng Chen <fchen3@utk.edu>
+License: GPL-2
+ This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License.
+ .
+ This program is distributed in the hope that it will be
+ useful, but WITHOUT ANY WARRANTY; without even the implied
+ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the GNU General Public License for more
+ details.
+ .
+ You should have received a copy of the GNU General Public
+ License along with this package; if not, write to the Free
+ Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the full text of the GNU General Public
+ License version 2 can be found in the file
+ `/usr/share/common-licenses/GPL-2'.
+

@@ -17,7 +17,7 @@
  * 1. [done] for optimized builds, at least debugging macros should become no-ops
  * 2. add the TRACE level; this has to be asked about on log4cxx mailing list perhaps. Other levels may follow easily. [will be done with log4cxx 0.10, once debian ships packages and we can safely migrate]
  *
- * For more informations, see http://logging.apache.org/log4cxx/, especially the part on configuration files, that allow
+ * For more information, see http://logging.apache.org/log4cxx/, especially the part on configuration files, that allow
  * very flexibe, runtime and fine-grained output redirections, filtering etc.
  *
  * Yade has the logging config file by default in ~/.yade-$VERSION/logging.conf.

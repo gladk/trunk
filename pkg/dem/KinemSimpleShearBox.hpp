@@ -55,7 +55,7 @@ class KinemSimpleShearBox : public BoundaryController
 			((Body::id_t,id_boxback,4,,"the id of the wall at the back of the sample"))
 			((Real,max_vel,1.0,,"to limit the speed of the vertical displacements done to control $\\sigma$ (CNL or CNS cases) [$m/s$]"))
 			((Real,wallDamping,0.2,,"the vertical displacements done to to control $\\sigma$ (CNL or CNS cases) are in fact damped, through this wallDamping"))
-			((bool,firstRun,true,,"boolean set to false as soon as the engine has done its job one time : usefull to know if initial height of, and normal force sustained by, the upper box are known or not (and thus if they have to be initialized). Not to be changed by the user."))
+			((bool,firstRun,true,,"boolean set to false as soon as the engine has done its job one time : useful to know if initial height of, and normal force sustained by, the upper box are known or not (and thus if they have to be initialized). Not to be changed by the user."))
 			((Real,f0,0.0,,"the (vertical) force acting on the upper plate on the very first time step (determined by the Engine). Controls of the loadings in case of :yref:`KinemCNSEngine` or :yref:`KinemCNLEngine` will be done according to this initial value [$N$]. Not to be changed by the user.]"))
 			((Real,y0,0.0,,"the height of the upper plate at the very first time step : the engine finds its value [$m$]. Not to be changed by the user."))
 			((bool,LOG,false,,"boolean controling the output of messages on the screen")) //FIXME : surely something better to use here

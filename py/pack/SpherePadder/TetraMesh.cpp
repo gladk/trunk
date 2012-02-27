@@ -289,7 +289,7 @@ int compareInt (const void * a, const void * b)
 
 void TetraMesh::organize ()
 {
-	// Display informations
+	// Display information
 	cout << "nb Nodes = " << node.size() << endl;
 	cout << "nb Tetra = " << tetraedre.size() << endl;
 
@@ -381,7 +381,7 @@ void TetraMesh::organize ()
             face.push_back(tmpFace[i]);
         }
     }
-    tmpFace.clear();  // It should be usefull to save memory before the end of the function
+    tmpFace.clear();  // It should be useful to save memory before the end of the function
 
     cout <<  "Computation of unit vectors normal to the boundary faces" << endl;
     unsigned int n1,n2,n3,n4;
@@ -525,7 +525,7 @@ void TetraMesh::organize ()
 //     cerr << "min_segment_length = " << min_segment_length << endl;
 //     cerr << "max_segment_length = " << max_segment_length << endl;
 
-    // Define tetraedre neighbors FIXME still usefull??
+    // Define tetraedre neighbors FIXME still useful??
     bool stop = false;
     for (unsigned int t1 = 0 ; t1 < tetraedre.size() ; ++t1)
     {

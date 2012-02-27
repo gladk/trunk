@@ -111,7 +111,7 @@ void ResetRandomPosition::action()
 			}
 			if (is_overlap)
 			{
-				LOG_WARN("Can't placing sphere during " << maxAttempts << " attemps.");
+				LOG_WARN("Can't placing sphere during " << maxAttempts << " attempts.");
 				position=backup_pos;
 				return;
 			}

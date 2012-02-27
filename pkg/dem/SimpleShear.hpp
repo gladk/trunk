@@ -24,7 +24,7 @@ class SimpleShear : public FileGenerator
 		void createActors(shared_ptr<Scene>& scene);
 		//method to create a list (containing the positions of centers and radii) of n non interpenetrating spheres, occupying a rectangle with a given (rather high) porosity (issued from TriaxialTest) :
 		string GenerateCloud(vector<BasicSphere>& sphere_list,Vector3r lowerCorner,Vector3r upperCorner,long number,Real rad_std_dev, Real porosity);
-// 		to create the same list but by reading a text file containing the informations :
+// 		to create the same list but by reading a text file containing the information :
 		std::pair<string,bool> ImportCloud(vector<BasicSphere>& sphere_list,string importFilename);
 
 

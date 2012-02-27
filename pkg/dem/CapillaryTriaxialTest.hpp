@@ -24,7 +24,7 @@ class GlobalStiffnessTimeStepper;
 
 /*! \brief Triaxial test on unsaturated sphere packings
 
-	This preprocessor is a variant of TriaxialTest, including the model of capillary forces developped as part of the PhD of Luc Scholtès. See the documentation of Law2_ScGeom_CapillaryPhys_Capillarity or the main page https://yade-dem.org/wiki/CapillaryTriaxialTest, for more details.
+	This preprocessor is a variant of TriaxialTest, including the model of capillary forces developed as part of the PhD of Luc Scholtès. See the documentation of Law2_ScGeom_CapillaryPhys_Capillarity or the main page https://yade-dem.org/wiki/CapillaryTriaxialTest, for more details.
 	Results obtained with this preprocessor were reported for instance in "Scholtes et al. Micromechanics of granular materials with capillary effects. International Journal of Engineering Science 2009,(47)1, 64-75."
 	
  */
@@ -64,13 +64,13 @@ class CapillaryTriaxialTest : public FileGenerator
 		bool generate(std::string& message);
 		
 		YADE_CLASS_BASE_DOC_ATTRS_INIT_CTOR_PY(
-		CapillaryTriaxialTest,FileGenerator,"This preprocessor is a variant of TriaxialTest, including the model of capillary forces developped as part of the PhD of Luc Scholtès. See the documentation of Law2_ScGeom_CapillaryPhys_Capillarity or the main page https://yade-dem.org/wiki/CapillaryTriaxialTest, for more details.\n\n Results obtained with this preprocessor were reported for instance in 'Scholtes et al. Micromechanics of granular materials with capillary effects. International Journal of Engineering Science 2009,(47)1, 64-75.'"
+		CapillaryTriaxialTest,FileGenerator,"This preprocessor is a variant of TriaxialTest, including the model of capillary forces developed as part of the PhD of Luc Scholtès. See the documentation of Law2_ScGeom_CapillaryPhys_Capillarity or the main page https://yade-dem.org/wiki/CapillaryTriaxialTest, for more details.\n\n Results obtained with this preprocessor were reported for instance in 'Scholtes et al. Micromechanics of granular materials with capillary effects. International Journal of Engineering Science 2009,(47)1, 64-75.'"
 		,
    		((Vector3r,lowerCorner,Vector3r(0,0,0),,"Lower corner of the box."))
 		((Vector3r,upperCorner,Vector3r(1,1,1),,"Upper corner of the box."))
 		((string,importFilename,"",,"File with positions and sizes of spheres."))
 		((string,Key,"",,"A code that is added to output filenames."))
-		((string,fixedBoxDims,"",,"string that contains some subset (max. 2) of {'x','y','z'} ; containes axes will have box dimension hardcoded, even if box is scaled as mean_radius is prescribed: scaling will be applied on the rest."))
+		((string,fixedBoxDims,"",,"string that contains some subset (max. 2) of {'x','y','z'} ; contains axes will have box dimension hardcoded, even if box is scaled as mean_radius is prescribed: scaling will be applied on the rest."))
 		((Real,CapillaryPressure,0,,"Define succion in the packing [Pa]. This is the value used in the capillary model."))
 		((bool,water,true,,"activate capillary model"))
 		((bool,fusionDetection,false,,"test overlaps between liquid bridges on modify forces if overlaps exist"))
@@ -97,7 +97,7 @@ class CapillaryTriaxialTest : public FileGenerator
 		((Real,sphereYoungModulus,15000000.0,,"Stiffness of spheres."))
 		((Real,sphereKsDivKn,0.5,,"Ratio of shear vs. normal contact stiffness for spheres."))
 		((Real,sphereFrictionDeg,18.0,,"Friction angle [°] of spheres assigned just before triaxial testing."))
-		((Real,compactionFrictionDeg,sphereFrictionDeg,,"Friction angle [°] of spheres during compaction (different values result in different porosities)]. This value is overriden by :yref:`TriaxialTest::sphereFrictionDeg` before triaxial testing."))
+		((Real,compactionFrictionDeg,sphereFrictionDeg,,"Friction angle [°] of spheres during compaction (different values result in different porosities)]. This value is overridden by :yref:`TriaxialTest::sphereFrictionDeg` before triaxial testing."))
 		((Real,boxYoungModulus,15000000.0,,"Stiffness of boxes."))
 		((Real,maxWallVelocity,10,,"max velocity of boundaries. Usually useless, but can help stabilizing the system in some cases."))
 		((Real,boxKsDivKn,0.5,,"Ratio of shear vs. normal contact stiffness for boxes."))
@@ -113,7 +113,7 @@ class CapillaryTriaxialTest : public FileGenerator
 		((Real,sigmaLateralConfinement,50000,,"Lateral stress during triaxial loading. An isotropic unloading is performed if the value is not equal to :yref:`CapillaryTriaxialTest::SigmaIsoCompaction`."))
 		
 		((int,timeStepUpdateInterval,50,,"interval for :yref:`GlobalStiffnessTimeStepper`"))
-		((int,timeStepOutputInterval,50,,"interval for outputing general informations on the simulation (stress,unbalanced force,...)"))
+		((int,timeStepOutputInterval,50,,"interval for outputing general information on the simulation (stress,unbalanced force,...)"))
 		((int,wallStiffnessUpdateInterval,10,,"interval for updating the stiffness of sample/boundaries contacts"))
 		((int,radiusControlInterval,10,,"interval between size changes when growing spheres."))
 		((int,numberOfGrains,400,,"Number of generated spheres."))

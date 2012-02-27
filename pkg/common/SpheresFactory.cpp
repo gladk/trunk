@@ -110,7 +110,7 @@ void SpheresFactory::action()
 		//bI->action(scene);
 		return;
 	}
-	LOG_WARN("Can't placing sphere during " << maxAttempts << " attemps.");
+	LOG_WARN("Can't placing sphere during " << maxAttempts << " attempts.");
 }
 
 Vector3r SpheresFactory::generatePositionOnSurface()

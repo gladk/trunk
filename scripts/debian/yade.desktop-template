@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=Yade @SNAPSHOT@ @VERSION@
+Name=Yade @VERSION@
 GenericName=Yade
-Exec=x-terminal-emulator -T 'Yade @SNAPSHOT@ @VERSION@' -e /usr/bin/yade@_VERSION@
+Exec=/usr/bin/yade@_VERSION@
 Icon=/usr/share/pixmaps/yade@_VERSION@_32x32.xpm
-Terminal=false
+Terminal=true
 Categories=Education;Physics;Science;

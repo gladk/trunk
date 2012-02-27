@@ -1,9 +1,0 @@
-?package(yade@_VERSION@):\
-	needs="X11"\
-	section="Applications/Science/Physics"\
-	title="Yade (@SNAPSHOT@ @VERSION@)"\
-	command="x-terminal-emulator -T 'Yade @SNAPSHOT@ @VERSION@' -e /usr/bin/yade@_VERSION@"\
-	icon=/usr/share/pixmaps/yade@_VERSION@_32x32.xpm\
-	icon16x16=/usr/share/pixmaps/yade@_VERSION@_16x16.xpm\
-	icon32x32=/usr/share/pixmaps/yade@_VERSION@_32x32.xpm
-

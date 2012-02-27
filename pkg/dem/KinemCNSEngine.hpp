@@ -29,7 +29,7 @@ class KinemCNSEngine : public KinemSimpleShearBox
 		((Real,shearSpeed,0.0,,"the speed at wich the shearing is performed : speed of the upper plate [m/s]"))
 		((Real,gammalim,0.0,,"the value of tangential displacement (of upper plate) at wich the shearing is stopped [m]"))
 		((Real,gamma,0.0,,"current value of tangential displacement [m]"))
-		((Real,KnC,10.0e6,,"the normal rigidity choosen by the user [MPa/mm] - the conversion in Pa/m will be made")),
+		((Real,KnC,10.0e6,,"the normal rigidity chosen by the user [MPa/mm] - the conversion in Pa/m will be made")),
 		temoin=0;
 		it_stop=0;
 	);

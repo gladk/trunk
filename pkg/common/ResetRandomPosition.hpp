@@ -51,7 +51,7 @@ private:
 		((Vector3r,point,Vector3r::Zero(),,"??"))
 		((Vector3r,normal,Vector3r(0,1,0),,"??"))
 		((bool,volumeSection,((void)"define factory by facets.",false),,"Create new spheres inside factory volume rather than on its surface."))
-		((int,maxAttempts,20,,"Max attemps to place sphere. If placing the sphere in certain random position would cause an overlap with any other physical body in the model, SpheresFactory will try to find another position."))
+		((int,maxAttempts,20,,"Max attempts to place sphere. If placing the sphere in certain random position would cause an overlap with any other physical body in the model, SpheresFactory will try to find another position."))
 		((Vector3r,velocity,Vector3r::Zero(),,"Mean velocity of spheres."))
 		((Vector3r,velocityRange,Vector3r::Zero(),,"Half size of a velocities distribution interval. New sphere will have random velocity within the range velocity±velocityRange."))
 		((Vector3r,angularVelocity,Vector3r::Zero(),,"Mean angularVelocity of spheres."))

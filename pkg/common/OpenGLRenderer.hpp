@@ -92,7 +92,7 @@ class OpenGLRenderer : public Serializable
 		((Vector3r,dispScale,((void)"disable scaling",Vector3r::Ones()),,"Artificially enlarge (scale) dispalcements from bodies' :yref:`reference positions<State.refPos>` by this relative amount, so that they become better visible (independently in 3 dimensions). Disbled if (1,1,1)."))
 		((Real,rotScale,((void)"disable scaling",1.),,"Artificially enlarge (scale) rotations of bodies relative to their :yref:`reference orientation<State.refOri>`, so the they are better visible."))
 		((Vector3r,lightPos,Vector3r(75,130,0),,"Position of OpenGL light source in the scene."))
-		((Vector3r,bgColor,Vector3r(.2,.2,.2),,"Color of the backgroud canvas (RGB)"))
+		((Vector3r,bgColor,Vector3r(.2,.2,.2),,"Color of the background canvas (RGB)"))
 		((bool,wire,false,,"Render all bodies with wire only (faster)"))
 		((bool,dof,false,,"Show which degrees of freedom are blocked for each body"))
 		((bool,id,false,,"Show body id's"))
