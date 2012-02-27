@@ -18,7 +18,7 @@ def textExt(fileName,format='x_y_z_r',shift=[0.0,0.0,0.0],scale=1.0,**kw):
 		`scale`: float
 			factor scales the given data.
 		`**kw`: (unused keyword arguments)
-				is passed to :yref:`utils.sphere`
+				is passed to :yref:`yade.utils.sphere`
 	:Returns: list of spheres.
 	Lines starting with # are skipped
 	"""
@@ -54,7 +54,7 @@ def text(fileName,shift=[0.0,0.0,0.0],scale=1.0,**kw):
 		`scale`: float
 			factor scales the given data.
 		`**kw`: (unused keyword arguments)
-				is passed to :yref:`utils.sphere`
+				is passed to :yref:`yade.utils.sphere`
 	:Returns: list of spheres.
 	Lines starting with # are skipped
 	"""
@@ -87,7 +87,7 @@ def gts(meshfile,shift=(0,0,0),scale=1.0,**kw):
 		`scale`: float
 			factor scales the given data.
 		`**kw`: (unused keyword arguments)
-				is passed to :yref:`utils.facet`
+				is passed to :yref:`yade.utils.facet`
 	:Returns: list of facets.
 	"""
 	import gts,yade.pack
@@ -107,7 +107,7 @@ def gmsh(meshfile="file.mesh",shift=[0.0,0.0,0.0],scale=1.0,orientation=Quaterni
 		`orientation`: quaternion
 			orientation of the imported mesh
 		`**kw`: (unused keyword arguments)
-				is passed to :yref:`utils.facet`
+				is passed to :yref:`yade.utils.facet`
 	:Returns: list of facets forming the specimen.
 	
 	mesh files can be easily created with `GMSH <http://www.geuz.org/gmsh/>`_.
@@ -179,7 +179,7 @@ def gengeoFile(fileName="file.geo",shift=[0.0,0.0,0.0],scale=1.0,**kw):
 		`scale`: float
 			factor scales the given data.
 		`**kw`: (unused keyword arguments)
-				is passed to :yref:`utils.sphere`
+				is passed to :yref:`yade.utils.sphere`
 	:Returns: list of spheres.
 	
 	LSMGenGeo library allows to create pack of spheres
@@ -215,7 +215,7 @@ def gengeo(mntable,shift=Vector3().Zero,scale=1.0,**kw):
 		`scale`: float
 			factor scales the given data.
 		`**kw`: (unused keyword arguments)
-				is passed to :yref:`utils.sphere`
+				is passed to :yref:`yade.utils.sphere`
 	
 	LSMGenGeo library allows to create pack of spheres
 	with given [Rmin:Rmax] with null stress inside the specimen.

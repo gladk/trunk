@@ -74,7 +74,6 @@ void Scene::moveToNextTimeStep(){
 	if(needsInitializers){
 		checkStateTypes();
 		FOREACH(shared_ptr<Engine> e, initializers){ e->scene=this; if(!e->isActivated()) continue;e->action(); } 
-		forces.resize(bodies->size());
 		needsInitializers=false;
 	}
 	if(isPeriodic) cell->integrateAndUpdate(dt);

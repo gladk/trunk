@@ -21,6 +21,8 @@ See older `tentative contents <http://bazaar.launchpad.net/~eudoxos/%2Bjunk/ydoc
 
   introduction.rst
 
+  formulation.rst
+
   user.rst
 
   prog.rst

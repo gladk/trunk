@@ -373,11 +373,20 @@ my_latex_preamble=r'''
 \usepackage{euler} % must be loaded before fontspec for the whole doc (below); this must be kept for pngmath, however
 \usepackage{amsmath}
 \usepackage{amsbsy}
+\usepackage{underscore}
+\usepackage[all]{xy}
 
 % symbols
 \let\mat\boldsymbol % matrix
 \let\vec\boldsymbol % vector
 \let\tens\boldsymbol % tensor
+
+\def\normalized#1{\widehat{#1}}
+\def\locframe#1{\widetilde{#1}}
+
+% timestep
+\def\Dt{\Delta t}
+\def\Dtcr{\Dt_{\rm cr}}
 
 % algorithm complexity
 \def\bigO#1{\ensuremath{\mathcal{O}(#1)}}
@@ -398,6 +407,42 @@ my_latex_preamble=r'''
 \def\nnext#1{#1^\oplus}
 \def\next#1{#1^+}
 
+% shorthands for geometry
+\def\currn{\curr{\vec{n}}}
+\def\currC{\curr{\vec{C}}}
+\def\uT{\vec{u}_T}
+\def\curruT{\curr{\vec{u}}_T}
+\def\prevuT{\prev{\vec{u}}_T}
+\def\currn{\curr{\vec{n}}}
+\def\prevn{\prev{\vec{n}}}
+
+% motion
+\def\pprevvel{\pprev{\dot{\vec{u}}}}
+\def\nnextvel{\nnext{\dot{\vec{u}}}}
+\def\curraccel{\curr{\ddot{\vec{u}}}}
+\def\prevpos{\prev{\vec{u}}}
+\def\currpos{\curr{\vec{u}}}
+\def\nextpos{\next{\vec{u}}}
+\def\curraaccel{\curr{\dot{\vec{\omega}}}}
+\def\pprevangvel{\pprev{\vec{\omega}}}
+\def\nnextangvel{\nnext{\vec{\omega}}}
+\def\loccurr#1{\curr{\locframe{#1}}}
+
+
+\def\numCPU{n_{\rm cpu}}
+\DeclareMathOperator{\Align}{Align}
+\DeclareMathOperator{\sign}{sgn}
+
+
+% sorting algorithms
+\def\isleq#1{\currelem{#1}\ar@/^/[ll]^{\leq}}
+\def\isnleq#1{\currelem{#1}\ar@/^/[ll]^{\not\leq}}
+\def\currelem#1{\fbox{$#1$}}
+\def\sortSep{||}
+\def\sortInv{\hbox{\phantom{||}}}
+\def\sortlines#1{\xymatrix@=3pt{#1}}
+\def\crossBound{||\mkern-18mu<}
+
 '''
 
 pngmath_latex_preamble=r'\usepackage[active]{preview}\usepackage{amsmath}\usepackage{amssymb}'+my_latex_preamble
@@ -405,7 +450,7 @@ pngmath_latex_preamble=r'\usepackage[active]{preview}\usepackage{amsmath}\usepac
 pngmath_use_preview=True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -414,7 +459,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'index-toctree'
 
 # General information about the project.
 project = u'Yade'
@@ -425,7 +470,7 @@ copyright = u'2009, Václav Šmilauer'
 # built documents.
 #
 # The short X.Y version.
-version = '0.5'
+version = yade.config.version
 # The full version, including alpha/beta/rc tags.
 release = yade.config.revision
 
@@ -490,12 +535,12 @@ html_theme_options = {'stickysidebar':'true'}
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = 'fig/yade-logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+html_favicon = 'fig/yade-favicon.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -513,9 +558,11 @@ html_use_smartypants = True
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
 
+html_index='index.html'
+
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+html_additional_pages = { 'index':'index.html'}
 
 # If false, no module index is generated.
 #html_use_modindex = True
@@ -547,9 +594,9 @@ htmlhelp_basename = 'Yadedoc'
 latex_elements=dict(
 	papersize='a4paper',
 	fontpkg=r'''
-		\usepackage{euler}
-		\usepackage{fontspec,xunicode,xltxtra}
-		\setmainfont[BoldFont={LMRoman10 Bold}]{CMU Concrete}
+\usepackage{euler}
+\usepackage{fontspec,xunicode,xltxtra}
+%\setmainfont[BoldFont={LMRoman10 Bold}]{CMU Concrete} %% CMU Concrete must be installed by hand as otf
 	''',
 	utf8extra='',
 	fncychap='',
@@ -568,7 +615,7 @@ latex_elements=dict(
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Yade.tex', u'Yade Documentation',
+  ('index-toctree', 'Yade.tex', u'Yade Documentation',
    u'Václav Šmilauer', 'manual'),
 ]
 

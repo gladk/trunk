@@ -36,6 +36,7 @@ ctypes.cdll.LoadLibrary(libstdcxx)
 import os,os.path
 import config
 libDir=(config.prefix if not os.environ.has_key('YADE_PREFIX') else os.environ['YADE_PREFIX'])+'/lib/yade'+config.suffix
+libDir=os.path.abspath(libDir) # needed if YADE_PREFIX is a relative path
 # find plugins recursively
 plugins=[]
 # might add followlinks=True to os.walk, for python>=2.6

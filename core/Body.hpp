@@ -28,6 +28,7 @@ class Scene;
 
 class Body: public Serializable{
 	public	:
+		typedef int id_t;
 		/*! \brief Numerical type for ::Body::id.
 		 * \bug  Current code mixes signed and unsigned int, this might be a way to enforce consistence. */
 		// typedef unsigned int id_t;

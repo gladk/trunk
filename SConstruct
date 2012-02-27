@@ -308,7 +308,7 @@ def CheckCXX(context):
 	return ret
 def CheckLibStdCxx(context):
 	context.Message('Finding libstdc++ library... ')
-	ret=os.popen(context.env['CXX']+' -print-file-name=libstdc++.so').readlines()[0][:-1]
+	ret=os.popen(context.env['CXX']+' -print-file-name=libstdc++.so.6').readlines()[0][:-1]
 	context.env['libstdcxx']=ret
 	context.Result(ret)
 	return ret
@@ -420,7 +420,7 @@ if env['brief']:
 		SHCCCOMSTR='C ${SOURCES}', 
 		SHLINKCOMSTR='L ${TARGET.file}',
 		LINKCOMSTR='L ${TARGET.file}',
-		INSTALLSTR='⇒ $TARGET',
+		INSTALLSTR='> $TARGET',
 		QT_UICCOMSTR='U ${SOURCES}',
 		QT_MOCCOMSTR='M ${SOURCES}',
 		QT_MOCFROMHCOMSTR='M ${SOURCES}',

@@ -52,7 +52,7 @@ void InteractionContainer::clear(){
 bool InteractionContainer::erase(body_id_t id1,body_id_t id2){
 	boost::mutex::scoped_lock lock(drawloopmutex);
 	if (id1>id2) swap(id1,id2);
-	if((size_t)id1<=vecmap.size()) return false; // id1 out of bounds
+	if((size_t)id1>=vecmap.size()) return false; // id1 out of bounds
 	map<body_id_t,size_t>::iterator mii;
 	mii=vecmap[id1].find(id2);
 	if(mii==vecmap[id1].end()) return false; // id2 not in interaction with id1

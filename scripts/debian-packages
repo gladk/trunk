@@ -4,21 +4,26 @@
 set -e -x
 
 RELEASE="0.50" # version we are preparing packages for
+UPDATE=.1 # empty or number such as .1, .2 (package yade-0.50, but verion 0.50.1)
 KEYID=62A21250  # key ID of the creator (password will be asked)
-DISTS="karmic lucid" # distributions for which packages will be built and uploaded 
+DISTS="lucid" # distributions for which packages will be built and uploaded 
 BASE="/home/vaclav/yade/yade-0.50" # base branch to clean checkout from
 
 TOP=`pwd`
 [ -d yade-$RELEASE.bzr ] || bzr co --lightweight $BASE yade-$RELEASE.bzr
 rm -rf yade-$RELEASE; cp -r yade-$RELEASE.bzr yade-$RELEASE; rm -rf yade-$RELEASE/.bzr yade-$RELEASE/attic
-tar -c yade-$RELEASE | gzip > yade-${RELEASE}_$RELEASE.orig.tar.gz
+# temporarily disabled to used downloaded .orig.tar.gz from previous upload
+# tar -c yade-$RELEASE | gzip > yade-${RELEASE}_$RELEASE$UPDATE.orig.tar.gz
 cd yade-$RELEASE
 echo $RELEASE > RELEASE
+echo $UPDATE > UPDATE
 NPKGS=0 # track number of packages; the first one will have source included
 for DIST in $DISTS; do
 	scripts/debian-prep $DIST
+	# temporary fix for debian package version update
+	perl -pi -e 's/lucid1/lucid8/g' debian/changelog
 	if [ $NPKGS -eq 0 ]; then
-		UPLOAD=-sa # the first package is uploaded with upstream source
+		UPLOAD=-sd # the first package is uploaded with upstream source
 	else
 		UPLOAD=-sd
 	fi
@@ -28,10 +33,7 @@ done
 
 cd $TOP
 
-for CHANGES in `ls -tr yade-${RELEASE}_$RELEASE-*_source.changes`; do
-	dput ppa:yade-users/ppa $CHANGES
+for CHANGES in `ls -tr yade-${RELEASE}_$RELEASE$UPDATE-*_source.changes`; do
+	# dput ppa:yade-users/ppa $CHANGES
 done
-
-
-
 

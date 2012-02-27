@@ -8,18 +8,9 @@
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
-export VERSION=`cat VERSION`
+
+export VERSION=$(shell cat VERSION)
 export _VERSION=-${VERSION}
-
-
-### eudoxos: FIXME: need to pass this to scons
-#CFLAGS = -Wall -g
-#
-#ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-#	CFLAGS += -O0
-#else
-#	CFLAGS += -O2
-#endif
 
 configure: configure-stamp
 configure-stamp:
@@ -65,17 +56,16 @@ install: build
 	NO_SCONS_GET_RECENT= scons profile=deb PREFIX=debian/yade${_VERSION}/usr variant='' optimize=1 debug=0
 	#install platform-independent files (docs, scripts, examples)
 	#NO_SCONS_GET_RECENT= scons profile=deb PREFIX=debian/yade${_VERSION}/usr debian/yade${_VERSION}/usr/share/doc/yade${_VERSION}-doc
-	mkdir -p debian/yade${_VERSION}/usr/share/doc/yade${_VERSION}-doc
-	cp -r examples scripts debian/yade${_VERSION}/usr/share/doc/yade${_VERSION}-doc
+	mkdir -p debian/yade${_VERSION}/usr/share/doc/yade${_VERSION}
+	cp -r examples scripts debian/yade${_VERSION}/usr/share/doc/yade${_VERSION}
 	# UGLY! generate sphinx docs only if python-sphinx is installed (distinguishes distributions which should build it or not as per debian/control-template build-deps)
-	if [ "`dpkg -l python-sphinx |grep -e '^ii'`" ]; then cd doc/sphinx; ../../scripts/yade-exec-wrapper debian/yade${_VERSION}/usr/bin/yade${_VERSION} yadeSphinx.py; cp -r _build/html  debian/yade${_VERSION}/usr/share/doc/yade${_VERSION}-doc/html; else echo "Not building HTML documentation, since the python-sphinx package is not installed"; fi
-
+	if dpkg-query -W python-sphinx; then cd doc/sphinx; PYTHONPATH=. YADE_PREFIX=../../debian/yade${_VERSION}/usr/ ../../debian/yade${_VERSION}/usr/bin/yade${_VERSION} yadeSphinx.py; cd _build/latex; xelatex Yade.tex; xelatex Yade.tex; xelatex Yade.tex; cd ../..; mkdir -p ../../debian/yade${_VERSION}-doc/usr/share/doc/yade${_VERSION}; cp -r _build/html _build/latex/Yade.pdf ../../debian/yade${_VERSION}-doc/usr/share/doc/yade${_VERSION}; else echo "Not building HTML documentation, since the python-sphinx package is not installed"; fi
 
 check: install
 	dh_testdir
 	dh_testroot
-	scripts/yade-exec-wrapper debian/yade${_VERSION}-dbg/usr/bin/yade${_VERSION}-dbg -x scripts/regression-tests.py
-	scripts/yade-exec-wrapper debian/yade${_VERSION}/usr/bin/yade${_VERSION} -x scripts/regression-tests.py
+	YADE_PREFIX=debian/yade${_VERSION}-dbg/usr debian/yade${_VERSION}-dbg/usr/bin/yade${_VERSION}-dbg -x scripts/regression-tests.py
+	YADE_PREFIX=debian/yade${_VERSION}/usr debian/yade${_VERSION}/usr/bin/yade${_VERSION} -x scripts/regression-tests.py
 
 # Build architecture-independent files here.
 binary-indep: build install

@@ -4,17 +4,21 @@ import sys,os.path,re,shutil,time
 DISTRIBUTION=sys.argv[1] if len(sys.argv)>1 else 'unstable'
 if os.path.exists('RELEASE'):
 	VERSION=file('RELEASE').readline().strip()
+	UPDATE=(file('UPDATE').readline().strip() if os.path.exists('UPDATE') else '')
+	print 'UPDATE is %s'%UPDATE
 	SNAPSHOT=''
 	PRIORITY=int(10000*float(re.sub('[^0-9.]','',VERSION)))
 	if re.match('^.*beta',VERSION): PRIORITY-=100
 	if re.match('^.*rc[0-9]$',VERSION): PRIORITY-=100
+	if UPDATE: PRIORITY+=int(re.sub('[^0-9]','',UPDATE))
 elif os.path.exists('.bzr'):
 	VERSION='bzr'+os.popen("LC_ALL=C bzr revno 2>/dev/null").readlines()[0][:-1]
 	SNAPSHOT='-snapshot'
 	PRIORITY=int(re.sub('[^0-9]','',VERSION))
+	UPDATE=''
 else:
 	raise RuntimeError('Revision could not be determined (RELEASE or .bzr)')
-print 'version %s%s, priority %d'%(VERSION,SNAPSHOT,PRIORITY)
+print 'version %s%s%s, priority %d'%(VERSION,SNAPSHOT,('%s%s'%(VERSION,UPDATE) if UPDATE else ''),PRIORITY)
 open('VERSION','w').write(VERSION+'\n')
 _VERSION='-'+VERSION #used in templates
 
@@ -32,14 +36,16 @@ for f1,f2 in [
 	('control-template','control')]:
 		copyReplace('debian/'+f1,'debian/'+f2)
 
+# package is yade-0.50, but with UPDATE .1, it is version 0.50.1
+
 # write debian/changelog
 open('debian/changelog','w').write(
-'''yade-%s (%s-%s1) %s; urgency=low
+'''yade-%s (%s%s-%s1) %s; urgency=low
 
   * Automatic debian changelog entry for yade-%s
 
  -- Václav Šmilauer <eudoxos@arcig.cz>  %s
-'''%(VERSION,VERSION,DISTRIBUTION,DISTRIBUTION,VERSION,time.strftime("%a, %d %b %Y %H:%M:%S +0000",time.gmtime())))
+'''%(VERSION,VERSION,UPDATE,DISTRIBUTION,DISTRIBUTION,VERSION,time.strftime("%a, %d %b %Y %H:%M:%S +0000",time.gmtime())))
 
 # remove some generated files
 for p in ('doc/doxygen','doc/sphinx/_build','tags'):

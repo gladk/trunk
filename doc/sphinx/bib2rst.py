@@ -68,7 +68,8 @@ def formatRest(db):
 			if i.has_key('year'): line+=' %s'%i['year']
 			if i.has_key('title'): line+=' **%s**'%i['title']
 		# add doi and url to everything, if present
-		if i.has_key('doi'): line+=' DOI `%s <http://dx.doi.org/%s>`_'%(i['doi'],i['doi'])
+		## ReST uses <..> to delimit URL, therefore < and > must be encoded in the URL (http://www.blooberry.com/indexdot/html/topics/urlencoding.htm)
+		if i.has_key('doi'): line+=' DOI `%s <http://dx.doi.org/%s>`_'%(i['doi'],i['doi'].replace('<','%3c').replace('>','%3e')) 
 		if i.has_key('url'): line+=' URL %s'%i['url']
 		ret.append(line)
 	return ret

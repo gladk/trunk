@@ -1,33 +1,26 @@
 Generating yade documentation
 ===============================
 
-1. You need to get the latest hg branch of Sphinx from
+1. Get sphinx 1.0 (development snapshots are fine) either form 
 
-	http://bitbucket.org/birkenfeld/sphinx/
+* packages at https://launchpad.net/~yade-users/+archive/external
 
-2. apply the patch from
+* from its repository:
 
-	http://bitbucket.org/birkenfeld/sphinx/issue/407/patch-do-not-inspect-boost-python-functions
+** hg branch http://bitbucket.org/birkenfeld/sphinx/
+** optionally apply the patch (only avoids warnings) from
+     http://bitbucket.org/birkenfeld/sphinx/issue/407/patch-do-not-inspect-boost-python-functions
+** run 
+     python setup.py install
 
-3. run
+2. Python default encoding must be set to utf-8. As it is not the default, PYTHONPATH=. is used to make Python import local sitecustomize.py file at startup which changes this setting. (The value cannot be set after startup, from within the script)
 
-	python setup.py install
+3. Run (from the current directory)
 
-in sphinx source directory to install.
+	PYTHONPATH=. yade yadeSphinx.py [optional outDir; _build by default]
 
-4. Add this at the end of /etc/python2.?/sitecustomize.py (on Debian/Ubuntu; 2.? is python version you compile Yade with, most likely the default you get from "python --version"):
-
-	import sys
-	sys.setdefaultencoding('utf-8')
-
-5. Run (from the current directory)
-
-	yade yadeSphinx.py [optional outDir; _build by default]
-
-It will be create/update $outDir/{html,latex}. The latex file (Yade.tex) is to be processed with xelatex (rather than latex).
-
+It will be create/update $outDir/{html,latex}. The latex file (Yade.tex) is to be processed with xelatex (rather than latex). See README.latex for details.
 
 ====
-
 
 ipython_console_highlighting.py is copied from matplotlib's trunk/matplotlib/lib/matplotlib/sphinxext

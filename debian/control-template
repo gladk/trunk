@@ -2,7 +2,7 @@ Source: yade@_VERSION@
 Section: x11
 Priority: optional
 Maintainer: Václav Šmilauer <eudoxos@arcig.cz>
-Build-Depends: debhelper (>= 5), scons, libqt3-mt-dev, qt3-dev-tools, freeglut3-dev, libboost-dev (>=1.34), libboost-date-time-dev (>=1.34), libboost-filesystem-dev (>=1.34), libboost-thread-dev (>=1.34), libboost-regex-dev (>=1.34), libboost-python-dev (>=1.34), libboost-iostreams-dev (>=1.34), libboost-program-options-dev, libboost-serialization-dev, docbook-to-man, ipython, libsqlite3-dev, libgts-dev, python-numpy, g++(>4.0), libvtk5-dev, libgl1-mesa-dev, gdb, ipython, python-matplotlib, python-tk, libeigen2-dev @', libqglviewer-qt3-dev' if DISTRIBUTION!='hardy' else ''@ @', binutils-gold' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny') else ''@ @', texlive-latex-recommended, python-sphinx' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny','karmic') else ''@
+Build-Depends: debhelper (>= 5), scons, libqt3-mt-dev, qt3-dev-tools, freeglut3-dev, libboost-dev (>=1.35), libboost-date-time-dev (>=1.35), libboost-filesystem-dev (>=1.35), libboost-thread-dev (>=1.35), libboost-regex-dev (>=1.35), libboost-python-dev (>=1.35), libboost-iostreams-dev (>=1.35), libboost-program-options-dev, libboost-serialization-dev, liblog4cxx9-dev | liblog4cxx10-dev, docbook-to-man, ipython, libsqlite3-dev, libgts-dev, python-numpy, g++(>>4.0), libvtk5-dev, libgl1-mesa-dev, gdb, ipython, python-matplotlib, python-tk, libeigen2-dev @', libqglviewer-qt3-dev' if DISTRIBUTION!='hardy' else ''@ @', binutils-gold' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny') else ''@ @', texlive-latex-recommended, texlive-latex-extra, lmodern, texlive-pictures, texlive-xetex, python-sphinx, python-bibtex, graphviz, dvipng' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny') else ''@
 Standards-Version: 3.7.2
 
 Package: yade@_VERSION@
@@ -31,4 +31,4 @@ Depends:
 Description: Platform for dynamical modeling.
  Yet Another Dynamic Engine. etc.
  .
- This package contains examples, test scripts and some documentation.
+ This package contains examples, test scripts and documentation.
