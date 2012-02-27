@@ -1,0 +1,34 @@
+Source: yade-0.20
+Section: x11
+Priority: optional
+Maintainer: Vaclav Smilauer <eudoxos@arcig.cz>
+Build-Depends: debhelper (>= 5), scons, libqt3-mt-dev, qt3-dev-tools, freeglut3-dev, libboost-dev (>=1.34), libboost-date-time-dev (>=1.34), libboost-filesystem-dev (>=1.34), libboost-thread-dev (>=1.34), libboost-regex-dev (>=1.34), libboost-python-dev (>=1.34), libboost-iostreams-dev (>=1.34), libboost-program-options-dev, libboost-serialization-dev, liblog4cxx9-dev | liblog4cxx10-dev, docbook-to-man, ipython, libsqlite3-dev, libgts-dev, python-numpy, g++(>4.0)
+Standards-Version: 3.7.2
+
+Package: yade-0.20
+Architecture: any
+Provides: yade
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-numpy, ipython, python-matplotlib
+Description: Platform for dynamical modeling.
+ Yet Another Dynamic Engine. etc.
+ .
+ This package contains speed-optimized build of yade.
+
+Package: yade-0.20-dbg
+Architecture: any
+Provides: yade-dbg
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-numpy, ipython, gdb, python-matplotlib
+Description: Platform for dynamical modeling.
+ Yet Another Dynamic Engine. etc.
+ .
+ This package contains debug build of yade.
+
+Package: yade-0.20-doc
+Architecture: all
+Provides: yade-doc
+Recommends: yade-0.20 | yade-0.20-dbg
+Depends: 
+Description: Platform for dynamical modeling.
+ Yet Another Dynamic Engine. etc.
+ .
+ This package contains examples, test scripts and some documentation.

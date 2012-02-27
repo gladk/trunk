@@ -1,0 +1,12 @@
+yade-0.20 (2~hardy) hardy; urgency=low
+
+  * Fix compat with karmic (work around
+    https://bugs.launchpad.net/yade/+bug/416335)
+
+ -- Václav Šmilauer <eudoxos@arcig.cz>  Sat, 19 Sep 2009 21:45:28 +0200
+
+yade-0.20 (1~hardy) hardy; urgency=low
+
+  * Automatic debian changelog entry for yade-0.20
+
+ -- Václav Šmilauer <eudoxos@arcig.cz>  Wed, 26 Aug 2009 19:00:25 +0200
