@@ -92,7 +92,7 @@ vector<Body::id_t> InsertionSortCollider::probeBoundingVolume(const Bound& bv){
 		// or the time of scheduled run already came, or we were never scheduled yet
 		if(!strideActive) return true;
 		if(!newton || (nBins>=1 && !newton->velocityBins)) return true;
-		if(nBins>=1 && newton->velocityBins->incrementDists_shouldCollide(scene->dt)) return true;
+		if(nBins>=1 && newton->velocityBins->checkSize_incrementDists_shouldCollide(scene)) return true;
 		if(nBins<=0){
 			if(fastestBodyMaxDist<0){fastestBodyMaxDist=0; return true;}
 			fastestBodyMaxDist+=sqrt(newton->maxVelocitySq)*scene->dt;

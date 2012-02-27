@@ -4,7 +4,6 @@
 #include<string.h>
 #include<vector>
 #include<yade/lib-base/Math.hpp>
-// for Body::id_t
 #include<yade/core/Body.hpp>
 
 #include<boost/static_assert.hpp>
@@ -52,14 +51,17 @@ class ForceContainer{
 		std::vector<vvector> _moveData;
 		std::vector<vvector> _rotData;
 		vvector _force, _torque, _move, _rot;
+		std::vector<size_t> sizeOfThreads;
 		size_t size;
+		bool syncedSizes;
 		int nThreads;
 		bool synced,moveRotUsed;
 		boost::mutex globalMutex;
+		Vector3r _zero;
 
-		inline void ensureSize(Body::id_t id){
+		inline void ensureSize(Body::id_t id, int threadN){
 			assert(nThreads>omp_get_thread_num());
-			if (size<=(size_t)id) resize(min((size_t)1.5*(id+100),(size_t)(id+2000)));
+			if (sizeOfThreads[threadN]<=(size_t)id) resize(min((size_t)1.5*(id+100),(size_t)(id+2000)),threadN);
 		}
 
 		inline void ensureSynced(){ if(!synced) throw runtime_error("ForceContainer not thread-synchronized; call sync() first!"); }
@@ -74,30 +76,43 @@ class ForceContainer{
 		// dummy function to avoid template resolution failure
 		friend class boost::serialization::access; template<class ArchiveT> void serialize(ArchiveT & ar, unsigned int version){}
 	public:
-		ForceContainer(): size(0), synced(true),moveRotUsed(false),syncCount(0), lastReset(0){
+		ForceContainer(): size(0),syncedSizes(true),synced(true),moveRotUsed(false),_zero(Vector3r::Zero()),syncCount(0),lastReset(0){
 			nThreads=omp_get_max_threads();
 			for(int i=0; i<nThreads; i++){
 				_forceData.push_back(vvector()); _torqueData.push_back(vvector());
-				_moveData.push_back(vvector()); _rotData.push_back(vvector());
+				_moveData.push_back(vvector());  _rotData.push_back(vvector());
+				sizeOfThreads.push_back(0);
 			}
 		}
 
-		const Vector3r& getForce(Body::id_t id)         { ensureSize(id); ensureSynced(); return _force[id]; }
-		void  addForce(Body::id_t id, const Vector3r& f){ ensureSize(id); synced=false;   _forceData[omp_get_thread_num()][id]+=f;}
-		const Vector3r& getTorque(Body::id_t id)        { ensureSize(id); ensureSynced(); return _torque[id]; }
-		void addTorque(Body::id_t id, const Vector3r& t){ ensureSize(id); synced=false;   _torqueData[omp_get_thread_num()][id]+=t;}
-		const Vector3r& getMove(Body::id_t id)          { ensureSize(id); ensureSynced(); return _move[id]; }
-		void  addMove(Body::id_t id, const Vector3r& m) { ensureSize(id); synced=false; moveRotUsed=true; _moveData[omp_get_thread_num()][id]+=m;}
-		const Vector3r& getRot(Body::id_t id)           { ensureSize(id); ensureSynced(); return _rot[id]; }
-		void  addRot(Body::id_t id, const Vector3r& r)  { ensureSize(id); synced=false; moveRotUsed=true; _rotData[omp_get_thread_num()][id]+=r;}
+		const Vector3r& getForce(Body::id_t id)         { ensureSynced(); return ((size_t)id<size)?_force[id]:_zero; }
+		void  addForce(Body::id_t id, const Vector3r& f){ ensureSize(id,omp_get_thread_num()); synced=false;   _forceData[omp_get_thread_num()][id]+=f;}
+		const Vector3r& getTorque(Body::id_t id)        { ensureSynced(); return ((size_t)id<size)?_torque[id]:_zero; }
+		void addTorque(Body::id_t id, const Vector3r& t){ ensureSize(id,omp_get_thread_num()); synced=false;   _torqueData[omp_get_thread_num()][id]+=t;}
+		const Vector3r& getMove(Body::id_t id)          { ensureSynced(); return ((size_t)id<size)?_move[id]:_zero; }
+		void  addMove(Body::id_t id, const Vector3r& m) { ensureSize(id,omp_get_thread_num()); synced=false; moveRotUsed=true; _moveData[omp_get_thread_num()][id]+=m;}
+		const Vector3r& getRot(Body::id_t id)           { ensureSynced(); return ((size_t)id<size)?_rot[id]:_zero; }
+		void  addRot(Body::id_t id, const Vector3r& r)  { ensureSize(id,omp_get_thread_num()); synced=false; moveRotUsed=true; _rotData[omp_get_thread_num()][id]+=r;}
 		/* To be benchmarked: sum thread data in getForce/getTorque upon request for each body individually instead of by the sync() function globally */
 		// this function is used from python so that running simulation is not slowed down by sync'ing on occasions
 		// since Vector3r writes are not atomic, it might (rarely) return wrong value, if the computation is running meanwhile
-		Vector3r getForceSingle (Body::id_t id){ ensureSize(id); Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=_forceData [t][id]; } return ret; }
-		Vector3r getTorqueSingle(Body::id_t id){ ensureSize(id); Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=_torqueData[t][id]; } return ret; }
-		Vector3r getMoveSingle  (Body::id_t id){ ensureSize(id); Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=_moveData  [t][id]; } return ret; }
-		Vector3r getRotSingle   (Body::id_t id){ ensureSize(id); Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=_rotData   [t][id]; } return ret; }
-
+		Vector3r getForceSingle (Body::id_t id){ Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=((size_t)id<sizeOfThreads[t])?_forceData [t][id]:_zero; } return ret; }
+		Vector3r getTorqueSingle(Body::id_t id){ Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=((size_t)id<sizeOfThreads[t])?_torqueData[t][id]:_zero; } return ret; }
+		Vector3r getMoveSingle  (Body::id_t id){ Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=((size_t)id<sizeOfThreads[t])?_moveData  [t][id]:_zero; } return ret; }
+		Vector3r getRotSingle   (Body::id_t id){ Vector3r ret(Vector3r::Zero()); for(int t=0; t<nThreads; t++){ ret+=((size_t)id<sizeOfThreads[t])?_rotData   [t][id]:_zero; } return ret; }
+		
+		inline void syncSizesOfContainers() {
+			if (syncedSizes) return;
+			//check whether all containers have equal length, and if not resize it
+			for(int i=0; i<nThreads; i++){
+				if (sizeOfThreads[i]<size) resize(size,i);
+			}
+			_force.resize(size,Vector3r::Zero());
+			_torque.resize(size,Vector3r::Zero());
+			_move.resize(size,Vector3r::Zero());
+			_rot.resize(size,Vector3r::Zero());
+			syncedSizes=true;
+		}
 		/* Sum contributions from all threads, save to _force&_torque.
 		 * Locks globalMutex, since one thread modifies common data (_force&_torque).
 		 * Must be called before get* methods are used. Exception is thrown otherwise, since data are not consistent. */
@@ -105,7 +120,9 @@ class ForceContainer{
 			if(synced) return;
 			boost::mutex::scoped_lock lock(globalMutex);
 			if(synced) return; // if synced meanwhile
-			// #pragma omp parallel for schedule(static)
+
+			syncSizesOfContainers();
+
 			for(long id=0; id<(long)size; id++){
 				Vector3r sumF(Vector3r::Zero()), sumT(Vector3r::Zero());
 				for(int thread=0; thread<nThreads; thread++){ sumF+=_forceData[thread][id]; sumT+=_torqueData[thread][id];}
@@ -123,31 +140,24 @@ class ForceContainer{
 		unsigned long syncCount;
 		long lastReset;
 
-		/* Change size of containers (number of bodies).
-		 * Locks globalMutex, since on threads modifies other threads' data.
-		 * Called very rarely (a few times at the beginning of the simulation). */
-		void resize(size_t newSize){
-			boost::mutex::scoped_lock lock(globalMutex);
-			if(size>=newSize) return; // in case on thread was waiting for resize, but it was already satisfied by another one
-			for(int thread=0; thread<nThreads; thread++){
-				_forceData [thread].resize(newSize,Vector3r::Zero());
-				_torqueData[thread].resize(newSize,Vector3r::Zero());
-				_moveData[thread].resize(newSize,Vector3r::Zero());
-				_rotData[thread].resize(newSize,Vector3r::Zero());
-			}
-			_force.resize(newSize,Vector3r::Zero()); _torque.resize(newSize,Vector3r::Zero());
-			_move.resize(newSize,Vector3r::Zero()); _rot.resize(newSize,Vector3r::Zero());
-			size=newSize;
+		void resize(size_t newSize, int threadN){
+			_forceData [threadN].resize(newSize,Vector3r::Zero());
+			_torqueData[threadN].resize(newSize,Vector3r::Zero());
+			_moveData[threadN].resize(newSize,Vector3r::Zero());
+			_rotData[threadN].resize(newSize,Vector3r::Zero());
+			sizeOfThreads[threadN] = newSize;
+			if (size<newSize) size=newSize;
+			syncedSizes=false;
 		}
 		/*! Reset all data, also reset summary forces/torques and mark the container clean. */
 		// perhaps should be private and friend Scene or whatever the only caller should be
 		void reset(long iter){
 			for(int thread=0; thread<nThreads; thread++){
-				memset(&_forceData [thread][0],0,sizeof(Vector3r)*size);
-				memset(&_torqueData[thread][0],0,sizeof(Vector3r)*size);
+				memset(&_forceData [thread][0],0,sizeof(Vector3r)*sizeOfThreads[thread]);
+				memset(&_torqueData[thread][0],0,sizeof(Vector3r)*sizeOfThreads[thread]);
 				if(moveRotUsed){
-					memset(&_moveData  [thread][0],0,sizeof(Vector3r)*size);
-					memset(&_rotData   [thread][0],0,sizeof(Vector3r)*size);
+					memset(&_moveData  [thread][0],0,sizeof(Vector3r)*sizeOfThreads[thread]);
+					memset(&_rotData   [thread][0],0,sizeof(Vector3r)*sizeOfThreads[thread]);
 				}
 			}
 			memset(&_force [0], 0,sizeof(Vector3r)*size);
@@ -225,6 +235,5 @@ class ForceContainer {
 		const int getNumAllocatedThreads() const {return 1;}
 		const bool& getMoveRotUsed() const {return moveRotUsed;}
 };
-
 
 #endif

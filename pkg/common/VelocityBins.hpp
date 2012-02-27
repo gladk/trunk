@@ -23,7 +23,7 @@ class VelocityBins{
 	struct Bin{
 		Bin(): binMinVelSq(-1), binMaxVelSq(-1), maxDist(0), currDist(0), currMaxVelSq(0), nBodies(0){
 			#ifdef YADE_OPENMP
-				threadMaxVelSq.resize(omp_get_max_threads());
+				threadMaxVelSq.resize(omp_get_max_threads(),0.);
 			#endif
 		};
 		// limits for bin memebrship
@@ -60,7 +60,8 @@ class VelocityBins{
 	void setBins(Scene*, Real currMaxVelSq, Real refSweepLength);
 
 	// Increment maximum per-bin distances and tell whether some bodies may be	already getting out of the swept bbox (in that case, we need to recompute bounding volumes and run the collider)
-	bool incrementDists_shouldCollide(Real dt);
+	// Also returns true if number of particles changed, in which case it adjusts internal storage accordingly
+	bool checkSize_incrementDists_shouldCollide(const Scene*);
 	
 	/* NOTE: following 3 functions are separated because of multi-threaded operation of NewtonIntegrator
 	in that case, every thread must have its own per-bin maximum and binVelSqFinalize will assign the

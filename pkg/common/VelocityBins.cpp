@@ -9,8 +9,12 @@
 #endif
 CREATE_LOGGER(VelocityBins);
 
-bool VelocityBins::incrementDists_shouldCollide(Real dt){
+bool VelocityBins::checkSize_incrementDists_shouldCollide(const Scene* scene){
+	// number of particles increased, recollision necessary
+	// smaller number of particles is handled in setBins
+	if(bodyBins.size()<scene->bodies->size()) { bodyBins.resize(scene->bodies->size(),/* put new particles to the slowest bin*/ bins.size()-1); return true; }
 	int i=0;
+	const Real& dt=scene->dt;
 	FOREACH(Bin& bin, bins){
 		// NOTE: this mimics the integration scheme of NewtonIntegrator
 		// if you use different integration method, it must be changed (or the infrastructure somehow modified to allow for that)

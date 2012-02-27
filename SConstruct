@@ -377,7 +377,7 @@ if not env.GetOption('clean'):
 			else: featureNotOK('qt4','Building with Qt4 implies the QGLViewer library installed (package libqglviewer-qt4-dev package in debian/ubuntu, libQGLViewer in RPM-based distributions)')
 	if 'vtk' in env['features']:
 		ok=conf.CheckLibWithHeader(['vtkCommon'],'vtkInstantiator.h','c++','vtkInstantiator::New();',autoadd=1)
-		env.Append(LIBS=['vtkHybrid','vtkFiltering','vtkRendering','vtkIO','vtkexoIIc','vtkParallel','vtkGraphics','vtkverdict','vtkImaging','vtkftgl','vtkDICOMParser','vtkmetaio','vtksqlite','vtkNetCDF'])
+		env.Append(LIBS=['vtkHybrid','vtkFiltering','vtkRendering','vtkIO','vtkexoIIc','vtkParallel','vtkGraphics','vtkverdict','vtkImaging','vtkftgl','vtkDICOMParser','vtkmetaio','vtksqlite'])
 		if not ok: featureNotOK('vtk',note="Installer can`t find vtk-library. Be sure you have it installed (usually, libvtk5-dev package). Or you might have to add VTK header directory (e.g. /usr/include/vtk-5.4) to CPPPATH.")
 	if 'gts' in env['features']:
 		env.ParseConfig('pkg-config gts --cflags --libs');
