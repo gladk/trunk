@@ -67,18 +67,9 @@ void Ip2_2xNormalInelasticMat_NormalInelasticityPhys::go(	  const shared_ptr<Mat
 			contactPhysics->prevNormal 			= geom->normal;
 			
 			contactPhysics->knLower = Kn;
-			contactPhysics->kn = Kn;
-			
+			contactPhysics->kn = Kn;			
 			contactPhysics->ks = Ks;
-			contactPhysics->initialOrientation1	= Body::byId(interaction->getId1())->state->ori;
-			contactPhysics->initialOrientation2	= Body::byId(interaction->getId2())->state->ori;
-			contactPhysics->initialPosition1    = Body::byId(interaction->getId1())->state->pos;
-			contactPhysics->initialPosition2    = Body::byId(interaction->getId2())->state->pos;
 			contactPhysics->kr = Kr;
-			contactPhysics->initialContactOrientation.setFromTwoVectors(Vector3r(1.0,0.0,0.0),geom->normal);
-			contactPhysics->currentContactOrientation = contactPhysics->initialContactOrientation;
-			contactPhysics->orientationToContact1   = contactPhysics->initialOrientation1.conjugate() * contactPhysics->initialContactOrientation;
-			contactPhysics->orientationToContact2	= contactPhysics->initialOrientation2.conjugate() * contactPhysics->initialContactOrientation;
 		}
 		
 	}

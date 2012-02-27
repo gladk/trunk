@@ -165,28 +165,10 @@ void Law2_ScGeom6D_NormalInelasticityPhys_NormalInelasticity::go(shared_ptr<IGeo
 
 		if(momentRotationLaw)
 		{
-// 			{// updates only orientation of contact (local coordinate system)
-// 				Vector3r axis = currentContactPhysics->prevNormal.cross(currentContactGeometry->normal); axis.normalize();
-// 				Real angle =  unitVectorsAngle(currentContactPhysics->prevNormal,currentContactGeometry->normal);
-// 				Quaternionr align(AngleAxisr(angle,axis));
-// 				currentContactPhysics->currentContactOrientation =  align * currentContactPhysics->currentContactOrientation;
-// 			}
-// 
-// 			Quaternionr delta( de1->se3.orientation * currentContactPhysics->initialOrientation1.conjugate() *
-// 		                           currentContactPhysics->initialOrientation2 * de2->se3.orientation.conjugate());
-// 
-// 			AngleAxisr aa(delta); // aa.axis() of rotation - this is the Moment direction UNIT vector; angle represents the power of resistant ELASTIC moment
-// 			if(angle > Mathr::PI) angle -= Mathr::TWO_PI; // angle is between 0 and 2*pi, but should be between -pi and pi 
+			currentContactPhysics->moment_twist = (currentContactGeometry->getTwist()*currentContactPhysics->kr)*currentContactGeometry->normal ;
+			currentContactPhysics->moment_bending = currentContactGeometry->getBending() * currentContactPhysics->kr;
 
-//Real elasticMoment = currentContactPhysics->kr * std::abs(angle); // positive value (*)
-
-// 			Real angle_twist(aa.angle() * aa.axis().dot(currentContactGeometry->normal) );
-// 			Vector3r axis_twist(angle_twist * currentContactGeometry->normal);
-			Vector3r moment_twist( (currentContactGeometry->getTwist()*currentContactPhysics->kr)*currentContactGeometry->normal );
-// 			Vector3r axis_bending(aa.angle()*aa.axis() - axis_twist);
-			Vector3r moment_bending( currentContactGeometry->getBending() * currentContactPhysics->kr );
-
-			Vector3r moment = moment_twist + moment_bending;
+			moment = currentContactPhysics->moment_twist + currentContactPhysics->moment_bending;
 
 // 	Limitation by plastic threshold
 			if (!momentAlwaysElastic)
@@ -196,7 +178,6 @@ void Law2_ScGeom6D_NormalInelasticityPhys_NormalInelasticity::go(shared_ptr<IGeo
 				if(normeMoment>normeMomentMax)
 					{
 					moment *= normeMomentMax/normeMoment;
-// 					nbreInteracMomPlastif++;
 					}
 			}
 			scene->forces.addTorque(id1,-moment);
@@ -205,8 +186,6 @@ void Law2_ScGeom6D_NormalInelasticityPhys_NormalInelasticity::go(shared_ptr<IGeo
 //	********	Moment law END				*******	 //
 
                 currentContactPhysics->prevNormal = currentContactGeometry->normal;
-//             }
-//         }
     }
 }
 

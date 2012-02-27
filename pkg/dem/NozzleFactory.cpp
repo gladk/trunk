@@ -60,8 +60,8 @@ void NozzleFactory::action(){
 		}
 		// pick random initial velocity (normal with some variation)
 		// preliminary version that randomizes valocity magnitude but always makes initVel exactly aligned with normal
-		//Vector3r initVel=normal*(vMin+randomUnit()*(vMax-vMin)); // TODO: compute from vMin, vMax, vAngle, normal;
-		Vector3r initVel= normal*100;
+		Vector3r initVel=normal*(vMin+randomUnit()*(vMax-vMin)); // TODO: compute from vMin, vMax, vAngle, normal;
+		//Vector3r initVel= normal*100;
 
 		// create particle
 		int mId=(materialId>=0 ? materialId : scene->materials.size()+materialId);
@@ -76,7 +76,7 @@ void NozzleFactory::action(){
 		state->vel=initVel; 
 		Real vol=(4/3.)*Mathr::PI*pow(r,3);
 		state->mass=vol*material->density;
-		 state->inertia=(2./5.)*vol*r*r*Vector3r::Ones();
+		state->inertia=(2./5.)*vol*r*r*material->density*Vector3r::Ones();
 
 		b->shape=sphere; 
 		b->state=state; 

@@ -10,8 +10,11 @@
 #include<yade/pkg-dem/ScGeom.hpp>
 #include<yade/pkg-common/Sphere.hpp>
 #include<yade/pkg-common/Facet.hpp>
+#include<yade/pkg-common/Wall.hpp>
 #include<yade/core/Scene.hpp>
 #include<yade/lib-base/Math.hpp>
+
+YADE_PLUGIN((Ig2_Facet_Sphere_ScGeom)(Ig2_Wall_Sphere_ScGeom));
 
 CREATE_LOGGER(Ig2_Facet_Sphere_ScGeom);
 
@@ -127,7 +130,32 @@ bool Ig2_Facet_Sphere_ScGeom::goReverse(	const shared_ptr<Shape>& cm1,
 	return go(cm2,cm1,state2,state1,-shift2,force,c);
 }
 
-YADE_PLUGIN((Ig2_Facet_Sphere_ScGeom));
 
-//YADE_REQUIRE_FEATURE(PHYSPAR);
+/********* Wall + Sphere **********/
+
+bool Ig2_Wall_Sphere_ScGeom::go(const shared_ptr<Shape>& cm1, const shared_ptr<Shape>& cm2, const State& state1, const State& state2, const Vector3r& shift2, const bool& force, const shared_ptr<Interaction>& c){
+	Wall* wall=static_cast<Wall*>(cm1.get());
+	const Real radius=static_cast<Sphere*>(cm2.get())->radius;
+	const int& ax(wall->axis);
+	Real dist=(state2.pos)[ax]+shift2[ax]-state1.pos[ax]; // signed "distance" between centers
+	if(!c->isReal() && abs(dist)>radius && !force) { return false; }// wall and sphere too far from each other
+
+	// contact point is sphere center projected onto the wall
+	Vector3r contPt=state2.pos+shift2; contPt[ax]=state1.pos[ax];
+	Vector3r normal(0.,0.,0.);
+	// wall interacting from both sides: normal depends on sphere's position
+	assert(wall->sense==-1 || wall->sense==0 || wall->sense==1);
+	if(wall->sense==0) normal[ax]=dist>0?1.:-1.;
+	else normal[ax]=wall->sense==1?1.:-1;
+
+	bool isNew=!c->geom;
+	if(isNew) c->geom=shared_ptr<ScGeom>(new ScGeom());
+	const shared_ptr<ScGeom>& ws=YADE_PTR_CAST<ScGeom>(c->geom);
+	ws->radius1=ws->radius2=radius; // do the same as for facet-sphere: wall's "radius" is the same as the sphere's radius
+	ws->contactPoint=contPt;
+	ws->penetrationDepth=-(abs(dist)-radius);
+	// ws->normal is assigned by precompute
+	ws->precompute(state1,state2,scene,c,normal,isNew,shift2,noRatch);
+	return true;
+}
 

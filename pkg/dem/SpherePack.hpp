@@ -19,9 +19,7 @@ using namespace boost;
 #include<yade/lib-base/Logging.hpp>
 #include<yade/lib-base/Math.hpp>
 
-/*! Class representing geometry of spherical packing, with some utility functions.
-
-*/
+/*! Class representing geometry of spherical packing, with some utility functions. */
 class SpherePack{
 	// return coordinate wrapped to x0…x1, relative to x0; don't care about period
 	// copied from PeriodicInsertionSortCollider
@@ -29,12 +27,23 @@ class SpherePack{
 		Real xNorm=(x-x0)/(x1-x0);
 		return (xNorm-floor(xNorm))*(x1-x0);
 	}
+	Real periPtDistSq(const Vector3r& p1, const Vector3r& p2){
+		Vector3r dr;
+		for(int ax=0; ax<3; ax++) dr[ax]=min(cellWrapRel(p1[ax],p2[ax],p2[ax]+cellSize[ax]),cellWrapRel(p2[ax],p1[ax],p1[ax]+cellSize[ax]));
+		return dr.squaredNorm();
+	}
+	struct ClumpInfo{ int clumpId; Vector3r center; Real rad; int minId, maxId; };
+
 public:
 	enum {RDIST_RMEAN, RDIST_POROSITY, RDIST_PSD};
 	struct Sph{
-		Vector3r c; Real r;
-		Sph(const Vector3r& _c, Real _r): c(_c), r(_r){};
-		python::tuple asTuple() const { return python::make_tuple(c,r); }
+		Vector3r c; Real r; int clumpId;
+		Sph(const Vector3r& _c, Real _r, int _clumpId=-1): c(_c), r(_r), clumpId(_clumpId) {};
+		python::tuple asTuple() const {
+			if(clumpId<0) return python::make_tuple(c,r);
+			return python::make_tuple(c,r,clumpId);
+		}
+		python::tuple asTupleNoClump() const { return python::make_tuple(c,r); }
 	};
 	std::vector<Sph> pack;
 	Vector3r cellSize;
@@ -46,10 +55,8 @@ public:
 
 	// I/O
 	void fromList(const python::list& l);
+	void fromLists(const vector<Vector3r>& centers, const vector<Real>& radii); // used as ctor in python
 	python::list toList() const;
-	#if 0
-		python::list toList_pointsAsTuples() const;
-	#endif
 	void fromFile(const string file);
 	void toFile(const string file) const;
 	void fromSimulation();
@@ -65,6 +72,10 @@ public:
 
 	// interpolate a variable with power distribution (exponent -3) between two margin values, given uniformly distributed x∈(0,1)
 	Real pow3Interp(Real x,Real a,Real b){ return pow(x*(pow(b,-2)-pow(a,-2))+pow(a,-2),-1./2); }
+
+	// generate packing of clumps, selected with equal probability
+	// periodic boundary is supported
+	long makeClumpCloud(const Vector3r& mn, const Vector3r& mx, const vector<shared_ptr<SpherePack> >& clumps, bool periodic=false, int num=-1);
 
 	// periodic repetition
 	void cellRepeat(Vector3i count);
@@ -85,12 +96,18 @@ public:
 		return sphVol/(dd[0]*dd[1]*dd[2]);
 	}
 	python::tuple psd(int bins=10, bool mass=false) const;
+	bool hasClumps() const;
+	python::tuple getClumps() const;
 
 	// transformations
 	void translate(const Vector3r& shift){ FOREACH(Sph& s, pack) s.c+=shift; }
 	void rotate(const Vector3r& axis, Real angle){
 		if(cellSize!=Vector3r::Zero()) { LOG_WARN("Periodicity reset when rotating periodic packing (non-zero cellSize="<<cellSize<<")"); cellSize=Vector3r::Zero(); }
 		Vector3r mid=midPt(); Quaternionr q(AngleAxisr(angle,axis)); FOREACH(Sph& s, pack) s.c=q*(s.c-mid)+mid;
+	}
+	void rotateAroundOrigin(const Quaternionr& rot){
+		if(cellSize!=Vector3r::Zero()){ LOG_WARN("Periodicity reset when rotating periodic packing (non-zero cellSize="<<cellSize<<")"); cellSize=Vector3r::Zero(); }
+		FOREACH(Sph& s, pack) s.c=rot*s.c;
 	}
 	void scale(Real scale){ Vector3r mid=midPt(); cellSize*=scale; FOREACH(Sph& s, pack) {s.c=scale*(s.c-mid)+mid; s.r*=abs(scale); } }
 	#if 0
@@ -107,7 +124,7 @@ public:
 		_iterator iter(){ return *this;}
 		python::tuple next(){
 			if(pos==sPack.pack.size()){ PyErr_SetNone(PyExc_StopIteration); python::throw_error_already_set(); }
-			return sPack.pack[pos++].asTuple();
+			return sPack.pack[pos++].asTupleNoClump();
 		}
 	};
 	SpherePack::_iterator getIterator() const{ return SpherePack::_iterator(*this);};

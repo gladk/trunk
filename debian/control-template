@@ -2,22 +2,34 @@ Source: yade@_VERSION@
 Section: x11
 Priority: optional
 Maintainer: Václav Šmilauer <eudoxos@arcig.cz>
-Build-Depends: debhelper (>= 5), scons, freeglut3-dev, libboost-dev (>=1.35), libboost-date-time-dev (>=1.35), libboost-filesystem-dev (>=1.35), libboost-thread-dev (>=1.35), libboost-regex-dev (>=1.35), libboost-python-dev (>=1.35), libboost-iostreams-dev (>=1.35), libboost-program-options-dev, libboost-serialization-dev, libloki-dev, liblog4cxx9-dev | liblog4cxx10-dev, docbook-to-man, ipython, libgts-dev, python-numpy, g++(>>4.0), libvtk5-dev, libgl1-mesa-dev, gdb, ipython, python-matplotlib, python-tk, libeigen2-dev, libqglviewer-qt4-dev @', binutils-gold' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny') else ''@ @', texlive-latex-recommended, texlive-latex-extra, lmodern, texlive-pictures, texlive-xetex, python-sphinx (>=0.99), python-bibtex, graphviz, dvipng' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny') else ''@, python-xlib, python-qt4, pyqt4-dev-tools
+Build-Depends: debhelper (>= 5), scons, freeglut3-dev, libboost-dev (>=1.35), libboost-date-time-dev (>=1.35), libboost-filesystem-dev (>=1.35), libboost-thread-dev (>=1.35), libboost-regex-dev (>=1.35), libboost-python-dev (>=1.35), libboost-iostreams-dev (>=1.35), libboost-program-options-dev, libboost-serialization-dev, libloki-dev, liblog4cxx9-dev | liblog4cxx10-dev, docbook-to-man, ipython, libgts-dev, python-numpy, g++(>>4.0), libvtk5-dev, libgl1-mesa-dev, gdb, ipython, python-matplotlib, python-tk, libeigen2-dev, libqglviewer-qt4-dev @', binutils-gold' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny') else ''@ @', texlive-latex-recommended, texlive-latex-extra, lmodern, texlive-pictures, texlive-xetex, python-sphinx (>=0.99), python-bibtex, graphviz, dvipng' if DISTRIBUTION not in ('hardy','intrepid','jaunty','lenny') else ''@, python-xlib, python-qt4, pyqt4-dev-tools, clang
 Standards-Version: 3.7.2
 
 Package: yade@_VERSION@
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, python-numpy, ipython, python-matplotlib, python-tk, python-qt4, python-xlib, mencoder, gnuplot
-Description: Platform for dynamical modeling.
- Yet Another Dynamic Engine. etc.
+Description: Platform for discrete element modeling.
+ Yet Another Dynamic Engine.
+ Extensible open-source framework for discrete numerical models, 
+ focused on Discrete Element Method. 
+ The computation parts are written in c++ using flexible object model, 
+ allowing independent implementation of new algorithms and interfaces. 
+ Python is used for rapid and concise scene construction, 
+ simulation control, postprocessing and debugging.
  .
  This package contains speed-optimized build of yade.
 
 Package: yade@_VERSION@-dbg
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, yade@_VERSION@, gdb
-Description: Platform for dynamical modeling.
- Yet Another Dynamic Engine. etc.
+Description: Platform for discrete element modeling.
+ Yet Another Dynamic Engine.
+ Extensible open-source framework for discrete numerical models, 
+ focused on Discrete Element Method. 
+ The computation parts are written in c++ using flexible object model, 
+ allowing independent implementation of new algorithms and interfaces. 
+ Python is used for rapid and concise scene construction, 
+ simulation control, postprocessing and debugging.
  .
  This package contains debug build of yade.
 
@@ -25,28 +37,58 @@ Package: yade@_VERSION@-doc
 Architecture: all
 Recommends: yade@_VERSION@ | yade@_VERSION@-dbg
 Depends: 
-Description: Platform for dynamical modeling.
- Yet Another Dynamic Engine. etc.
+Description: Platform for discrete element modeling.
+ Yet Another Dynamic Engine.
+ Extensible open-source framework for discrete numerical models, 
+ focused on Discrete Element Method. 
+ The computation parts are written in c++ using flexible object model, 
+ allowing independent implementation of new algorithms and interfaces. 
+ Python is used for rapid and concise scene construction, 
+ simulation control, postprocessing and debugging.
  .
  This package contains examples, test scripts and documentation.
 
 Package: yade@SNAPSHOT@
 Architecture: all
 Depends: yade@_VERSION@
-Description: Platform for dynamical modeling.
+Description: Platform for discrete element modeling.
+ Yet Another Dynamic Engine.
+ Extensible open-source framework for discrete numerical models, 
+ focused on Discrete Element Method. 
+ The computation parts are written in c++ using flexible object model, 
+ allowing independent implementation of new algorithms and interfaces. 
+ Python is used for rapid and concise scene construction, 
+ simulation control, postprocessing and debugging.
+ .
  This package depends on the latest
  @'snapshot' if SNAPSHOT else 'stable release'@ of Yade.
 
 Package: yade@SNAPSHOT@-dbg
 Architecture: all
 Depends: yade@_VERSION@-dbg
-Description: Platform for dynamical modeling.
+Description: Platform for discrete element modeling.
+ Yet Another Dynamic Engine.
+ Extensible open-source framework for discrete numerical models, 
+ focused on Discrete Element Method. 
+ The computation parts are written in c++ using flexible object model, 
+ allowing independent implementation of new algorithms and interfaces. 
+ Python is used for rapid and concise scene construction, 
+ simulation control, postprocessing and debugging.
+ .
  This package depends on the latest debug build of
  @'snapshot' if SNAPSHOT else 'stable release'@ of Yade.
 
 Package: yade@SNAPSHOT@-doc
 Architecture: all
 Depends: yade@_VERSION@-doc
-Description: Platform for dynamical modeling.
+Description: Platform for discrete element modeling.
+ Yet Another Dynamic Engine.
+ Extensible open-source framework for discrete numerical models, 
+ focused on Discrete Element Method. 
+ The computation parts are written in c++ using flexible object model, 
+ allowing independent implementation of new algorithms and interfaces. 
+ Python is used for rapid and concise scene construction, 
+ simulation control, postprocessing and debugging.
+ .
  This package depends on the latest documentation of
  @'snapshot' if SNAPSHOT else 'stable release'@ of Yade.

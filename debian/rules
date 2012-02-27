@@ -51,7 +51,7 @@ install: build
 	# remove the profile, if existing, to have clean config
 	rm -f scons.profile-deb
 	# the last argument specified that we only want files in lib installed -- common files (the executable) are already in the optimized package
-	NO_SCONS_GET_RECENT= scons profile=deb buildPrefix=debian runtimePREFIX=/usr version=${VERSION} brief=0 chunkSize=1 jobs=1 features=vtk,gts,opengl,openmp,qt4 PREFIX=debian/yade${_VERSION}-dbg/usr variant='' optimize=0 march= debug=1 CPPPATH=/usr/include/vtk-5.0:/usr/include/vtk-5.2:/usr/include/vtk-5.4:/usr/include/eigen2 QT4DIR=/usr/share/qt4 debian/yade${_VERSION}-dbg/usr/lib
+	NO_SCONS_GET_RECENT= scons profile=deb buildPrefix=debian runtimePREFIX=/usr version=${VERSION} brief=0 chunkSize=5 jobs=1 features=vtk,gts,opengl,qt4 PREFIX=debian/yade${_VERSION}-dbg/usr variant='' optimize=0 march= debug=1 CPPPATH=/usr/include/vtk-5.0:/usr/include/vtk-5.2:/usr/include/vtk-5.4:/usr/include/eigen2 QT4DIR=/usr/share/qt4 debian/yade${_VERSION}-dbg/usr/lib
 	#optimized build
 	NO_SCONS_GET_RECENT= scons profile=deb PREFIX=debian/yade${_VERSION}/usr variant='' optimize=1 debug=0
 	#install platform-independent files (docs, scripts, examples)
@@ -59,7 +59,11 @@ install: build
 	cp -r examples scripts debian/yade${_VERSION}/usr/share/doc/yade${_VERSION}
 	# copy pixmap files in relevant directories
 	mkdir -p debian/yade${_VERSION}/usr/share/pixmaps
-	cp debian/*.xpm debian/yade${_VERSION}/usr/share/pixmaps
+	mkdir -p debian/yade${_VERSION}/usr/share/applications
+	cp debian/yade16x16.xpm debian/yade${_VERSION}/usr/share/pixmaps/yade${_VERSION}_16x16.xpm
+	cp debian/yade32x32.xpm debian/yade${_VERSION}/usr/share/pixmaps/yade${_VERSION}_32x32.xpm
+	cp debian/yade${_VERSION}.desktop debian/yade${_VERSION}/usr/share/applications/
+	dh_installmenu
 
 	# UGLY! generate sphinx docs only if python-sphinx is installed (distinguishes distributions which should build it or not as per debian/control-template build-deps)
 	if dpkg-query -W python-sphinx; then cd doc/sphinx; PYTHONPATH=. YADE_PREFIX=../../debian/yade${_VERSION}/usr/ ../../debian/yade${_VERSION}/usr/bin/yade${_VERSION} yadeSphinx.py; cd _build/latex; xelatex Yade.tex; xelatex Yade.tex; xelatex Yade.tex; cd ../..; mkdir -p ../../debian/yade${_VERSION}-doc/usr/share/doc/yade${_VERSION}; cp -r _build/html _build/latex/Yade.pdf ../../debian/yade${_VERSION}-doc/usr/share/doc/yade${_VERSION}; else echo "Not building HTML documentation, since the python-sphinx package is not installed"; fi
@@ -75,7 +79,7 @@ check: install
 	YADE_PREFIX=debian/yade${_VERSION}-dbg/usr debian/yade${_VERSION}/usr/bin/yade${_VERSION} --debug --test
 
 # Build architecture-independent files here.
-binary-indep: build install
+binary-indep: build install 
 # We have nothing to do by default.
 
 # Build architecture-dependent files here.
@@ -87,7 +91,6 @@ binary-arch: build install check
 	dh_installdocs
 	dh_installexamples
 #	dh_install
-	dh_installmenu
 #	dh_installdebconf	
 #	dh_installlogrotate
 #	dh_installemacsen
@@ -101,7 +104,7 @@ binary-arch: build install check
 #	dh_installman -p yade${_VERSION}-dbg yade${_VERSION}-dbg.1 yade${_VERSION}-dbg-batch.1
 	dh_link
 	dh_strip --exclude=yade${_VERSION}-dbg   # don't strip the debug package
-	dh_compress --all --exclude=/usr/share/doc # don't compress documentation and examples
+	#dh_compress --all --exclude=/usr/share/doc # don't compress documentation and examples
 	dh_fixperms
 #	dh_perl
 	dh_makeshlibs
@@ -110,6 +113,7 @@ binary-arch: build install check
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
+	dh_installmenu
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install configure

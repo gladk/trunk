@@ -39,3 +39,16 @@ class Ig2_Facet_Sphere_ScGeom : public IGeomFunctor
 REGISTER_SERIALIZABLE(Ig2_Facet_Sphere_ScGeom);
 
 
+class Ig2_Wall_Sphere_ScGeom: public IGeomFunctor{
+	public:
+		virtual bool go(const shared_ptr<Shape>& cm1, const shared_ptr<Shape>& cm2, const State& state1, const State& state2, const Vector3r& shift2, const bool& force, const shared_ptr<Interaction>& c);
+	YADE_CLASS_BASE_DOC_ATTRS(Ig2_Wall_Sphere_ScGeom,IGeomFunctor,"Create/update a :yref:`ScGeom` instance representing intersection of :yref:`Wall` and :yref:`Sphere`.",
+		((bool,noRatch,true,,"Avoid granular ratcheting"))
+	);
+	FUNCTOR2D(Wall,Sphere);
+	DEFINE_FUNCTOR_ORDER_2D(Wall,Sphere);
+};
+REGISTER_SERIALIZABLE(Ig2_Wall_Sphere_ScGeom);
+
+
+

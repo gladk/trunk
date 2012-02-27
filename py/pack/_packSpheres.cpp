@@ -6,13 +6,11 @@
 BOOST_PYTHON_MODULE(_packSpheres){
 	python::scope().attr("__doc__")="Creation, manipulation, IO for generic sphere packings.";
 	YADE_SET_DOCSTRING_OPTS;
-	python::class_<SpherePack>("SpherePack","Set of spheres represented as centers and radii. This class is returned by :yref:`yade.pack.randomDensePack`, :yref:`yade.pack.randomPeriPack` and others. The object supports iteration over spheres, as in \n\n\t>>> sp=SpherePack()\n\t>>> for center,radius in sp: print center,radius\n\n\t>>> for sphere in sp: print sphere[0],sphere[1]   ## same, but without unpacking the tuple automatically\n\n\t>>> for i in range(0,len(sp)): print sp[i][0], sp[i][1]   ## same, but accessing spheres by index\n",python::init<python::optional<python::list> >(python::args("list"),"Empty constructor, optionally taking list [ ((cx,cy,cz),r), … ] for initial data." ))
+	python::class_<SpherePack>("SpherePack","Set of spheres represented as centers and radii. This class is returned by :yref:`yade.pack.randomDensePack`, :yref:`yade.pack.randomPeriPack` and others. The object supports iteration over spheres, as in \n\n\t>>> sp=SpherePack()\n\t>>> for center,radius in sp: print center,radius\n\n\t>>> for sphere in sp: print sphere[0],sphere[1]   ## same, but without unpacking the tuple automatically\n\n\t>>> for i in range(0,len(sp)): print sp[i][0], sp[i][1]   ## same, but accessing spheres by index\n\n\n.. admonition:: Special constructors\n\n\tConstruct from list of ``[(c1,r1),(c2,r2),…]``. To convert two same-length lists of ``centers`` and ``radii``, construct with ``zip(centers,radii)``.\n",python::init<python::optional<python::list> >(python::args("list"),"Empty constructor, optionally taking list [ ((cx,cy,cz),r), … ] for initial data." ))
 		.def("add",&SpherePack::add,"Add single sphere to packing, given center as 3-tuple and radius")
 		.def("toList",&SpherePack::toList,"Return packing data as python list.")
-		#if 0
-		.def("toList_pointsAsTuples",&SpherePack::toList_pointsAsTuples,"Return packing data as python list, but using only pure-python data types (3-tuples instead of Vector3) (for pickling with cPickle)")
-		#endif
 		.def("fromList",&SpherePack::fromList,"Make packing from given list, same format as for constructor. Discards current data.")
+		.def("fromList",&SpherePack::fromLists,(python::arg("centers"),python::arg("radii")),"Make packing from given list, same format as for constructor. Discards current data.")
 		.def("load",&SpherePack::fromFile,(python::arg("fileName")),"Load packing from external text file (current data will be discarded).")
 		.def("save",&SpherePack::toFile,(python::arg("fileName")),"Save packing to external text file (will be overwritten).")
 		.def("fromSimulation",&SpherePack::fromSimulation,"Make packing corresponding to the current simulation. Discards current data.")
@@ -22,6 +20,7 @@ BOOST_PYTHON_MODULE(_packSpheres){
 		.def("psd",&SpherePack::psd,(python::arg("bins")=10,python::arg("mass")=false),"Return `particle size distribution <http://en.wikipedia.org/wiki/Particle_size_distribution>`__ of the packing.\n:param int bins: number of bins between minimum and maximum diameter\n:param mass: Compute relative mass rather than relative particle count for each bin. Corresponds to :yref:`distributeMass parameter for makeCloud<yade.pack.SpherePack.makeCloud>`.\n:returns: tuple of ``(cumm,edges)``, where ``cumm`` are cummulative fractions for respective diameters  and ``edges`` are those diameter values. Dimension of both arrays is equal to ``bins+1``.")
 		// new psd
 		.def("particleSD",&SpherePack::particleSD,(python::arg("minCorner"),python::arg("maxCorner"),python::arg("rMean"),python::arg("periodic")=false,python::arg("name"),python::arg("numSph"),python::arg("radii")=vector<Real>(),python::arg("passing")=vector<Real>(),python::arg("passingIsNotPercentageButCount")=false),"Create random packing enclosed in box given by minCorner and maxCorner, containing numSph spheres. Returns number of created spheres, which can be < num if the packing is too tight. The computation is done according to the given psd.")
+		.def("makeClumpCloud",&SpherePack::makeClumpCloud,(python::arg("minCorner"),python::arg("maxCorner"),python::arg("clumps"),python::arg("periodic")=false,python::arg("num")=-1),"Create random loose packing of clumps within box given by *minCorner* and *maxCorner*. Clumps are selected with equal probability. At most *num* clumps will be positioned if *num* is positive; otherwise, as many clumps as possible will be put in space, until maximum number of attemps to place a new clump randomly is attained.")
 		//
 		.def("aabb",&SpherePack::aabb_py,"Get axis-aligned bounding box coordinates, as 2 3-tuples.")
 		.def("dim",&SpherePack::dim,"Return dimensions of the packing in terms of aabb(), as a 3-tuple.")
@@ -33,6 +32,8 @@ BOOST_PYTHON_MODULE(_packSpheres){
 		.def("translate",&SpherePack::translate,"Translate all spheres by given vector.")
 		.def("rotate",&SpherePack::rotate,(python::arg("axis"),python::arg("angle")),"Rotate all spheres around packing center (in terms of aabb()), given axis and angle of the rotation.")
 		.def("scale",&SpherePack::scale,"Scale the packing around its center (in terms of aabb()) by given factor (may be negative).")
+		.def("hasClumps",&SpherePack::hasClumps,"Whether this object contains clumps.")
+		.def("getClumps",&SpherePack::getClumps,"Return lists of sphere ids sorted by clumps they belong to. The return value is (standalones,[clump1,clump2,…]), where each item is list of id's of spheres.")
 		.def("__len__",&SpherePack::len,"Get number of spheres in the packing")
 		.def("__getitem__",&SpherePack::getitem,"Get entry at given index, as tuple of center and radius.")
 		.def("__iter__",&SpherePack::getIterator,"Return iterator over spheres.")

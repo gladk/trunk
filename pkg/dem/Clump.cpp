@@ -19,7 +19,7 @@ void Clump::add(const shared_ptr<Body>& clumpBody, const shared_ptr<Body>& subBo
 	subBody->clumpId=clumpBody->id;
 	clumpBody->clumpId=clumpBody->id; // just to make sure
 	clumpBody->setBounded(false); // disallow collisions with the clump itself
-	LOG_DEBUG("Added body #"<<subId<<" to clump #"<<getId());
+	LOG_DEBUG("Added body #"<<subBody->id<<" to clump #"<<clumpBody->id);
 }
 
 void Clump::del(const shared_ptr<Body>& clumpBody, const shared_ptr<Body>& subBody){
@@ -27,7 +27,7 @@ void Clump::del(const shared_ptr<Body>& clumpBody, const shared_ptr<Body>& subBo
 	const shared_ptr<Clump> clump=YADE_PTR_CAST<Clump>(clumpBody->shape);
 	if(clump->members.erase(subBody->id)!=1) throw std::invalid_argument(("Body #"+lexical_cast<string>(subBody->id)+" not part of clump #"+lexical_cast<string>(clumpBody->id)+"; not removing.").c_str());
 	subBody->clumpId=Body::ID_NONE;
-	LOG_DEBUG("Removed body #"<<subId<<" from clump #"<<getId());
+	LOG_DEBUG("Removed body #"<<subBody->id<<" from clump #"<<clumpBody->id);
 }
 
 void Clump::moveMembers(const shared_ptr<Body>& clumpBody, Scene* scene){
@@ -75,11 +75,11 @@ void Clump::moveMembers(const shared_ptr<Body>& clumpBody, Scene* scene){
 */
 
 void Clump::updateProperties(const shared_ptr<Body>& clumpBody, bool intersecting){
-	LOG_DEBUG("Updating clump #"<<getId()<<" parameters");
-	assert(members.size()>0);
+	LOG_DEBUG("Updating clump #"<<clumpBody->id<<" parameters");
 	const shared_ptr<State> state(clumpBody->state);
 	const shared_ptr<Clump> clump(YADE_PTR_CAST<Clump>(clumpBody->shape));
-
+	
+	if(clump->members.empty()){ throw std::runtime_error("Clump::updateProperties: clump has zero members."); }
 	// trivial case
 	if(clump->members.size()==1){
 		LOG_DEBUG("Clump of size one will be treated specially.")

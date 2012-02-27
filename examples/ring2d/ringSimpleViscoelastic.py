@@ -71,13 +71,19 @@ o.engines=[
 
 ]
 
+# FIXME: why this not worked properly?
+#for b in O.bodies:
+    #if isinstance(b.shape.name,Sphere):
+		 #b.state.blockedDOFs=['z']
+
 for b in o.bodies:
-    if isinstance(b.shape.name,Sphere):
-		 b.state.blockedDOFs=['z']
+	if b.shape.name=='Sphere':
+		b.state.blockedDOFs=['z']
 
-o.dt=0.02*tc
 
-o.saveTmp('init');
+O.dt=0.02*tc
+
+O.saveTmp('init');
 
 from yade import qt
 renderer=qt.Renderer()

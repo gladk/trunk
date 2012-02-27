@@ -23,8 +23,6 @@ class OpenGLRenderer : public Serializable
 	public:
 		int _nothing; // remove later, only target for deprecated selectBodyLimit
 
-		Body::id_t current_selection;
-
 		static const int numClipPlanes=3;
 
 		bool pointClipped(const Vector3r& p);
@@ -104,6 +102,7 @@ class OpenGLRenderer : public Serializable
 		((bool,intrGeom,false,,"Render :yref:`Interaction::geom` objects."))
 		((bool,intrPhys,false,,"Render :yref:`Interaction::phys` objects"))
 		((int,mask,((void)"draw everything",~0),,"Bitmask for showing only bodies where ((mask & :yref:`Body::mask`)!=0)"))
+		((Body::id_t,selId,Body::ID_NONE,,"Id of particle that was selected by the user."))
 		((vector<Se3r>,clipPlaneSe3,vector<Se3r>(numClipPlanes,Se3r(Vector3r::Zero(),Quaternionr::Identity())),,"Position and orientation of clipping planes"))
 		((vector<bool>,clipPlaneActive,vector<bool>(numClipPlanes,false),,"Activate/deactivate respective clipping planes"))
 		((vector<shared_ptr<GlExtraDrawer> >,extraDrawers,,,"Additional rendering components (:yref:`GlExtraDrawer`)."))

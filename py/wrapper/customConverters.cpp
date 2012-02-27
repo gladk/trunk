@@ -35,6 +35,7 @@
 
 #include<yade/pkg-common/Dispatching.hpp>
 #include<yade/pkg-common/Callbacks.hpp>
+#include<yade/pkg-dem/SpherePack.hpp>
 #ifdef YADE_OPENGL
 	#include<yade/pkg-common/GLDrawFunctors.hpp>
 	#include<yade/pkg-common/OpenGLRenderer.hpp>
@@ -225,6 +226,7 @@ BOOST_PYTHON_MODULE(_customConverters){
 		VECTOR_SEQ_CONV(shared_ptr<LawFunctor>);
 		VECTOR_SEQ_CONV(shared_ptr<IntrCallback>);
 		VECTOR_SEQ_CONV(shared_ptr<BodyCallback>);
+		VECTOR_SEQ_CONV(shared_ptr<SpherePack>);
 		#ifdef YADE_OPENGL
 			VECTOR_SEQ_CONV(shared_ptr<GlBoundFunctor>);
 			VECTOR_SEQ_CONV(shared_ptr<GlStateFunctor>);

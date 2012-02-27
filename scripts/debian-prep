@@ -38,21 +38,29 @@ for f1,f2 in [
 	('yade.prerm-template','yade-%s.prerm'%VERSION),
 	('yade-dbg.prerm-template','yade-%s-dbg.prerm'%VERSION),
 	('yade.menu-template','yade-%s.menu'%VERSION),
-	('yade-dbg.menu-template','yade-%s-dbg.menu'%VERSION),
+	('yade.desktop-template','yade-%s.desktop'%VERSION),
 	('control-template','control')]:
 		copyReplace('debian/'+f1,'debian/'+f2)
 
 # package is yade-0.50, but with UPDATE .1, it is version 0.50.1
 
+# rename a current folder and create orig.tar.gz
+curName = os.path.basename(os.path.abspath(''))
+newName = 'yade-%s_%s1' % (VERSION,DISTRIBUTION)
+os.rename (('../'+curName), '../'+newName)
+shutil.rmtree('.bzr')
+os.system(('tar -czf ../yade-%s_%s1.orig.tar.gz ../'+os.path.basename(os.path.abspath(''))+'/')%(VERSION,DISTRIBUTION))
+
+
 # write debian/changelog
 try:
 	open('debian/changelog','w').write(
-	'''yade-%s (%s%s-%s1) %s; urgency=low
+	'''yade-%s (%s1) %s; urgency=low
 
   * Automatic debian changelog entry for yade-%s
 
  -- %s <%s>  %s
-'''%(VERSION,VERSION,UPDATE,DISTRIBUTION,DISTRIBUTION,VERSION,os.environ['DEBFULLNAME'],os.environ['DEBEMAIL'],time.strftime("%a, %d %b %Y %H:%M:%S +0000",time.gmtime())))
+'''%(VERSION,DISTRIBUTION,DISTRIBUTION,VERSION,os.environ['DEBFULLNAME'],os.environ['DEBEMAIL'],time.strftime("%a, %d %b %Y %H:%M:%S +0000",time.gmtime())))
 except KeyError:
 	print "Please, set DEBEMAIL and DEBFULLNAME as described here http://www.debian.org/doc/maint-guide/ch-first.en.html"
 

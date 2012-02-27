@@ -134,7 +134,7 @@ void OpenGLRenderer::render(const shared_ptr<Scene>& _scene,Body::id_t selection
 
 	if(!initDone) init();
 	assert(initDone);
-	current_selection = selection;
+	selId = selection;
 
 	scene=_scene;
 
@@ -229,7 +229,7 @@ void OpenGLRenderer::renderDOF_ID(){
 		if(!b) continue;
 		if(b->shape && ((b->getGroupMask() & mask) || b->getGroupMask()==0)){
 			if(!id && b->state->blockedDOFs==0) continue;
-			if(current_selection==b->getId()){glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambientColorSelected);}
+			if(selId==b->getId()){glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambientColorSelected);}
 			{ // write text
 				glColor3f(1.0-bgColor[0],1.0-bgColor[1],1.0-bgColor[2]);
 				unsigned d = b->state->blockedDOFs;
@@ -239,11 +239,11 @@ void OpenGLRenderer::renderDOF_ID(){
 				if(dof && id) sId += " ";
 				if(id) str += sId;
 				if(dof) str += sDof;
-				const Vector3r& h(current_selection==b->getId() ? highlightEmission0 : Vector3r(1,1,1));
+				const Vector3r& h(selId==b->getId() ? highlightEmission0 : Vector3r(1,1,1));
 				glColor3v(h);
 				GLUtils::GLDrawText(str,bodyDisp[b->id].pos,h);
 			}
-			if(current_selection == b->getId()){glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambientColorUnselected);}
+			if(selId == b->getId()){glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambientColorUnselected);}
 		}
 	}
 }
@@ -323,14 +323,16 @@ void OpenGLRenderer::renderShape(){
 
 		// ignored in non-selection mode, use it always
 		glPushName(b->id);
+		bool highlight=(b->id==selId || (b->clumpId>=0 && b->clumpId==selId) || b->shape->highlight);
 
 		glPushMatrix();
 			AngleAxisr aa(ori);	
 			glTranslatef(pos[0],pos[1],pos[2]);
 			glRotatef(aa.angle()*Mathr::RAD_TO_DEG,aa.axis()[0],aa.axis()[1],aa.axis()[2]);
-			if(current_selection==b->getId() || b->shape->highlight){
+			if(highlight){
 				// set hightlight
-				const Vector3r& h(current_selection==b->getId() ? highlightEmission0 : highlightEmission1);
+				// different color for body highlighted by selection and by the shape attribute
+				const Vector3r& h((selId==b->id||(b->clumpId>=0 && selId==b->clumpId)) ? highlightEmission0 : highlightEmission1);
 				glMaterialv(GL_FRONT_AND_BACK,GL_EMISSION,h);
 				glMaterialv(GL_FRONT_AND_BACK,GL_SPECULAR,h);
 				shapeDispatcher(b->shape,b->state,wire || b->shape->wire,viewInfo);
@@ -342,7 +344,7 @@ void OpenGLRenderer::renderShape(){
 				shapeDispatcher(b->shape,b->state,wire || b->shape->wire,viewInfo);
 			}
 		glPopMatrix();
-		if(current_selection==b->getId() || b->shape->highlight){
+		if(highlight){
 			if(!b->bound || wire || b->shape->wire) GLUtils::GLDrawInt(b->getId(),pos);
 			else {
 				// move the label towards the camera by the bounding box so that it is not hidden inside the body
