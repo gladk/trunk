@@ -366,7 +366,7 @@ if 1:
 	id.fmtout =' ->  [%d]: '  # for some reason, out and cont must have the trailing space
 	id.fmtcont='     .\D.: '
 	id.rc_override=dict(prompt_in1="Yade [\#]:",prompt_in2="     .\D.:",prompt_out=r" ->  [\#]: ")
-	id.reconfig_shell()
+	#id.reconfig_shell()
 
 	import ipython_console_highlighting as ich
 	ich.IPythonConsoleLexer.input_prompt = re.compile("(Yade \[[0-9]+\]: )")
