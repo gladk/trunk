@@ -650,7 +650,7 @@ my_maketitle=r'''
 \vspace{5 mm}
 \vspace{70 mm}
 \begin{sffamily}\bfseries\Large
-Václav Šmilauer, Emanuele Catalano, Bruno Chareyre, Sergei Dorofeenko, Jerome Duriez, Anton Gladky, Janek Kozicki, Chiara Modenese, Luc Scholtès, Luc Sibille, Jan Stránský, Klaus Thoeni
+V\'{a}clav \v{S}milauer, Emanuele Catalano, Bruno Chareyre, Sergei Dorofeenko, Jerome Duriez, Anton Gladky, Janek Kozicki, Chiara Modenese, Luc Scholt\`{e}s, Luc Sibille, Jan Str\'{a}nsk\'{y}, Klaus Thoeni
 \end{sffamily}
 \vspace{20 mm}
 \hrule{}
@@ -666,7 +666,7 @@ Václav Šmilauer, Emanuele Catalano, Bruno Chareyre, Sergei Dorofeenko, Jerome 
 
 \text{\sffamily\bfseries\LARGE Authors}\\
 \\
-\text{\sffamily\bfseries\Large Václav Šmilauer}\\
+\text{\sffamily\bfseries\Large V\'{a}clav \v{S}milauer}\\
 \text{\sffamily\Large University of Innsbruck}\\
 \\
 \text{\sffamily\bfseries\Large Emanuele Catalano}\\
@@ -690,13 +690,13 @@ Václav Šmilauer, Emanuele Catalano, Bruno Chareyre, Sergei Dorofeenko, Jerome 
 \text{\sffamily\bfseries\Large Chiara Modenese}\\
 \text{\sffamily\Large University of Oxford}\\
 \\
-\text{\sffamily\bfseries\Large Luc Scholtès}\\
+\text{\sffamily\bfseries\Large Luc Scholt\`{e}s}\\
 \text{\sffamily\Large Grenoble INP, UJF, CNRS, lab. 3SR}\\
 \\
 \text{\sffamily\bfseries\Large Luc Sibille}\\
 \text{\sffamily\Large University of Nantes, lab. GeM}\\
 \\
-\text{\sffamily\bfseries\Large Jan Stránský}\\
+\text{\sffamily\bfseries\Large Jan Str\'{a}nsk\'{y}}\\
 \text{\sffamily\Large CVUT Prague}\\
 \\
 \text{\sffamily\bfseries\Large Klaus Thoeni}
