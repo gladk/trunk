@@ -80,7 +80,6 @@ The following creates periodic cloud of spheres and compresses to achieve $\sigm
 
 .. ipython::
 
-	@suppress
 	Yade [1]: from yade import pack
 	
 	Yade [1]: sp=pack.SpherePack()

@@ -495,7 +495,6 @@ In Python, basic numeric types are wrapped and imported from the ``miniEigen`` m
 
 .. ipython::
 
-	@suppress
 	Yade [0]: from math import pi
 
 	# cross product
@@ -527,7 +526,6 @@ Some RTTI information can be accessed from python:
 
 .. ipython::
 	
-	@suppress
 	Yade [1]: import yade.system
 
 	Yade [2]: yade.system.childClasses('Shape')
@@ -1151,7 +1149,6 @@ You can list available functors of a particular type by querying child classes o
 
 .. ipython::
 
-	@suppress
 	Yade [1]: import yade.system
 
 	Yade [2]: yade.system.childClasses('GlShapeFunctor')
@@ -1482,7 +1479,6 @@ In python, the BodyContainer wrapper also has iteration capabilities; for conven
 
 .. ipython::
 
-	@suppress
 	Yade [0]: O.reset()
 
 	Yade [1]: O.bodies.append([Body(),Body(),Body()])

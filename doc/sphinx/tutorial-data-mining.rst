@@ -50,7 +50,6 @@ Labels
 
 .. ipython::
 
-	@suppress
 	Yade [1]: from yade import *
 	
 	Yade [1]: O.engines=[

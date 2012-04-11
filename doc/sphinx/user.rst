@@ -27,7 +27,6 @@ If no :yref:`Material` is specified when calling :yref:`yade.utils.sphere`, the 
 
 .. ipython::
 
-	@suppress
 	Yade [0]: O.reset()
 
 	Yade [1]: len(O.materials)
@@ -63,7 +62,6 @@ As shown above, bodies are added one by one or several at the same time using th
 
 .. ipython::
 
-	@suppress
 	Yade [0]: O.reset()
 
 	Yade [1]: O.bodies.append(utils.sphere((0,0,0),1))
@@ -93,7 +91,7 @@ In some cases, you might want to create rigid aggregate of individual particles 
 
 .. ipython::
 
-	@suppress
+	
 	Yade [0]: O.reset()
 
 	Yade [1]: O.bodies.appendClumped([
@@ -430,7 +428,7 @@ It is possible to create an interaction between a pair of particles independentl
 
 .. ipython::
 
-	@suppress
+	
 	Yade [1]: O.reset()
 
 	Yade [1]: O.materials.append(FrictMat(young=3e10,poisson=.2,density=1000))
@@ -623,7 +621,7 @@ Motion constraints
 
   .. ipython::
 
-     @suppress
+     
      Yade [1]: O.reset()
 
      Yade [1]: O.bodies.append(utils.sphere((0,0,0),1))
@@ -697,7 +695,7 @@ After Yade startup, ``O.tags`` contains the following:
 
 .. ipython::
 
-	@suppress
+	
 	Yade [1]: O.reset()
 
 	Yade [1]: dict(O.tags) # convert to real dictionary
@@ -811,7 +809,7 @@ The data are in :yref:`yade.plot.data` dictionary, which maps variable names to 
 
 .. ipython::
 
-	@suppress
+	
 	Yade [1]: O.reset()
 
 	Yade [1]: from yade import plot

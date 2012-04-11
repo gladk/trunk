@@ -6,7 +6,6 @@ Getting started
 ===============
 
 .. ipython::
-	:suppress:
 
 	In [1]: from yade import *
 
@@ -136,7 +135,6 @@ for streamlined body construction, import of geometries from files and reuse of 
 Since this topic is more involved, it is explained in the *User's manual*.
 
 .. ipython::
-	:suppress:
 
 	In [7]: O.reset()
 
@@ -199,7 +197,6 @@ interrupted. Note that since XML is merely readable dump of Yade's internal obje
 
 	In [2]: O.reload() 
 
-	@suppress
 	In [4]: O.save('/tmp/another.xml.bz2')
 
 	In [3]: O.load('/tmp/another.xml.bz2')
@@ -246,7 +243,6 @@ Architecture overview
 ======================
 
 .. ipython::
-	:suppress:
 
 	In [12]: from yade import *
 
@@ -363,7 +359,6 @@ Interactions
 Suppose now interactions have been already created. We can access them by the id pair:
 
 .. ipython::
-	:suppress:
 
 	In [1]: O.engines=[InteractionLoop([Ig2_Sphere_Sphere_Dem3DofGeom()],[Ip2_FrictMat_FrictMat_FrictPhys()],[])]
 
@@ -405,7 +400,6 @@ Generalized forces include force, torque and forced displacement and rotation; t
 
 	Yade [3]: O.forces.f(0)
 
-	@suppress
 	In [7]: O.reset()
 
 
