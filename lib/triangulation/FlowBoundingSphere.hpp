@@ -66,9 +66,8 @@ class FlowBoundingSphere : public Network<_Tesselation>
 	
 		void mplot ( char *filename);
 		void Localize();
-
 		void Compute_Permeability();
-		virtual void GaussSeidel ( );
+		virtual void GaussSeidel (Real dt=0);
 		virtual void ResetNetwork();
 
 		double MeasurePorePressure (double X, double Y, double Z);
@@ -81,7 +80,9 @@ class FlowBoundingSphere : public Network<_Tesselation>
 		Real minPermLength; //min branch length for Poiseuille
 
 		double P_SUP, P_INF, P_INS, VISCOSITY;
-
+		bool compressible;
+		double fluidBulkModulus;
+		
 		Tesselation& Compute_Action ( );
 		Tesselation& Compute_Action ( int argc, char *argv[ ], char *envp[ ] );
 		Tesselation& LoadPositions(int argc, char *argv[ ], char *envp[ ]);
@@ -129,6 +130,8 @@ class FlowBoundingSphere : public Network<_Tesselation>
 		bool isOnSolid  (double X, double Y, double Z);
 		void MeasurePressureProfile(double Wall_up_y, double Wall_down_y);
 		double MeasureAveragedPressure(double Y);
+		double MeasureTotalAveragedPressure();
+		
 		vector<Real> Average_Fluid_Velocity_On_Sphere(unsigned int Id_sph);
 		//Solver?
 		int useSolver;//(0 : GaussSeidel, 1 : TAUCS, 2 : PARDISO)

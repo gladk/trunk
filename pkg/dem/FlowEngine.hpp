@@ -90,8 +90,9 @@ class FlowEngine : public PartialEngine
 		Vector3r fluidShearForce(unsigned int id_sph, Solver& flow) {return (flow->viscousShearForces.size()>id_sph)?flow->viscousShearForces[id_sph]:Vector3r::Zero();}
 		void setBoundaryVel(Vector3r vel) {topBoundaryVelocity=vel; Update_Triangulation=true;}
 		void PressureProfile(double wallUpY, double wallDownY) {return solver->MeasurePressureProfile(wallUpY,wallDownY);}
-		double MeasurePressure(double posX, double posY, double posZ){return solver->MeasurePorePressure(posX, posY, posZ);}
+		double MeasurePorePressure(double posX, double posY, double posZ){return solver->MeasurePorePressure(posX, posY, posZ);}
 		double MeasureAveragedPressure(double posY){return solver->MeasureAveragedPressure(posY);}
+		double MeasureTotalAveragedPressure(){return solver->MeasureTotalAveragedPressure();}
 		
 		//Instanciation of templates for python binding
 		Vector3r 	_fluidShearForce(unsigned int id_sph) {return fluidShearForce(id_sph,solver);}
@@ -108,6 +109,8 @@ class FlowEngine : public PartialEngine
 		YADE_CLASS_BASE_DOC_ATTRS_INIT_CTOR_PY(FlowEngine,PartialEngine,"An engine to solve flow problem in saturated granular media",
 					((bool,isActivated,true,,"Activates Flow Engine"))
 					((bool,first,true,,"Controls the initialization/update phases"))
+					((double, fluidBulkModulus, 0.,,"Bulk modulus of fluid (inverse of compressibility) K=-dP*V/dV [Pa]. Flow is compressible if fluidBulkModulus > 0, else incompressible."))
+					((Real, dt, 0,,"timestep [s]"))
 // 					((bool,save_vtk,false,,"Enable/disable vtk files creation for visualization"))
 					((bool,permeability_map,false,,"Enable/disable stocking of average permeability scalar in cell infos."))
 					((bool, save_mgpost, false,,"Enable/disable mgpost file creation"))
@@ -190,8 +193,9 @@ class FlowEngine : public PartialEngine
 					.def("fluidShearForce",&FlowEngine::_fluidShearForce,(python::arg("Id_sph")),"Return the viscous shear force on sphere Id_sph.")
 					.def("setBoundaryVel",&FlowEngine::setBoundaryVel,(python::arg("vel")),"Change velocity on top boundary.")
 					.def("PressureProfile",&FlowEngine::PressureProfile,(python::arg("wallUpY"),python::arg("wallDownY")),"Measure pore pressure in 6 equally-spaced points along the height of the sample")
-					.def("MeasurePressure",&FlowEngine::MeasurePressure,(python::arg("posX"),python::arg("posY"),python::arg("posZ")),"Measure pore pressure in position pos[0],pos[1],pos[2]")
+					.def("MeasurePorePressure",&FlowEngine::MeasurePorePressure,(python::arg("posX"),python::arg("posY"),python::arg("posZ")),"Measure pore pressure in position pos[0],pos[1],pos[2]")
 					.def("MeasureAveragedPressure",&FlowEngine::MeasureAveragedPressure,(python::arg("posY")),"Measure slice-averaged pore pressure at height posY")
+					.def("MeasureTotalAveragedPressure",&FlowEngine::MeasureTotalAveragedPressure,"Measure averaged pore pressure in the entire volume")
 					)
 		DECLARE_LOGGER;
 };

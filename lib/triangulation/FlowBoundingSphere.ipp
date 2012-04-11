@@ -72,6 +72,8 @@ FlowBoundingSphere<Tesselation>::FlowBoundingSphere()
 	SectionArea = 0, Height=0, Vtotale=0;
 	vtk_infinite_vertices=0, vtk_infinite_cells=0;
 	VISCOSITY = 1;
+	compressible = false;
+	fluidBulkModulus = 0;
 	tess_based_force = true;
 	for (int i=0;i<6;i++) boundsIds[i] = 0;
 	minPermLength=-1;
@@ -204,9 +206,8 @@ Tesselation& FlowBoundingSphere<Tesselation>::Compute_Action(int argc, char *arg
 	clock.top("Initialize_pressures");
         GaussSeidel();
         clock.top("GaussSeidel");
-
         /** END GAUSS SEIDEL */
-        const char* file ="Permeability";
+	const char* file ="Permeability";
         ks = Permeameter(boundary(y_min_id).value, boundary(y_max_id).value, SectionArea, Height, file);
         clock.top("Permeameter");
 
@@ -399,14 +400,16 @@ vector<Real> FlowBoundingSphere<Tesselation>::Average_Fluid_Velocity_On_Sphere(u
 template <class Tesselation> 
 double FlowBoundingSphere<Tesselation>::MeasurePorePressure (double X, double Y, double Z)
 {
-  RTriangulation& Tri = T[noCache?(!currentTes):currentTes].Triangulation();
+//   RTriangulation& Tri = T[noCache?(!currentTes):currentTes].Triangulation(); // produit erreur segmentation si appele a la premiere iteration
+  RTriangulation& Tri = T[currentTes].Triangulation();
   Cell_handle cell = Tri.locate(Point(X,Y,Z));
   return cell->info().p();
 }
 template <class Tesselation> 
 void FlowBoundingSphere<Tesselation>::MeasurePressureProfile(double Wall_up_y, double Wall_down_y)
 {  
-	RTriangulation& Tri = T[noCache?(!currentTes):currentTes].Triangulation();
+//   	RTriangulation& Tri = T[noCache?(!currentTes):currentTes].Triangulation(); // produit erreur segmentation si appele a la premiere iteration
+	RTriangulation& Tri = T[currentTes].Triangulation();
         Cell_handle permeameter;
 	std::ofstream capture ("Pressure_profile", std::ios::app);
         int intervals = 5;
@@ -447,6 +450,22 @@ double FlowBoundingSphere<Tesselation>::MeasureAveragedPressure(double Y)
   }
   P_ave/=n;
   return P_ave;
+}
+template <class Tesselation> 
+double FlowBoundingSphere<Tesselation>::MeasureTotalAveragedPressure()
+{
+  RTriangulation& Tri = T[currentTes].Triangulation();
+  double P = 0.f, Ppond=0.f, Vpond=0.f;
+  int n = 0;
+  for (Finite_cells_iterator cell = Tri.finite_cells_begin(); cell != Tri.finite_cells_end(); cell++) {
+	P+=cell->info().p();
+	n++;
+	Ppond+=cell->info().p()*cell->info().volume();
+	Vpond+=cell->info().volume();
+  }
+  P/=n;
+  Ppond/=Vpond;
+  return Ppond;
 }
 template <class Tesselation> 
 void FlowBoundingSphere<Tesselation>::ComputeFacetForces()
@@ -1029,12 +1048,8 @@ void FlowBoundingSphere<Tesselation>::reApplyBoundaryConditions()
 		IPCells[n]->info().p()=imposedP[n].second;
 		IPCells[n]->info().Pcondition=true;}
 }
-
-
-
-
 template <class Tesselation> 
-void FlowBoundingSphere<Tesselation>::GaussSeidel()
+void FlowBoundingSphere<Tesselation>::GaussSeidel(Real dt)
 {
 
 // 	std::ofstream iter("Gauss_Iterations", std::ios::app);
@@ -1043,6 +1058,9 @@ void FlowBoundingSphere<Tesselation>::GaussSeidel()
 	RTriangulation& Tri = T[currentTes].Triangulation();
 	int j = 0;
 	double m, n, dp_max, p_max, sum_p, p_moy, dp_moy, dp, sum_dp;
+	double compFlowFactor=0;
+	vector<Real> previousP;
+	previousP.resize(Tri.number_of_finite_cells());
 	double tolerance = TOLERANCE;
 	double relax = RELAX;
 	const int num_threads=1;
@@ -1059,7 +1077,6 @@ void FlowBoundingSphere<Tesselation>::GaussSeidel()
 			t_p_max.resize(num_threads);
 			t_sum_p.resize(num_threads);
 // 			cerr <<"====    THREADS : "<<num_threads<<"    ===="<<endl;
-
 
 //         cout << "tolerance = " << tolerance << endl;
 //         cout << "relax = " << relax << endl;
@@ -1088,22 +1105,45 @@ void FlowBoundingSphere<Tesselation>::GaussSeidel()
 			const Finite_cells_iterator& cell = cells_its[kk];
 			{
 		#else
+		int bb=-1;
                 for (Finite_cells_iterator cell = Tri.finite_cells_begin(); cell != cell_end; cell++) {
-			 if ( !cell->info().Pcondition ) {
+			bb++;
+			if ( !cell->info().Pcondition ) {
 		                cell2++;
 		#endif
-				 m=0, n=0;
+				if (compressible && j==0) previousP[bb]=cell->info().p();
+				
+				m=0, n=0;
                                 for (int j2=0; j2<4; j2++) {
+				  
 					if (!Tri.is_infinite(cell->neighbor(j2))) {
-                                                m += (cell->info().k_norm())[j2] * cell->neighbor(j2)->info().p();
-						if ( isinf(m) && j<10 ) cout << "(cell->info().k_norm())[j2] = " << (cell->info().k_norm())[j2] << " cell->neighbor(j2)->info().p() = " << cell->neighbor(j2)->info().p() << endl;
-                                                if (j==0) n += (cell->info().k_norm())[j2];}
+					  
+						/// COMPRESSIBLE: 
+						if ( compressible ) {
+							compFlowFactor = fluidBulkModulus*dt*cell->info().invVoidVolume();
+							m += compFlowFactor*(cell->info().k_norm())[j2] * cell->neighbor(j2)->info().p();
+							if (j==0) n +=compFlowFactor*(cell->info().k_norm())[j2];
+						} else {							
+						/// INCOMPRESSIBLE 
+							m += (cell->info().k_norm())[j2] * cell->neighbor(j2)->info().p();
+							if ( isinf(m) && j<10 ) cout << "(cell->info().k_norm())[j2] = " << (cell->info().k_norm())[j2] << " cell->neighbor(j2)->info().p() = " << cell->neighbor(j2)->info().p() << endl;
+							if (j==0) n += (cell->info().k_norm())[j2];
+						}  
+					}
                                 }
                                 dp = cell->info().p();
                                 if (n!=0 || j!=0) {
-                                        //     cell->info().p() =   - ( cell->info().dv() - m ) / ( n );
-					if (j==0) cell->info().inv_sum_k=1/n;
-					cell->info().p() = (- (cell->info().dv() - m) * cell->info().inv_sum_k - cell->info().p()) * relax + cell->info().p();
+
+					if (j==0) { if (compressible) cell->info().inv_sum_k=1/(1+n); else cell->info().inv_sum_k=1/n; }
+					
+					if ( compressible ) {
+					/// COMPRESSIBLE cell->info().p() = ( (previousP - compFlowFactor*cell->info().dv()) + m ) / n ;
+						cell->info().p() = ( ((previousP[bb] - ((fluidBulkModulus*dt*cell->info().invVoidVolume())*(cell->info().dv()))) + m) * cell->info().inv_sum_k - cell->info().p()) * relax + cell->info().p();
+					} else {
+					/// INCOMPRESSIBLE cell->info().p() =   - ( cell->info().dv() - m ) / ( n ) = ( -cell.info().dv() + m ) / n ;
+						cell->info().p() = (- (cell->info().dv() - m) * cell->info().inv_sum_k - cell->info().p()) * relax + cell->info().p();
+					}
+					
 					#ifdef GS_OPEN_MP
 // 					double r = sqrt(sqrt(sqrt(cell->info().p())/(1+sqrt(cell->info().p()))));
 // 					if (j % 100 == 0) cout<<"cell->info().p() "<<cell->info().p()<<" vs. "<< (- (cell->info().dv() - m) / (n) - cell->info().p())* relax<<endl;
@@ -1223,7 +1263,7 @@ double FlowBoundingSphere<Tesselation>::Permeameter(double P_Inf, double P_Sup, 
         cout << "The gradient of charge is = " << DeltaH/DeltaY << " [-]" << endl;
         cout << "Darcy's velocity is = " << Vdarcy << " m/s" <<endl;
         cout << "The permeability of the sample is = " << k << " m^2" <<endl;
-	cout << endl << "The hydraulic conductivity of the sample is = " << k << " m^2" << endl << endl;
+	cout << endl << "The hydraulic conductivity of the sample is = " << Ks << " m/s" << endl << endl;
 	}
 	kFile << "y_max id = "<<y_max_id<< "y_min id = "<<y_min_id<<endl;
 	kFile << "the maximum superior pressure is = " << p_out_max << " the min is = " << p_out_min << endl;
@@ -1452,7 +1492,6 @@ double FlowBoundingSphere<Tesselation>::Sample_Permeability(double& x_Min,double
         Initialize_pressures( P_zero );
 	cerr<<"GaussSeidel"<<endl;
 	GaussSeidel();
-
 	const char *kk = "Permeability";
         return Permeameter(boundary(y_min_id).value, boundary(y_max_id).value, Section, DeltaY, kk);
 }

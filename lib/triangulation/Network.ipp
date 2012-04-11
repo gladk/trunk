@@ -105,6 +105,16 @@ double Network<Tesselation>::Volume_Pore_VoronoiFraction (Cell_handle& cell, int
 }
 
 template<class Tesselation>
+double Network<Tesselation>::volumeSolidPore (Finite_cells_iterator& cell)
+{
+  double Vsolid=0;
+  for (int i=0;i<4;i++) {
+	if ( !cell->vertex(permut4[i][0])->info().isFictious ) Vsolid += spherical_triangle_volume( cell->vertex(permut4[i][0])->point(), cell->vertex(permut4[i][1])->point(), cell->vertex(permut4[i][2])-> point(), cell->vertex(permut4[i][3])-> point());
+  }
+  return Vsolid;
+}
+
+template<class Tesselation>
 double Network<Tesselation>::volume_single_fictious_pore(const Vertex_handle& SV1, const Vertex_handle& SV2, const Vertex_handle& SV3, const Point& PV1,  const Point& PV2, Vecteur& facetSurface)
 {
         double A [3], B[3];

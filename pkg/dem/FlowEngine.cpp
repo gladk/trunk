@@ -19,6 +19,7 @@
 #include <sys/types.h>
 
 CREATE_LOGGER ( FlowEngine );
+CREATE_LOGGER ( PeriodicFlowEngine );
 
 CGT::Vecteur makeCgVect ( const Vector3r& yv ) {return CGT::Vecteur ( yv[0],yv[1],yv[2] );}
 CGT::Point makeCgPoint ( const Vector3r& yv ) {return CGT::Point ( yv[0],yv[1],yv[2] );}
@@ -51,7 +52,7 @@ void FlowEngine::action()
         timingDeltas->checkpoint ( "Update_Volumes" );
 
         ///Compute flow and and forces here
-        solver->GaussSeidel();
+	solver->GaussSeidel(scene->dt);
         timingDeltas->checkpoint ( "Gauss-Seidel" );
         if ( save_mgpost ) solver->MGPost();
         if ( !CachedForces ) solver->ComputeFacetForces();
@@ -189,7 +190,8 @@ void FlowEngine::Build_Triangulation ( double P_zero, Solver& flow )
         flow->meanK_LIMIT = meanK_correction;
         flow->meanK_STAT = meanK_opt;
         flow->permeability_map = permeability_map;
-
+	if ( fluidBulkModulus > 0 ) flow->compressible = 1;
+	flow->fluidBulkModulus = fluidBulkModulus;
         flow->T[flow->currentTes].Clear();
         flow->T[flow->currentTes].max_id=-1;
         flow->x_min = 1000.0, flow->x_max = -10000.0, flow->y_min = 1000.0, flow->y_max = -10000.0, flow->z_min = 1000.0, flow->z_max = -10000.0;
@@ -333,26 +335,30 @@ void FlowEngine::Triangulate ( Solver& flow )
 template<class Solver>
 void FlowEngine::Initialize_volumes ( Solver& flow )
 {
-        typedef typename Solver::element_type Flow;
-        typedef typename Flow::Finite_vertices_iterator Finite_vertices_iterator;
-        typedef typename Solver::element_type Flow;
-        typedef typename Flow::Finite_cells_iterator Finite_cells_iterator;
+	typedef typename Solver::element_type Flow;
+	typedef typename Flow::Finite_vertices_iterator Finite_vertices_iterator;
+	typedef typename Solver::element_type Flow;
+	typedef typename Flow::Finite_cells_iterator Finite_cells_iterator;
+	
+	Finite_vertices_iterator vertices_end = flow->T[flow->currentTes].Triangulation().finite_vertices_end();
+	CGT::Vecteur Zero(0,0,0);
+	for (Finite_vertices_iterator V_it = flow->T[flow->currentTes].Triangulation().finite_vertices_begin(); V_it!= vertices_end; V_it++) V_it->info().forces=Zero;
+	
+	Finite_cells_iterator cell_end = flow->T[flow->currentTes].Triangulation().finite_cells_end();
+	for ( Finite_cells_iterator cell = flow->T[flow->currentTes].Triangulation().finite_cells_begin(); cell != cell_end; cell++ )
+	{
+		switch ( cell->info().fictious() )
+		{
+			case ( 0 ) : cell->info().volume() = Volume_cell ( cell ); break;
+			case ( 1 ) : cell->info().volume() = Volume_cell_single_fictious ( cell ); break;
+			case ( 2 ) : cell->info().volume() = Volume_cell_double_fictious ( cell ); break;
+			case ( 3 ) : cell->info().volume() = Volume_cell_triple_fictious ( cell ); break;
+			default: break; 
+		}
 
-        Finite_vertices_iterator vertices_end = flow->T[flow->currentTes].Triangulation().finite_vertices_end();
-        CGT::Vecteur Zero ( 0,0,0 );
-        for ( Finite_vertices_iterator V_it = flow->T[flow->currentTes].Triangulation().finite_vertices_begin(); V_it!= vertices_end; V_it++ ) V_it->info().forces=Zero;
-
-        Finite_cells_iterator cell_end = flow->T[flow->currentTes].Triangulation().finite_cells_end();
-        for ( Finite_cells_iterator cell = flow->T[flow->currentTes].Triangulation().finite_cells_begin(); cell != cell_end; cell++ ) {
-                switch ( cell->info().fictious() ) {
-                case ( 0 ) : cell->info().volume() = Volume_cell ( cell ); break;
-                case ( 1 ) : cell->info().volume() = Volume_cell_single_fictious ( cell ); break;
-                case ( 2 ) : cell->info().volume() = Volume_cell_double_fictious ( cell ); break;
-                case ( 3 ) : cell->info().volume() = Volume_cell_triple_fictious ( cell ); break;
-                default: break;
-                }
-        }
-        if ( Debug ) cout << "Volumes initialised." << endl;
+		if (flow->compressible) { cell->info().invVoidVolume() = (1 / ( cell->info().volume() - flow->volumeSolidPore(cell) )); }
+	}
+	if (Debug) cout << "Volumes initialised." << endl;
 }
 
 void FlowEngine::Average_real_cell_velocity()
@@ -602,11 +608,11 @@ void PeriodicFlowEngine:: action()
         } else  retriangulationLastIter++;
 // 		timingDeltas->checkpoint("Update_Volumes");
 
-        ///Compute flow and and forces here
-        solver->GaussSeidel();
-        solver->ComputeFacetForcesWithCache();
-// 		timingDeltas->checkpoint("Gauss-Seidel");
-// 		timingDeltas->checkpoint("Compute_Forces");
+	///Compute flow and and forces here
+	solver->GaussSeidel(scene->dt);
+	solver->ComputeFacetForcesWithCache();
+// 	timingDeltas->checkpoint("Gauss-Seidel");
+// 	timingDeltas->checkpoint("Compute_Forces");
 
         ///Application of vicscous forces
         scene->forces.sync();
@@ -831,6 +837,9 @@ void PeriodicFlowEngine::Initialize_volumes ()
 			case ( 1 ) : cell->info().volume() = Volume_cell_single_fictious ( cell ); break;
 // 			case ( 2 ) : cell->info().volume() = Volume_cell_double_fictious ( cell ); break;
 // 			case ( 3 ) : cell->info().volume() = Volume_cell_triple_fictious ( cell ); break;
+
+			if (solver->compressible) { cell->info().invVoidVolume() = 1 / ( Volume_cell ( cell ) - solver->volumeSolidPore(cell) ); }
+
 			default:  cell->info().volume() = 0; break;
 		}
         }
@@ -853,7 +862,8 @@ void PeriodicFlowEngine::Build_Triangulation ( double P_zero )
         solver->useSolver = useSolver;
         solver->VISCOSITY = viscosity;
         solver->areaR2Permeability=areaR2Permeability;
-
+	if ( fluidBulkModulus > 0 ) solver->compressible = 1;
+	solver->fluidBulkModulus = fluidBulkModulus;
         solver->T[solver->currentTes].Clear();
         solver->T[solver->currentTes].max_id=-1;
         AddBoundary ( solver );
@@ -861,9 +871,7 @@ void PeriodicFlowEngine::Build_Triangulation ( double P_zero )
         Triangulate ();
         if ( Debug ) cout << endl << "Tesselating------" << endl << endl;
         solver->T[solver->currentTes].Compute();
-
         solver->Define_fictious_cells();
-
         solver->meanK_LIMIT = meanK_correction;
         solver->meanK_STAT = meanK_opt;
         solver->permeability_map = permeability_map;

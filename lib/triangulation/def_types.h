@@ -82,6 +82,7 @@ class FlowCellInfo : public SimpleCellInfo {
 	unsigned int index;
 	int volumeSign;
 	bool Pcondition;
+	Real invVoidV;
 	Real t;
 	int fict;
  	Real VolumeVariation;
@@ -121,6 +122,7 @@ class FlowCellInfo : public SimpleCellInfo {
 		s=0;
 		VolumeVariation=0;
 		pression=0;
+		invVoidV=0;
 	}	
 
 	double inv_sum_k;
@@ -130,15 +132,16 @@ class FlowCellInfo : public SimpleCellInfo {
 	bool isLateral;
 	bool isvisited;
 	bool isExternal;
+	
 	FlowCellInfo& operator= (const std::vector<double> &v) { for (int i=0; i<4;i++) module_permeability[i]= v[i]; return *this; }
-
 	FlowCellInfo& operator= (const Point &p) { Point::operator= (p); return *this; }
 	FlowCellInfo& operator= (const float &scalar) { s=scalar; return *this; }
+	
 	inline Real& volume (void) {return t;}
+	inline Real& invVoidVolume (void) {return invVoidV;}
 	inline Real& dv (void) {return VolumeVariation;}
 	inline int& fictious (void) {return fict;}
 	inline double& p (void) {return pression;}
-
 	inline std::vector<double>& k_norm (void) {return module_permeability;}
 	inline std::vector< Vecteur >& facetSurf (void) {return facetSurfaces;}
 	inline std::vector<Vecteur>& force (void) {return cell_force;}
@@ -193,7 +196,7 @@ class PeriodicVertexInfo : public FlowVertexInfo {
 	PeriodicVertexInfo& operator= (const unsigned int &id) { i= id; return *this; }
 	bool isGhost;
 	int period[3];
-	inline const Vecteur ghostShift (void) {return period[0]*PeriodicCellInfo::hSize[0]+period[1]*PeriodicCellInfo::hSize[1]+period[2]*PeriodicCellInfo::hSize[2];}
+	inline const Vecteur ghostShift (void) {return isGhost? (period[0]*PeriodicCellInfo::hSize[0]+period[1]*PeriodicCellInfo::hSize[1]+period[2]*PeriodicCellInfo::hSize[2]) : CGAL::NULL_VECTOR;}
 };
 
 

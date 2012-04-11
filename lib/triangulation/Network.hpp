@@ -63,6 +63,7 @@ class Network
 		int Detect_facet_fictious_vertices (Cell_handle& cell, int& j);
 
 		double Volume_Pore_VoronoiFraction ( Cell_handle& cell, int& j);
+		double volumeSolidPore (Finite_cells_iterator& cell);
 		double volume_single_fictious_pore(const Vertex_handle& SV1, const Vertex_handle& SV2, const Vertex_handle& SV3, const Point& PV1,  const Point& PV2, Vecteur& facetSurface);
 		double volume_double_fictious_pore(const Vertex_handle& SV1, const Vertex_handle& SV2, const Vertex_handle& SV3, const Point& PV1, const Point& PV2, Vecteur& facetSurface);
 		double spherical_triangle_volume(const Sphere& ST1, const Point& PT1, const Point& PT2, const Point& PT3);

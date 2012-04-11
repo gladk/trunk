@@ -26,6 +26,10 @@ Remote GDB Shell Script=
 Try Setting Breakpoints On Loading Libraries=true
 Working Directory=
 isExecutable=true
+
 [MakeBuilder]
 Make Binary=scons
 Number Of Jobs=3
+
+[Project]
+VersionControlSupport=kdevgit
