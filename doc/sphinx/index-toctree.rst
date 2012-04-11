@@ -21,34 +21,3 @@ See older `tentative contents <http://bazaar.launchpad.net/~eudoxos/%2Bjunk/ydoc
 
   introduction.rst
 
-  tutorial.rst
-
-  user.rst
-
-  prog.rst
-
-  installation.rst
-
-  formulation.rst
-
-  yade.wrapper.rst
-
-  modules.rst
-
-  external.rst
-
-  citing.rst
-
-  publications.rst
-
-  references.rst
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
