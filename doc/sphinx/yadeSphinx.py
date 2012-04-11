@@ -220,5 +220,26 @@ for w in ['html','latex']: #['html','latex']:
 	if (os.path.exists('/usr/share/javascript/jquery/jquery.js')): #Check, whether jquery.js installed in system
 		os.system('rm '+ outDir+'/html/_static/jquery.js')
 		os.system('ln -s /usr/share/javascript/jquery/jquery.js '+ outDir+'/html/_static/jquery.js')
-
+    
+	# HACK!!!!==========================================================================
+	# New sphinx-python versions (hopefully) are producing empty "verbatim"-environments.
+	# That is why xelatex crashes. 
+	# The following "script" removes all empty environments. Needs to be fixed in python-sphinx.
+	if (writer=='latex'):
+		infile = open(outDir+'/latex/Yade.tex',"r")
+		lines = infile.readlines()
+		infile.close()
+		
+		out=[]
+		for i in range(0,len(lines)):
+			if (i<>len(lines) and
+					lines[i].strip()=="\\begin{Verbatim}[commandchars=\\\\\{\\}]" and
+					lines[i+1].strip()=="\\end{Verbatim}"):
+					lines[i]=''; lines[i+1]=''
+			else:
+				out.append(lines[i])
+		file(outDir+'/latex/Yade.tex','w').write('')
+		for i in out:
+			file(outDir+'/latex/Yade.tex','a').write(i)
+	# HACK!!!!==========================================================================
 sys.exit()
