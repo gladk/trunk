@@ -4,6 +4,7 @@
 #include<yade/pkg/dem/ScGeom.hpp>
 #include<yade/core/Omega.hpp>
 #include<yade/core/Scene.hpp>
+#include<yade/pkg/common/Sphere.hpp>
 
 YADE_PLUGIN((ViscElMat)(ViscElPhys)(Ip2_ViscElMat_ViscElMat_ViscElPhys)(Law2_ScGeom_ViscElPhys_Basic));
 
@@ -25,6 +26,8 @@ void Ip2_ViscElMat_ViscElMat_ViscElPhys::go(const shared_ptr<Material>& b1, cons
 	const Real ks1 = mat1->ks*mass1; const Real cs1 = mat1->cs*mass1;
 	const Real kn2 = mat2->kn*mass2; const Real cn2 = mat2->cn*mass2;
 	const Real ks2 = mat2->ks*mass2; const Real cs2 = mat2->cs*mass2;
+	
+		
 	ViscElPhys* phys = new ViscElPhys();
 	
 	if ((kn1>0) or (kn2>0)) {
@@ -43,7 +46,28 @@ void Ip2_ViscElMat_ViscElMat_ViscElPhys::go(const shared_ptr<Material>& b1, cons
 	
 	phys->tangensOfFrictionAngle = std::tan(std::min(mat1->frictionAngle, mat2->frictionAngle)); 
 	phys->shearForce = Vector3r(0,0,0);
-	//phys->prevNormal = Vector3r(0,0,0);
+	
+	if (mat1->Capillar and mat2->Capillar)  {
+		if (mat1->Vb == mat2->Vb) {
+			phys->Vb = mat1->Vb;
+		} else {
+			throw runtime_error("Vb should be equal for both particles!.");
+		}
+		
+		if (mat1->gamma == mat2->gamma) {
+			phys->gamma = mat1->gamma;
+		} else {
+			throw runtime_error("Gamma should be equal for both particles!.");
+		}
+	
+		if (mat1->theta == mat2->theta) {
+			phys->theta = (mat1->theta*M_PI/180.0);
+		} else {
+			throw runtime_error("Theta should be equal for both particles!.");
+		}
+		phys->Capillar=true;
+	}
+	
 	interaction->phys = shared_ptr<ViscElPhys>(phys);
 }
 
@@ -57,14 +81,70 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
 	const int id2 = I->getId2();
 	
 	if (geom.penetrationDepth<0) {
- 		scene->interactions->requestErase(I);
-		return;
-	}
+		if (phys.liqBridgeCreated and -geom.penetrationDepth<phys.sCrit and phys.Capillar) {
+			//Capillar
+			Real c0 = 0.96;
+			Real c1 = 1.1;
+			Real R = phys.R;
+			Real s = -geom.penetrationDepth;
+			
+			Real beta = asin(pow(phys.Vb/((c0*R*R*R*(1+3*s/R)*(1+c1*sin(phys.theta)))), 1.0/4.0));
+			Real r1 = (R*(1-cos(beta)) + s/2.0)/(cos(beta+phys.theta));
+			Real r2 = R*sin(beta) + r1*(sin(beta+phys.theta)-1);
+			Real Pc = phys.gamma*(1/r1 - 1/r2);
+
+			Real fC = 2*M_PI*phys.gamma*R*sin(beta)*sin(beta+phys.theta) + M_PI*R*R*Pc*sin(beta)*sin(beta);
+			
+			/*
+			std::cerr<<"R: "<<phys.R<<std::endl;
+			std::cerr<<"s: "<<s<<std::endl;
+			std::cerr<<"Vb: "<<phys.Vb<<std::endl;
+			std::cerr<<"Theta: "<<phys.theta<<std::endl;
+			std::cerr<<"Gamma: "<<phys.gamma<<std::endl;
+			std::cerr<<"beta: "<<beta<<std::endl;
+			std::cerr<<"r1: "<<r1<<std::endl;
+			std::cerr<<"r2: "<<r2<<std::endl;
+			std::cerr<<"Pc: "<<Pc<<std::endl;
+			std::cerr<<"Scrit: "<<phys.sCrit<<std::endl;
+			std::cerr<<"Fc: "<<fC<<std::endl<<std::endl;
+			*/
+			
+			phys.normalForce = -fC*geom.normal;
+		  if (I->isActive) {
+				addForce (id1,-phys.normalForce,scene);
+				addForce (id2, phys.normalForce,scene);
+			};
+			//std::cerr<<"Capillar: "<<phys.normalForce<<"; Pen Depth: "<< geom.penetrationDepth <<"; Schritt "<< phys.sCrit <<std::endl;
+			return;
+		} else {
+			scene->interactions->requestErase(I);
+			return;
+		};
+	};
 
 	const BodyContainer& bodies = *scene->bodies;
 
 	const State& de1 = *static_cast<State*>(bodies[id1]->state.get());
 	const State& de2 = *static_cast<State*>(bodies[id2]->state.get());
+	
+	if (not(phys.liqBridgeCreated) and phys.Capillar) {
+		phys.liqBridgeCreated = true;
+		//std::cerr<<"First contact! Setting corresponding variables."<<std::endl;
+		phys.sCrit = (1+0.5*phys.theta)*pow(phys.Vb,1/3.0);
+		Sphere* s1=dynamic_cast<Sphere*>(bodies[id1]->shape.get());
+		Sphere* s2=dynamic_cast<Sphere*>(bodies[id2]->shape.get());
+		if (s1 and s2) {
+			if (s1->radius == s2->radius) {
+				phys.R = s1->radius;
+			} else {
+				throw runtime_error("We can calculate only monodisperse for the moment!.");
+			}
+		} else if (s1 and not(s2)) {
+			phys.R = s1->radius;
+		} else {
+			phys.R = s2->radius;
+		}
+	}
 
 	Vector3r& shearForce = phys.shearForce;
 	if (I->isFresh(scene)) shearForce=Vector3r(0,0,0);
@@ -113,6 +193,7 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
 	}
 	
 	if (I->isActive) {
+		//std::cerr<<"Contact: "<<phys.normalForce<<std::endl;
 		const Vector3r f = phys.normalForce + shearForce + shearForceVisc;
 		addForce (id1,-f,scene);
 		addForce (id2, f,scene);
