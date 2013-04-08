@@ -581,8 +581,8 @@ void CpmStateUpdater::update(Scene* _scene){
 			}
 		}
 	}
-	Matrix3r m3i; m3i<<0.4,-0.1,-0.1, -0.1,0.4,-0.1, -0.1,-0.1,0.4; // inversion of Matrix3r(3,1,1, 1,3,1, 1,1,3)
-	Vector3r temp;
+	Matrix3r identity = Matrix3r::Identity();
+	Real tr;
 	FOREACH(shared_ptr<Body> B, *scene->bodies){
 		if (!B) continue;
 		const Body::id_t& id = B->getId();
@@ -599,12 +599,8 @@ void CpmStateUpdater::update(Scene* _scene){
 			}
 			Matrix3r& dmgRhs = bodyStats[id].dmgRhs;
 			dmgRhs *= 15./cohLinksWhenever;
-			temp = m3i*dmgRhs.diagonal();
-			Matrix3r& damageTensor = state->damageTensor;
-			for (int i=0; i<3; i++) { damageTensor(i,i) = temp(i); }
-			damageTensor(0,1) = damageTensor(1,0) = dmgRhs(0,1);
-			damageTensor(1,2) = damageTensor(2,1) = dmgRhs(1,2);
-			damageTensor(2,0) = damageTensor(0,2) = dmgRhs(2,0);
+			tr = 3*state->normDmg;
+			state->damageTensor = .5 * (dmgRhs - tr*identity);
 		}
 		else { state->normDmg = 0; /*state->normEpsPl=0;*/ state->damageTensor = Matrix3r::Zero(); }
 		B->shape->color = Vector3r(state->normDmg,1-state->normDmg,B->state->blockedDOFs==State::DOF_ALL?0:1);

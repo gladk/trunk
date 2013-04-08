@@ -11,7 +11,7 @@ except ImportError:
 # get yade path (allow YADE_PREFIX to override)
 prefix,suffix='${runtimePREFIX}' if not os.environ.has_key('YADE_PREFIX') else os.environ['YADE_PREFIX'],'${SUFFIX}'
 # duplicate some items from yade.config here, so that we can increase verbosity when the c++ part is booting
-features,version='${features}'.split(','),'${realVersion}'
+features,version='${features}'.split(' '),'${realVersion}'
 
 libPATH='${LIBRARY_OUTPUT_PATH}'
 if (libPATH[1:] == '{LIBRARY_OUTPUT_PATH}'): libPATH='lib'

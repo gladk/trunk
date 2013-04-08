@@ -33,7 +33,6 @@ rrr=yade.qt.Renderer()
 rrr.intrAllWire,rrr.bound=True,True
 #isc.watch1,isc.watch2=0,-1
 
-#from yade import log
 #import yade.qt,time
 #v=yade.qt.View()
 #v.axes=True

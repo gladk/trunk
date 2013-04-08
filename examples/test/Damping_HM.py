@@ -60,7 +60,6 @@ qt.Controller()
 
 #__________________________________________________________________
 # plot some results
-from math import *
 from yade import plot
 
 plot.labels=dict(Fn='$Normal\,force$',un='$Overlapping$',time='$Time$',time_='$Time$',Fs='$Shear\,force$',t='$Time$')

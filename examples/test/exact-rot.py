@@ -1,5 +1,5 @@
 # -*- encoding=utf-8 -*-
-from math import *
+
 O.engines=[
 	ForceResetter(),
 	InsertionSortCollider([Bo1_Sphere_Aabb(),Bo1_Box_Aabb()]),

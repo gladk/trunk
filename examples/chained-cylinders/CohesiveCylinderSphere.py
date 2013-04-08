@@ -1,7 +1,6 @@
 # encoding: utf-8
 from yade import pack,geom,qt
 from pylab import *
-import math
 qt.View()
 
 O.dt=5e-07

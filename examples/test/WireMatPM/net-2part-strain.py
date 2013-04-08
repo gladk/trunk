@@ -82,7 +82,6 @@ O.dt = 1e-5
 #O.dt = 0.2*sqrt(particleMass/(2.*O.interactions[0,1].phys.kn))
 
 #### plot some results
-from math import *
 from yade import plot
 
 plot.plots={'un':('Fn',)}

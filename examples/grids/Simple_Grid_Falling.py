@@ -2,7 +2,6 @@
 
 from yade import pack,geom,qt
 from pylab import *
-import math
 qt.View()
 
 

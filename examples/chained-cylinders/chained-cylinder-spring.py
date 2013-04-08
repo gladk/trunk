@@ -47,8 +47,7 @@ O.bodies[Ne-1].state.blockedDOFs='xyzXYZ'
 yade.qt.View();
 
 
- #plot some results
-from math import *
+#plot some results
 from yade import plot
 plot.plots={'t':('pos1',None,'vel1')}
 def history():

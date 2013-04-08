@@ -3,7 +3,6 @@
 ## TODO: verify that the code for facet & hasShear is physically correct!
 ##
 
-from math import *
 O.engines=[
 	ForceResetter(),
 	InsertionSortCollider([Bo1_Sphere_Aabb(),Bo1_Box_Aabb(),Bo1_Facet_Aabb()]),

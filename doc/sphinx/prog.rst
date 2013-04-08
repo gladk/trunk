@@ -175,7 +175,6 @@ The following rules that should be respected; documentation is treated separatel
 * programming style
 
   * Be defensive, if it has no significant performance impact. Use assertions abundantly: they don't affect performance (in the optimized build) and make spotting error conditions much easier.
-  * Use logging abundantly. Again, ``LOG_TRACE`` and ``LOG_DEBUG`` are eliminated from optimized code; unless turned on explicitly, the ouput will be suppressed even in the debug build (see below).
   * Use ``YADE_CAST`` and ``YADE_PTR_CAST`` where you want type-check during debug builds, but fast casting in optimized build. 
   * Initialize all class variables in the default constructor. This avoids bugs that may manifest randomly and are difficult to fix. Initializing with NaN's will help you find otherwise unitialized variable. (This is taken care of by :ref:`YADE_CLASS_BASE_DOC` macros for user classes)
 
@@ -1102,63 +1101,6 @@ At places which are susceptible of being accessed concurrently from multiple thr
 * simultaneously writeable container for :ref:`ForceContainer`,
 * mutex for :yref:`Body::state`.
 
-.. _logging:
-
-Logging
---------
-
-Regardless of whether the library log4cxx is used or not, yade provides logging macros. [#log4cxxup]_ If log4cxx is enabled, these macros internally operate on the local logger instance (named ``logger``, but that is hidden for the user); if log4cxx is disabled, they send their arguments to standard error output (``cerr``).
-
-.. [#log4cxxup] Because of (seemingly?) no upstream development of log4cxx and a few problems it has, Yade will very likely move to the hypothetical ``boost::logging`` library once it exists. The logging code will not have to be changed, however, as the log4cxx logic is hidden behind these macros.
-
-Log messages are classified by their *severity*, which is one of ``TRACE`` (tracing variables), ``DEBUG`` (generally uninsteresting messages useful for debugging), ``INFO`` (information messages -- only use sparingly), ``WARN`` (warning), ``FATAL`` (serious error, consider throwing an exception with description instead). Logging level determines which messages will be shown -- by default, ``INFO`` and higher will be shown; if you run yade with ``-v`` or ``-vv``, ``DEBUG`` and ``TRACE`` messages will be also enabled (with log4cxx).
-
-Every class using logging should create logger using these 2 macros (they expand to nothing if log4cxx is not used):
-
-``DECLARE_LOGGER;``
-	in class declaration body (in the ``.hpp`` file); this declares static variable ``logger``;
-``CREATE_LOGGER(ClassName);``
-	in the implementation file; it creates and initializes that static variable. The logger will be named ``yade.ClassName``.
-
-The logging macros are the following:
-
-* ``LOG_TRACE``, ``LOG_DEBUG``, ``LOG_INFO``, ``LOG_WARN``, ``LOG_ERROR``, ``LOG_FATAL`` (increasing severity); their argument is fed to the logger stream, hence can contain the ``<<`` operation:
-
-	.. code-block:: c++
-
-		LOG_WARN("Exceeded "<<maxSteps<<" steps in attempts to converge, the result returned will not be precise (relative error "<<relErr<<", tolerance "<<relTol<<")");
-
-	Every log message is prepended filename, line number and function name; the final message that will appear will look like this::
-
-		237763 WARN  yade.ViscosityIterSolver /tmp/yade/trunk/extra/ViscosityIterSolver.cpp:316 newtonRaphsonSolve: Exceeded 30 steps in attempts to converge, the result returned will not be precise (relative error 5.2e-3, tolerance 1e-3)
-
-	The ``237763 WARN  yade.ViscosityIterSolver`` (microseconds from start, severity, logger name) is added by log4cxx and is completely configurable, either programatically, or by using file ``~/.yade-\$SUFFIX/logging.conf``, which is loaded at startup, if present (FIXME: see more etc user's guide)
-
-
-* special tracing macros ``TRVAR1``, ``TRVAR2``, … ``TRVAR6``, which show both variable name and its value (there are several more macros defined inside ``/lib/base/Logging.hpp``, but they are not generally in use):
-
-	.. code-block:: c++
-
-		TRVAR3(var1,var2,var3);
-		// will be expanded to:
-		LOG_TRACE("var1="<<var1<<"; var2="<<var2<<"; var3="<<var3);
-
-
-.. note:: For performance reasons, optimized builds eliminate ``LOG_TRACE`` and ``LOG_DEBUG`` from the code at preprocessor level.
-
-.. note:: Builds without log4cxx (even in debug mode) eliminate ``LOG_TRACE`` and ``LOG_DEBUG``. As there is no way to enable/disable them selectively, the log amount would be huge.
-
-Python provides rudimentary control for the logging system in ``yade.log`` module (FIXME: ref to docs):
-
-.. ipython::
-
-	Yade [2]: from yade import log
-
-	Yade [3]: log.setLevel('InsertionSortCollider',log.DEBUG)  # sets logging level of the yade.InsertionSortCollider logger
-
-	Yade [4]: log.setLevel('',log.WARN)                        # sets logging level of all yade.* loggers (they inherit level from the parent logger, except when overridden)
-
-As of now, there is no python interface for performing logging into log4cxx loggers themselves.
 
 .. _timing:
 
@@ -1593,7 +1535,7 @@ Startup sequence
 Yade's main program is python script in :ysrc:`core/main/main.py.in`; the build system replaces a few ``\${variables}`` in that file before copying it to its install location. It does the following:
 
 #. Process command-line options, set environment variables based on those options.
-#. Import main yade module (``import yade``), residing in :ysrc:`py/__init__.py.in`. This module locates plugins (recursive search for files ``lib*.so`` in the ``lib`` installation directory). :ysrc:`yade.boot<core/main/pyboot.cpp>` module is used to setup logging, temporary directory, … and, most importantly, loads plugins.
+#. Import main yade module (``import yade``), residing in :ysrc:`py/__init__.py.in`. This module locates plugins (recursive search for files ``lib*.so`` in the ``lib`` installation directory). :ysrc:`yade.boot<core/main/pyboot.cpp>` module is used to setup temporary directory, … and, most importantly, loads plugins.
 #. Manage further actions, such as running scripts given at command line, opening :yref:`yade.qt.Controller` (if desired), launching the ``ipython`` prompt.
 
 

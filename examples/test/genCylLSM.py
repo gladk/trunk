@@ -15,8 +15,6 @@ https://svn.esscc.uq.edu.au/svn/esys3/lsm/contrib/LSMGenGeo/
 """
 from yade import pack,ymport
 
-from math import *
-
 try:
 	from GenGeo import *
 except ImportError:

@@ -12,6 +12,7 @@ postprocessing and debugging.
 
 - https://www.yade-dem.org/doc/ (includes c++ and python reference)
 - https://yade-dem.org/doc/Yade.pdf (PDF-file with documentation)
+- https://yade-dem.org/doc/Yade.epub (EPUB-file with documentation)
  
 **Downloads:**
 

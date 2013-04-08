@@ -44,7 +44,6 @@ qt.Controller()
 ##### now the part pertaining to plots #####
 ############################################
 
-from math import *
 from yade import plot
 ## make one plot: step as function of fn
 plot.plots={'un':('fn')}

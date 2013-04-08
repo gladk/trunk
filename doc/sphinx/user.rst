@@ -1427,7 +1427,30 @@ You can move between frames (snapshots that were saved) via the "Animation" menu
 Python specialties and tricks
 ******************************
 
+Importing Yade in other Python applications
+===========================================
+Yade can be imported in other Python applications. To do so, you need somehow to make yade executable .py extended. The easiest way is to create a symbolic link, i.e. (suppose your Yade executable file is called "yade-trunk" and you want make it "yadeimport.py"):
+
+.. code-block:: console
+	
+	\$ cd /path/where/you/want/yadeimport
+	\$ ln -s /path/to/yade/executable/yade-trunk yadeimport.py
+
+Then you need to make your yadeimport.py findable by Python. You can export PYTHONPATH environment variable, or simply use sys.path directly in Python script:
+
+.. code-block:: python
+
+	import sys
+	sys.path.append('/path/where/you/want/yadeimport')
+	from yadeimport import *
+
+	print Matrix3(1,2,3, 4,5,6, 7,8,9)
+	print O.bodies
+	# any other Yade code
+
 .. perhaps turn this section into a list of FAQs on python as gathered from the yade-users list?
+
+
 
 
  

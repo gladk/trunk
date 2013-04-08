@@ -5,7 +5,6 @@
 # Experiment beam-like behaviour with chained cylinders + CohFrict connexions
 
 from yade import pack
-import math
 
 young=4.0e6
 poisson=3

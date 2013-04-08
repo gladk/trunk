@@ -92,7 +92,7 @@ class OpenMPAccumulator{
 		int eSize; // size of an element, computed from cache line size and sizeof(T)
 		char* data; // use void* rather than T*, since with T* the pointer arithmetics has sizeof(T) as unit, which is confusing; char* takes one byte
 	public:
-	// initialize storage with _zeroValue, depending on muber of threads
+	// initialize storage with _zeroValue, depending on number of threads
 	OpenMPAccumulator(): CLS(sysconf(_SC_LEVEL1_DCACHE_LINESIZE)>0 ? sysconf(_SC_LEVEL1_DCACHE_LINESIZE) : 64), nThreads(omp_get_max_threads()), eSize(CLS*(sizeof(T)/CLS+(sizeof(T)%CLS==0 ? 0 :1))) {
 		int succ=posix_memalign(/*where allocated*/(void**)&data,/*alignment*/CLS,/*size*/ nThreads*eSize);
 		if(succ!=0) throw std::runtime_error("OpenMPAccumulator: posix_memalign failed to allocate memory.");

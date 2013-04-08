@@ -28,7 +28,6 @@ O.dt=.002*PWaveTimeStep()
 ##### now the part pertaining to plots #####
 ############################################
 
-from math import *
 from yade import plot
 ## we will have 2 plots:
 ## 1. t as function of i (joke test function)
