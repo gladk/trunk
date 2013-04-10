@@ -245,8 +245,9 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
 
 	if (not(phys.liqBridgeCreated) and phys.Capillar) {
 		phys.liqBridgeCreated = true;
-		//std::cerr<<"First contact! Setting corresponding variables."<<std::endl;     // Willett, equation (2)
-		phys.sCrit = (1+0.5*phys.theta)*pow(phys.Vb,1/3.0);                            // Herminghaus, equation (8)
+		//std::cerr<<"First contact! Setting corresponding variables."<<std::endl;     
+		//phys.sCrit = (1+0.5*phys.theta)*pow(phys.Vb,1/3.0);                              // Willett, equation (2)
+		phys.sCrit = (1+0.5*phys.theta)*(pow(phys.Vb,1/3.0) + 0.1*pow(phys.Vb,2.0/3.0));   // Herminghaus, equation (8)
 		Sphere* s1=dynamic_cast<Sphere*>(bodies[id1]->shape.get());
 		Sphere* s2=dynamic_cast<Sphere*>(bodies[id2]->shape.get());
 		if (s1 and s2) {
