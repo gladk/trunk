@@ -65,6 +65,11 @@ void Ip2_ViscElMat_ViscElMat_ViscElPhys::go(const shared_ptr<Material>& b1, cons
 		} else {
 			throw runtime_error("Theta should be equal for both particles!.");
 		}
+		if (mat1->CapillarType == mat2->CapillarType and mat2->CapillarType != ""){
+			phys->CapillarType = mat1->CapillarType;
+		} else {
+			throw runtime_error("CapillarType should be equal for both particles!.");
+		}
 		phys->Capillar=true;
 	}
 	
@@ -83,18 +88,123 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
 	if (geom.penetrationDepth<0) {
 		if (phys.liqBridgeCreated and -geom.penetrationDepth<phys.sCrit and phys.Capillar) {
 			//Capillar
-			Real c0 = 0.96;
-			Real c1 = 1.1;
-			Real R = phys.R;
-			Real s = -geom.penetrationDepth;
-			
-			Real beta = asin(pow(phys.Vb/((c0*R*R*R*(1+3*s/R)*(1+c1*sin(phys.theta)))), 1.0/4.0));
-			Real r1 = (R*(1-cos(beta)) + s/2.0)/(cos(beta+phys.theta));
-			Real r2 = R*sin(beta) + r1*(sin(beta+phys.theta)-1);
-			Real Pc = phys.gamma*(1/r1 - 1/r2);
-
-			Real fC = 2*M_PI*phys.gamma*R*sin(beta)*sin(beta+phys.theta) + M_PI*R*R*Pc*sin(beta)*sin(beta);
-			
+      
+      Real fC = 0.0;
+      if (phys.CapillarType  == "Weigert") {
+      /* Capillar model from Weigert
+       * http://onlinelibrary.wiley.com/doi/10.1002/%28SICI%291521-4117%28199910%2916:5%3C238::AID-PPSC238%3E3.0.CO;2-E/abstract
+       * 
+        ﻿@article {PPSC:PPSC238,
+        author = {Weigert, Tom and Ripperger, Siegfried},
+        title = {Calculation of the Liquid Bridge Volume and Bulk Saturation from the Half-filling Angle},
+        journal = {Particle & Particle Systems Characterization},
+        volume = {16},
+        number = {5},
+        publisher = {WILEY-VCH Verlag GmbH},
+        issn = {1521-4117},
+        url = {http://dx.doi.org/10.1002/(SICI)1521-4117(199910)16:5<238::AID-PPSC238>3.0.CO;2-E},
+        doi = {10.1002/(SICI)1521-4117(199910)16:5<238::AID-PPSC238>3.0.CO;2-E},
+        pages = {238--242},
+        year = {1999},
+        }
+        * 
+       */
+        Real c0 = 0.96;
+        Real c1 = 1.1;
+        Real R = phys.R;
+        Real s = -geom.penetrationDepth;
+        
+        Real beta = asin(pow(phys.Vb/((c0*R*R*R*(1+3*s/R)*(1+c1*sin(phys.theta)))), 1.0/4.0));
+        Real r1 = (R*(1-cos(beta)) + s/2.0)/(cos(beta+phys.theta));
+        Real r2 = R*sin(beta) + r1*(sin(beta+phys.theta)-1);
+        Real Pc = phys.gamma*(1/r1 + 1/r2);
+  
+        fC = 2*M_PI*phys.gamma*R*sin(beta)*sin(beta+phys.theta) + M_PI*R*R*Pc*sin(beta)*sin(beta);
+      } else if (phys.CapillarType  == "Willett") {
+      
+        /* Capillar model from Willett
+         * http://pubs.acs.org/doi/abs/10.1021/la000657y
+         * 
+          @article{doi:10.1021/la000657y,
+          author = {Willett, Christopher D. and Adams, Michael J. and Johnson, Simon A. and Seville, Jonathan P. K.},
+          title = {Capillary Bridges between Two Spherical Bodies},
+          journal = {Langmuir},
+          volume = {16},
+          number = {24},
+          pages = {9396-9405},
+          year = {2000},
+          doi = {10.1021/la000657y},
+          
+          URL = {http://pubs.acs.org/doi/abs/10.1021/la000657y},
+          eprint = {http://pubs.acs.org/doi/pdf/10.1021/la000657y}
+          }
+         */ 
+        
+        Real R = phys.R;
+        Real s = -geom.penetrationDepth;
+        Real Vb = phys.Vb;
+        
+        Real VbS = Vb/(R*R*R);
+        Real Th1 = phys.theta;
+        Real Th2 = phys.theta*phys.theta;
+        Real Gamma = phys.gamma;
+        
+        Real f1 = (-0.44507 + 0.050832*Th1 - 1.1466*Th2) + 
+                  (-0.1119 - 0.000411*Th1 - 0.1490*Th2) * log(VbS) +
+                  (-0.012101 - 0.0036456*Th1 - 0.01255*Th2) *log(VbS)*log(VbS) +
+                  (-0.0005 - 0.0003505*Th1 - 0.00029076*Th2) *log(VbS)*log(VbS)*log(VbS);
+        
+        Real f2 = (1.9222 - 0.57473*Th1 - 1.2918*Th2) +
+                  (-0.0668 - 0.1201*Th1 - 0.22574*Th2) * log(VbS) +
+                  (-0.0013375 - 0.0068988*Th1 - 0.01137*Th2) *log(VbS)*log(VbS);
+                  
+                  
+        Real f3 = (1.268 - 0.01396*Th1 - 0.23566*Th2) +
+                  (0.198 + 0.092*Th1 - 0.06418*Th2) * log(VbS) +
+                  (0.02232 + 0.02238*Th1 - 0.009853*Th2) *log(VbS)*log(VbS) +
+                  (0.0008585 + 0.001318*Th1 - 0.00053*Th2) *log(VbS)*log(VbS)*log(VbS);
+        
+        Real f4 = (-0.010703 + 0.073776*Th1 - 0.34742*Th2) +
+                  (0.03345 + 0.04543*Th1 - 0.09056*Th2) * log(VbS) +
+                  (0.0018574 + 0.004456*Th1 - 0.006257*Th2) *log(VbS)*log(VbS);
+  
+        Real sPl = s/sqrt(Vb/R);
+        
+        Real lnFS = f1 - f2*exp(f3*log(sPl) + f4*log(sPl)*log(sPl));
+        Real FS = exp(lnFS);
+        
+        fC = FS * 2.0 * M_PI* R * Gamma;
+      } else if (phys.CapillarType  == "Herminghaus") {
+      
+        /* Capillar model from Herminghaus
+         * http://www.tandfonline.com/doi/abs/10.1080/00018730500167855
+         * 
+          @article{doi:10.1080/00018730500167855,
+          author = {Herminghaus * , S.},
+          title = {Dynamics of wet granular matter},
+          journal = {Advances in Physics},
+          volume = {54},
+          number = {3},
+          pages = {221-261},
+          year = {2005},
+          doi = {10.1080/00018730500167855},
+          
+          URL = {http://www.tandfonline.com/doi/abs/10.1080/00018730500167855},
+          eprint = {http://www.tandfonline.com/doi/pdf/10.1080/00018730500167855}
+          }
+         */ 
+         
+        Real R = phys.R;
+        Real Gamma = phys.gamma;
+        Real s = -geom.penetrationDepth;
+        Real Vb = phys.Vb;
+        Real sPl = s/sqrt(Vb/R);
+        fC = 2.0 * M_PI* R * Gamma * cos(phys.theta)/(1 + 1.05*sPl + 2.5 *sPl * sPl);
+        
+      } else {
+        throw runtime_error("CapillarType is unknown, please, use only Willett, Weigert or Herminghaus");
+      }
+      
 			/*
 			std::cerr<<"R: "<<phys.R<<std::endl;
 			std::cerr<<"s: "<<s<<std::endl;

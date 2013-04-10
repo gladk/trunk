@@ -25,7 +25,8 @@ class ViscElMat : public Material {
 		((bool,Capillar,false,,"True, if capillar forces need to be added."))
 		((Real,Vb,NaN,,"Liquid bridge volume [m^3]"))
 		((Real,gamma,NaN,,"Surface tension [N/m]"))
-		((Real,theta,NaN,,"Contact angle [°]")),
+		((Real,theta,NaN,,"Contact angle [°]"))
+		((std::string,CapillarType,"",,"Different types of capillar interaction: Willett, Weigert, Herminghaus")),
 		createIndex();
 	);
 	REGISTER_CLASS_INDEX(ViscElMat,Material);
@@ -45,7 +46,8 @@ class ViscElPhys : public FrictPhys{
 		((Real,sCrit,false,,"Critical bridge length [m]"))
 		((Real,Vb,NaN,,"Liquid bridge volume [m^3]"))
 		((Real,gamma,NaN,,"Surface tension [N/m]"))
-		((Real,theta,NaN,,"Contact angle [rad]")),
+		((Real,theta,NaN,,"Contact angle [rad]"))
+		((std::string,CapillarType,"",,"Different types of capillar interaction: Willett, Weigert, Herminghaus")),
 		createIndex();
 	)
 };
