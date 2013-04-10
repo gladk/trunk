@@ -145,7 +145,7 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
          */ 
         
         Real R = phys.R;
-        Real s = -geom.penetrationDepth;
+        Real s = -geom.penetrationDepth/2.0;
         Real Vb = phys.Vb;
         
         Real VbS = Vb/(R*R*R);
