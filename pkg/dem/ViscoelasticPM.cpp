@@ -87,7 +87,11 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
 	
 	if (geom.penetrationDepth<0) {
 		if (phys.liqBridgeCreated and -geom.penetrationDepth<phys.sCrit and phys.Capillar) {
-			//Capillar
+      // Capillar
+      // 
+      // Some equations have constants, which can be calculated only once per contact.
+      // No need to recalculate them at each step.
+      // It needs to be fixed.
       
       Real fC = 0.0;
       if (phys.CapillarType  == "Weigert") {
@@ -114,12 +118,12 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
         Real R = phys.R;
         Real s = -geom.penetrationDepth;
         
-        Real beta = asin(pow(phys.Vb/((c0*R*R*R*(1+3*s/R)*(1+c1*sin(phys.theta)))), 1.0/4.0));
-        Real r1 = (R*(1-cos(beta)) + s/2.0)/(cos(beta+phys.theta));
-        Real r2 = R*sin(beta) + r1*(sin(beta+phys.theta)-1);
-        Real Pc = phys.gamma*(1/r1 + 1/r2);
+        Real beta = asin(pow(phys.Vb/((c0*R*R*R*(1+3*s/R)*(1+c1*sin(phys.theta)))), 1.0/4.0));    // Weigert, equation (19), small modifications
+        Real r1 = (R*(1-cos(beta)) + s/2.0)/(cos(beta+phys.theta));                               // Weigert, equation (5), small modifications
+        Real r2 = R*sin(beta) + r1*(sin(beta+phys.theta)-1);                                      // Weigert, equation (6), small modifications
+        Real Pc = phys.gamma*(1/r1 + 1/r2);                                                       // Weigert, equation (22), small modifications
   
-        fC = 2*M_PI*phys.gamma*R*sin(beta)*sin(beta+phys.theta) + M_PI*R*R*Pc*sin(beta)*sin(beta);
+        fC = M_PI*R*R*Pc*sin(beta)*sin(beta) + 2*M_PI*phys.gamma*R*sin(beta)*sin(beta+phys.theta);// Weigert, equation (22)
       } else if (phys.CapillarType  == "Willett") {
       
         /* Capillar model from Willett
@@ -149,6 +153,9 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
         Real Th2 = phys.theta*phys.theta;
         Real Gamma = phys.gamma;
         
+        /*
+         * Willett, equations in Anhang
+        */
         Real f1 = (-0.44507 + 0.050832*Th1 - 1.1466*Th2) + 
                   (-0.1119 - 0.000411*Th1 - 0.1490*Th2) * log(VbS) +
                   (-0.012101 - 0.0036456*Th1 - 0.01255*Th2) *log(VbS)*log(VbS) +
@@ -175,7 +182,6 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
         
         fC = FS * 2.0 * M_PI* R * Gamma;
       } else if (phys.CapillarType  == "Herminghaus") {
-      
         /* Capillar model from Herminghaus
          * http://www.tandfonline.com/doi/abs/10.1080/00018730500167855
          * 
@@ -192,19 +198,19 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
           URL = {http://www.tandfonline.com/doi/abs/10.1080/00018730500167855},
           eprint = {http://www.tandfonline.com/doi/pdf/10.1080/00018730500167855}
           }
-         */ 
+         */
          
         Real R = phys.R;
         Real Gamma = phys.gamma;
         Real s = -geom.penetrationDepth;
         Real Vb = phys.Vb;
         Real sPl = s/sqrt(Vb/R);
-        fC = 2.0 * M_PI* R * Gamma * cos(phys.theta)/(1 + 1.05*sPl + 2.5 *sPl * sPl);
+        fC = 2.0 * M_PI* R * Gamma * cos(phys.theta)/(1 + 1.05*sPl + 2.5 *sPl * sPl);         // Herminghaus, equation (7)
         
       } else {
         throw runtime_error("CapillarType is unknown, please, use only Willett, Weigert or Herminghaus");
       }
-      
+
 			/*
 			std::cerr<<"R: "<<phys.R<<std::endl;
 			std::cerr<<"s: "<<s<<std::endl;
@@ -236,19 +242,15 @@ void Law2_ScGeom_ViscElPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IPhys
 
 	const State& de1 = *static_cast<State*>(bodies[id1]->state.get());
 	const State& de2 = *static_cast<State*>(bodies[id2]->state.get());
-	
+
 	if (not(phys.liqBridgeCreated) and phys.Capillar) {
 		phys.liqBridgeCreated = true;
-		//std::cerr<<"First contact! Setting corresponding variables."<<std::endl;
-		phys.sCrit = (1+0.5*phys.theta)*pow(phys.Vb,1/3.0);
+		//std::cerr<<"First contact! Setting corresponding variables."<<std::endl;     // Willett, equation (2)
+		phys.sCrit = (1+0.5*phys.theta)*pow(phys.Vb,1/3.0);                            // Herminghaus, equation (8)
 		Sphere* s1=dynamic_cast<Sphere*>(bodies[id1]->shape.get());
 		Sphere* s2=dynamic_cast<Sphere*>(bodies[id2]->shape.get());
 		if (s1 and s2) {
-			if (s1->radius == s2->radius) {
-				phys.R = s1->radius;
-			} else {
-				throw runtime_error("We can calculate only monodisperse for the moment!.");
-			}
+			phys.R = 2 * s1->radius * s2->radius / (s1->radius + s2->radius);
 		} else if (s1 and not(s2)) {
 			phys.R = s1->radius;
 		} else {
