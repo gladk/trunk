@@ -23,7 +23,9 @@
 #ifndef HOST_NAME_MAX
 #define HOST_NAME_MAX 255 
 #endif
-
+#ifdef YADE_OPENMP
+	#include<omp.h>
+#endif
 
 class Bound;
 #ifdef YADE_OPENGL
@@ -59,6 +61,11 @@ class Scene: public Serializable{
 
 
 		shared_ptr<Engine> engineByName(const string& s);
+
+		#ifdef YADE_LIQCONTROL
+			OpenMPVector<shared_ptr<Interaction> > addIntrs;    //Array of added interactions, needed for liquid control.
+			OpenMPVector<shared_ptr<Interaction> > delIntrs;    //Array of deleted interactions, needed for liquid control.
+		#endif
 
 		#ifdef YADE_OPENGL
 			shared_ptr<OpenGLRenderer> renderer;
