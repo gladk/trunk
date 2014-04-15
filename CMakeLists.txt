@@ -16,6 +16,7 @@
 #  ENABLE_PFVFLOW: enable PFVFLOW-option, FlowEngine (ON by default)
 #  ENABLE_SPH: enable SPH-option, Smoothed Particle Hydrodynamics (OFF by default, experimental)
 #  ENABLE_LBMFLOW: enable LBMFLOW-option, LBM_ENGINE (OFF by default)
+#  ENABLE_LIQCONTROL: enable LIQCONTROL-option, (OFF by default)
 #  runtimePREFIX: used for packaging, when install directory is not the same is runtime directory (/usr/local by default)
 #  CHUNKSIZE: set >1, if you want several sources to be compiled at once. Increases compilation speed and RAM-consumption during it (1 by default).
 
@@ -120,6 +121,7 @@ OPTION(ENABLE_LINSOLV "Enable direct solver for the flow engines (experimental)"
 OPTION(ENABLE_PFVFLOW "Enable flow engine (experimental)" ${DEFAULT})
 OPTION(ENABLE_SPH "Enable SPH" OFF)
 OPTION(ENABLE_LBMFLOW "Enable LBM engine (very experimental)" OFF)
+OPTION(ENABLE_LIQCONTROL "Enable liquid control (very experimental)" OFF)
 
 #===========================================================
 # Use Eigen3 by default
@@ -296,6 +298,13 @@ IF(ENABLE_SPH)
 ELSE(ENABLE_SPH)
   SET(DISABLED_FEATS "${DISABLED_FEATS} SPH")
 ENDIF(ENABLE_SPH)
+#===============================================
+IF(ENABLE_LIQCONTROL)
+  ADD_DEFINITIONS("-DYADE_LIQCONTROL")
+  SET(CONFIGURED_FEATS "${CONFIGURED_FEATS} LIQCONTROL")
+ELSE(ENABLE_LIQCONTROL)
+  SET(DISABLED_FEATS "${DISABLED_FEATS} LIQCONTROL")
+ENDIF(ENABLE_LIQCONTROL)
 #===============================================
 IF(ENABLE_GL2PS)
   FIND_PACKAGE(GL2PS)
