@@ -83,6 +83,9 @@ void Law2_ScGeom_ViscElCapPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IP
   if (not(phys.liqBridgeCreated) and phys.Capillar and geom.penetrationDepth>=0) {
     phys.liqBridgeCreated = true;
     phys.liqBridgeActive = false;
+    #ifdef YADE_LIQCONTROL
+    scene->addIntrs.push_back(I);
+    #endif
     Sphere* s1=dynamic_cast<Sphere*>(bodies[id1]->shape.get());
     Sphere* s2=dynamic_cast<Sphere*>(bodies[id2]->shape.get());
     if (s1 and s2) {
@@ -339,3 +342,51 @@ Real Law2_ScGeom_ViscElCapPhys_Basic::Soulie_f(const ScGeom& geom, ViscElCapPhys
 Real Law2_ScGeom_ViscElCapPhys_Basic::None_f(const ScGeom& geom, ViscElCapPhys& phys) {
   return 0;
 }
+
+#ifdef YADE_LIQCONTROL
+YADE_PLUGIN((LiqControl));
+void LiqControl::action(){
+  mapBodyInt bI;
+  
+  // Calculate, how much new contacts will be at each body
+  for (unsigned int i=0; i<scene->addIntrs.size(); i++) {
+    addBodyMapInt( bI, scene->addIntrs[i]->getId1() );
+    addBodyMapInt( bI, scene->addIntrs[i]->getId2() );
+  }
+  
+  // Update volume bridge at each new interaction
+  for (unsigned int i=0; i<scene->addIntrs.size(); i++) {
+    shared_ptr<Body> b1 = Body::byId(scene->addIntrs[i]->getId1(),scene);
+    shared_ptr<Body> b2 = Body::byId(scene->addIntrs[i]->getId2(),scene);
+    
+    const id_t id1 = b1->id;
+    const id_t id2 = b2->id;
+    
+    const Real Vf1 = b1->Vf/bI[id1];
+    const Real Vf2 = b2->Vf/bI[id2];
+    
+    // std::cerr<<"LIQControl; id1="<<id1<<"; id2="<<id2<<"; Vf1="<<Vf1<<"; Vf2="<<Vf2<<"; bI[id1]="<<bI[id1]<<"; bI[id2]="<<bI[id2]<<std::endl;
+    
+    const Real Vrup = Vf1+Vf2;
+    b1->Vf -= Vf1;
+    b2->Vf -= Vf2;
+    
+    ViscElCapPhys* Vb=dynamic_cast<ViscElCapPhys*>(scene->addIntrs[i]->phys.get());
+    bI[id1] -=1;
+    bI[id2] -=1;
+    Vb->Vb = Vrup;
+  }
+  
+  scene->addIntrs.clear();
+}
+
+void LiqControl::addBodyMapInt( mapBodyInt &  m, Body::id_t b  ){
+  mapBodyInt::const_iterator got;
+  got = m.find (b);
+  if ( got == m.end() ) {
+    m.insert (mapBodyInt::value_type(b,1));
+  } else {
+    m[b] += 1;
+  }
+}
+#endif

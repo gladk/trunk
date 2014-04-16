@@ -63,8 +63,8 @@ class Scene: public Serializable{
 		shared_ptr<Engine> engineByName(const string& s);
 
 		#ifdef YADE_LIQCONTROL
-			OpenMPVector<shared_ptr<Interaction> > addIntrs;    //Array of added interactions, needed for liquid control.
-			OpenMPVector<shared_ptr<Interaction> > delIntrs;    //Array of deleted interactions, needed for liquid control.
+			OpenMPVector<Interaction* > addIntrs;    //Array of added interactions, needed for liquid control.
+			OpenMPVector<Interaction* > delIntrs;    //Array of deleted interactions, needed for liquid control.
 		#endif
 
 		#ifdef YADE_OPENGL

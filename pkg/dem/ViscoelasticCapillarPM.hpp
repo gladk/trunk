@@ -1,4 +1,5 @@
 #include"ViscoelasticPM.hpp"
+#include <boost/unordered_map.hpp>
 
 class ViscElCapMat : public ViscElMat {
 	public:
@@ -72,3 +73,17 @@ class Law2_ScGeom_ViscElCapPhys_Basic: public LawFunctor {
 	DECLARE_LOGGER;
 };
 REGISTER_SERIALIZABLE(Law2_ScGeom_ViscElCapPhys_Basic);
+
+#ifdef YADE_LIQCONTROL
+class LiqControl: public PartialEngine{
+	typedef boost::unordered_map<unsigned int, int> mapBodyInt;
+	public:
+		virtual void action();
+		void addBodyMapInt( mapBodyInt & m, Body::id_t b );
+	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"Apply given torque (momentum) value at every subscribed particle, at every step. ",
+		((int, mask,-1,, "Bitmask for particles."))
+  );
+};
+
+REGISTER_SERIALIZABLE(LiqControl);
+#endif
