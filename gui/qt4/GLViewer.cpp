@@ -78,7 +78,7 @@ GLViewer::GLViewer(int _viewId, const shared_ptr<OpenGLRenderer>& _renderer, QGL
 #if QGLVIEWER_VERSION>=0x020500
   manipulatedFrame()->setWheelSensitivity(-1.0f);
 #endif
-
+	setKeyDescription(Qt::Key_Return,"Run simulation.");
 	setKeyDescription(Qt::Key_A,"Toggle visibility of global axes.");
 	setKeyDescription(Qt::Key_C,"Set scene center so that all bodies are visible; if a body is selected, center around this body.");
 	setKeyDescription(Qt::Key_C & Qt::AltModifier,"Set scene center to median body position (same as space)");
@@ -263,6 +263,11 @@ void GLViewer::keyPressEvent(QKeyEvent *e)
 		}
 	}
 	else if(e->key()==Qt::Key_Period) gridSubdivide = !gridSubdivide;
+	else if(e->key()==Qt::Key_Return){
+		if (Omega::instance().isRunning()) Omega::instance().pause();
+		else Omega::instance().run();
+		LOG_INFO("Running...");
+	}
 #ifdef YADE_GL2PS
 	else if(e->key()==Qt::Key_V){
 		for(int i=0; ;i++){

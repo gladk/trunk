@@ -21,15 +21,6 @@ void InteractionLoop::pyHandleCustomCtorArgs(python::tuple& t, python::dict& d){
 
 
 void InteractionLoop::action(){
-// 	if(eraseIntsInLoop && scene->interactions->conditionalyEraseNonReal(scene)>0 && !alreadyWarnedNoCollider){
-// 		LOG_WARN("Interactions pending erase found (erased), no collider being used?");
-// 		alreadyWarnedNoCollider=true;
-// 	}
-	/*
-	if(scene->interactions->dirty){
-		throw std::logic_error("InteractionContainer::dirty is true; the collider should re-initialize in such case and clear the dirty flag.");
-	}
-	*/
 	// update Scene* of the dispatchers
 	geomDispatcher->scene=physDispatcher->scene=lawDispatcher->scene=scene;
 	// ask dispatchers to update Scene* of their functors
@@ -60,11 +51,9 @@ void InteractionLoop::action(){
 	// (only for some kinds of colliders; see comment for InteractionContainer::iterColliderLastRun)
 	bool removeUnseenIntrs=(scene->interactions->iterColliderLastRun>=0 && scene->interactions->iterColliderLastRun==scene->iter);
 
-
-
 	#ifdef YADE_OPENMP
 	const long size=scene->interactions->size();
-	#pragma omp parallel for schedule(guided) num_threads(ompThreads>0 ? ompThreads : omp_get_max_threads())
+	#pragma omp parallel for schedule(guided) num_threads(ompThreads>0 ? min(ompThreads,omp_get_max_threads()) : omp_get_max_threads())
 	for(long i=0; i<size; i++){
 		const shared_ptr<Interaction>& I=(*scene->interactions)[i];
 	#else
@@ -154,15 +143,4 @@ void InteractionLoop::action(){
 			if(callbackPtrs[i]!=NULL) (*(callbackPtrs[i]))(callbacks[i].get(),I.get());
 		}
 	}
-	
-	// process eraseAfterLoop
-	#ifdef YADE_OPENMP
-		FOREACH(list<idPair>& l, eraseAfterLoopIds){
-			FOREACH(idPair p,l) scene->interactions->erase(p.first,p.second);
-			l.clear();
-		}
-	#else
-		FOREACH(idPair p, eraseAfterLoopIds) scene->interactions->erase(p.first,p.second);
-		eraseAfterLoopIds.clear();
-	#endif
 }

@@ -8,11 +8,6 @@ class InteractionContainer;
 
 /*! Periodic collider notes.
 
-Use
-===
-* scripts/test/periodic-simple.py
-* In the future, triaxial compression working by growing/shrinking the cell should be implemented.
-
 Architecture
 ============
 Values from bounding boxes are added information about period in which they are.
@@ -50,7 +45,8 @@ python:
 
 Requirements
 ============
-* No body can have Aabb larger than about .499*cellSize. Exception is thrown if that is false.
+* By default, no body can have Aabb larger than about .499*cellSize. Exception is thrown if that is false.
+	Large bodies are accepted if allowBiggerThanPeriod (experimental)
 * Constitutive law must not get body positions from Body::state directly.
 	If it does, it uses Interaction::cellDist to compute periodic position.
 * No body can get further away than MAXINT periods. It will do horrible things if there is overflow. Not checked at the moment.
@@ -67,7 +63,7 @@ Possible performance improvements & bugs
 
 
 // #define this macro to enable timing within this engine
-//#define ISC_TIMING
+// #define ISC_TIMING
 
 // #define to turn on some tracing information for the periodic part
 // all code under this can be probably removed at some point, when the collider will have been tested thoroughly
@@ -157,6 +153,7 @@ class InsertionSortCollider: public Collider{
   	    http://en.wikipedia.org/wiki/Insertion_sort has the algorithm and other details
 	*/
 	void insertionSort(VecBounds& v,InteractionContainer*,Scene*,bool doCollide=true);
+	void insertionSortParallel(VecBounds& v,InteractionContainer*,Scene*,bool doCollide=true);
 	void handleBoundInversion(Body::id_t,Body::id_t,InteractionContainer*,Scene*);
 // 	bool spatialOverlap(Body::id_t,Body::id_t) const;
 

@@ -107,7 +107,7 @@ void TemplateFlowEngine<_CellInfo,_VertexInfo,_Tesselation,solverT>::action()
 		if (updateTriangulation || (ellapsedIter>(0.5*meshUpdateInterval) && backgroundCompleted)) {
 			if (debug) cerr<<"switch flow solver"<<endl;
 			if (useSolver==0) LOG_ERROR("background calculations not available for Gauss-Seidel");
-			if (fluidBulkModulus>0) solver->interpolate (solver->T[solver->currentTes], backgroundSolver->T[backgroundSolver->currentTes]);
+			if (fluidBulkModulus>0 || doInterpolate) solver->interpolate (solver->T[solver->currentTes], backgroundSolver->T[backgroundSolver->currentTes]);
 			solver=backgroundSolver;
 			backgroundSolver = shared_ptr<FlowSolver> (new FlowSolver);
 			if (metisForced) {backgroundSolver->eSolver.cholmod().nmethods=1; backgroundSolver->eSolver.cholmod().method[0].ordering=CHOLMOD_METIS;}
@@ -276,7 +276,7 @@ void TemplateFlowEngine<_CellInfo,_VertexInfo,_Tesselation,solverT>::buildTriang
         boundaryConditions ( flow );
         flow.initializePressure ( pZero );
 	
-        if ( !first && !multithread && (useSolver==0 || fluidBulkModulus>0)) flow.interpolate ( flow.T[!flow.currentTes], flow.T[flow.currentTes] );
+        if ( !first && !multithread && (useSolver==0 || fluidBulkModulus>0 || doInterpolate)) flow.interpolate ( flow.T[!flow.currentTes], flow.T[flow.currentTes] );
         if ( waveAction ) flow.applySinusoidalPressure ( flow.T[flow.currentTes].Triangulation(), sineMagnitude, sineAverage, 30 );
         if (normalLubrication || shearLubrication || viscousShear) flow.computeEdgesSurfaces();
 }

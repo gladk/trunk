@@ -11,6 +11,9 @@
 #include<algorithm>
 #include<vector>
 #include<boost/static_assert.hpp>
+#ifdef YADE_OPENMP
+  #include<omp.h>
+#endif
 
 using namespace std;
 
@@ -52,6 +55,92 @@ void InsertionSortCollider::insertionSort(VecBounds& v, InteractionContainer* in
 		v[j+1]=viInit;
 	}
 }
+
+
+//Periodic version, only for non-periodic case at the moment (feel free to implement for the periodic case...)
+void InsertionSortCollider::insertionSortParallel(VecBounds& v, InteractionContainer* interactions, Scene*, bool doCollide){
+#ifdef YADE_OPENMP
+	assert(!periodic);	
+	assert(v.size==(long)v.vec.size());	
+	if (ompThreads<=1) return insertionSort(v,interactions, scene, doCollide);
+	
+	Real chunksVerlet = 4*verletDist;//is 2* the theoretical requirement?
+	if (chunksVerlet<=0) {LOG_ERROR("Parallel insertion sort needs verletDist>0");}
+	
+	///chunks defines subsets of the bounds lists, we make sure they are not too small wrt. verlet dist.
+	std::vector<unsigned> chunks;
+	unsigned nChunks = ompThreads;
+	unsigned chunkSize = unsigned(v.size/nChunks)+1;
+	for(unsigned n=0; n<nChunks;n++) chunks.push_back(n*chunkSize); chunks.push_back(v.size);
+	while (nChunks>1){
+		bool changeChunks=false;
+		for(unsigned n=1; n<nChunks;n++) if (chunksVerlet>(v[chunks[n]].coord-v[chunks[n-1]].coord)) changeChunks=true;
+		if (!changeChunks) break;
+		nChunks--; chunkSize = unsigned(v.size/nChunks)+1; chunks.clear();		
+		for(unsigned n=0; n<nChunks;n++) chunks.push_back(n*chunkSize); chunks.push_back(v.size);
+	}
+	static unsigned warnOnce=0;
+	if (nChunks<unsigned(ompThreads) && !warnOnce++) LOG_WARN("Parallel insertion: only "<<nChunks <<" thread(s) used. The number of bodies is probably too small for allowing more threads. The contact detection should succeed but not all available threads are used.");
+
+	///Define per-thread containers bufferizing the actual insertion of new interactions, since inserting is not thread-safe
+	std::vector<std::vector<std::pair<Body::id_t,Body::id_t> > > newInteractions;
+	newInteractions.resize(ompThreads,std::vector<std::pair<Body::id_t,Body::id_t> >());
+	for (int kk=0;  kk<ompThreads; kk++) newInteractions[kk].reserve(100);
+	
+	/// First sort, independant in each chunk
+	#pragma omp parallel for schedule(dynamic,1) num_threads(ompThreads>0 ? min(ompThreads,omp_get_max_threads()) : omp_get_max_threads())
+	for (unsigned k=0; k<nChunks;k++) {
+		int threadNum = omp_get_thread_num();
+		for(long i=chunks[k]+1; i<chunks[k+1]; i++){
+			const Bounds viInit=v[i]; long j=i-1; const bool viInitBB=viInit.flags.hasBB;
+			const bool isMin=viInit.flags.isMin; 
+			while(j>=chunks[k] && v[j]>viInit){
+				v[j+1]=v[j];
+				if(isMin && !v[j].flags.isMin && doCollide && viInitBB && v[j].flags.hasBB && (viInit.id!=v[j].id)) {
+					const Body::id_t& id1 = v[j].id; const Body::id_t& id2 = viInit.id; 
+					if (spatialOverlap(id1,id2) && Collider::mayCollide(Body::byId(id1,scene).get(),Body::byId(id2,scene).get()) && !interactions->found(id1,id2))
+						newInteractions[threadNum].push_back(std::pair<Body::id_t,Body::id_t>(v[j].id,viInit.id));
+				}
+				j--;
+			}
+			v[j+1]=viInit;
+		}
+	}
+	
+	///In the second sort, the chunks are connected consistently.
+	///If sorting requires to move a bound past half-chunk, the algorithm is not thread safe, if it happens we error out.
+	///Better than computing with messed up interactions
+	#pragma omp parallel for schedule(dynamic,1) num_threads(ompThreads>0 ? min(ompThreads,omp_get_max_threads()) : omp_get_max_threads())
+	for (unsigned k=1; k<nChunks;k++) {
+		
+		int threadNum = omp_get_thread_num();
+		long i=chunks[k];
+		for(; v[i]<v[i-1]; i++){
+			const Bounds viInit=v[i]; long j=i-1; /* cache hasBB; otherwise 1% overall performance hit */ const bool viInitBB=viInit.flags.hasBB;
+			const bool isMin=viInit.flags.isMin; 
+
+			while(j>=chunks[k-1] && viInit<v[j]){
+				v[j+1]=v[j];
+				if(isMin && !v[j].flags.isMin && doCollide && viInitBB && v[j].flags.hasBB && (viInit.id!=v[j].id)) {
+					const Body::id_t& id1 = v[j].id; const Body::id_t& id2 = viInit.id;
+					//FIXME: do we need the check with found(id1,id2) here? It is checked again below...
+					if (spatialOverlap(id1,id2) && Collider::mayCollide(Body::byId(id1,scene).get(),Body::byId(id2,scene).get()) && !interactions->found(id1,id2))
+						newInteractions[threadNum].push_back(std::pair<Body::id_t,Body::id_t>(v[j].id,viInit.id));}
+				j--;
+			}
+			v[j+1]=viInit;
+			if (j<=long(chunks[k]-chunkSize*0.5)) LOG_ERROR("parallel sort not guaranteed to succeed; in chunk "<<k<<" of "<<nChunks<< ", bound descending past half-chunk. Consider turning ompThreads=1 for thread safety.");
+		}
+		if (i>=long(chunks[k]+chunkSize*0.5)) LOG_ERROR("parallel sort not guaranteed to succeed; in chunk "<<k+1<<" of "<<nChunks<< ", bound advancing past half-chunk. Consider turning ompThreads=1 for thread safety.")
+	}
+	/// Check again, just to be sure...
+	for (unsigned k=1; k<nChunks;k++) if (v[chunks[k]]<v[chunks[k]-1]) LOG_ERROR("parallel sort failed, consider turning ompThreads=1");
+
+	/// Now insert interactions sequentially	
+	for (int n=0;n<ompThreads;n++) for (size_t k=0, kend=newInteractions[n].size();k<kend;k++) if (!interactions->found(newInteractions[n][k].first,newInteractions[n][k].second)) interactions->insert(shared_ptr<Interaction>(new Interaction(newInteractions[n][k].first,newInteractions[n][k].second)));
+#endif
+}
+
 
 vector<Body::id_t> InsertionSortCollider::probeBoundingVolume(const Bound& bv){
 	if(periodic){ throw invalid_argument("InsertionSortCollider::probeBoundingVolume: handling periodic boundary not implemented."); }
@@ -101,7 +190,9 @@ void InsertionSortCollider::action(){
 	long nBodies=(long)scene->bodies->size();
 	InteractionContainer* interactions=scene->interactions.get();
 	scene->interactions->iterColliderLastRun=-1;
-
+	#ifdef YADE_OPENMP
+	if (ompThreads<=0) ompThreads = omp_get_max_threads();
+	#endif
 	// periodicity changed, force reinit
 	if(scene->isPeriodic != periodic){
 		for(int i=0; i<3; i++) BB[i].vec.clear();
@@ -153,6 +244,11 @@ void InsertionSortCollider::action(){
 			// if no spheres, disable stride
 			verletDist=isinf(minR) ? 0 : abs(verletDist)*minR;
 		}
+		// if interactions are dirty, force reinitialization
+		if(scene->interactions->dirty){
+			doInitSort=true;
+			scene->interactions->dirty=false;
+		}
 		
 		// update bounds via boundDispatcher
 		boundDispatcher->scene=scene;
@@ -161,12 +257,8 @@ void InsertionSortCollider::action(){
 		boundDispatcher->targetInterv=targetInterv;
 		boundDispatcher->updatingDispFactor=updatingDispFactor;
 		boundDispatcher->action();
+		ISC_CHECKPOINT("boundDispatcher");
 
-		// if interactions are dirty, force reinitialization
-		if(scene->interactions->dirty){
-			doInitSort=true;
-			scene->interactions->dirty=false;
-		}
 		
 		// STRIDE
 		if(verletDist>0){
@@ -176,67 +268,61 @@ void InsertionSortCollider::action(){
 				if(!newton){ throw runtime_error("InsertionSortCollider.verletDist>0, but unable to locate NewtonIntegrator within O.engines."); }
 			}
 		}
-	ISC_CHECKPOINT("init");
-
 		// STRIDE
 			// get us ready for strides, if they were deactivated
-			if(!strideActive && verletDist>0 && newton->maxVelocitySq>=0){ // maxVelocitySq is a really computed value
-				strideActive=true;
-			}
+			if(!strideActive && verletDist>0 && newton->maxVelocitySq>=0) strideActive=true;
 			if(strideActive){
 				assert(verletDist>0);
 				assert(strideActive); assert(newton->maxVelocitySq>=0);
-					newton->updatingDispFactor=updatingDispFactor;
-			} else { /* !strideActive */
-				boundDispatcher->sweepDist=0;
-			}
+				newton->updatingDispFactor=updatingDispFactor;
+			} else boundDispatcher->sweepDist=0;
 
 	ISC_CHECKPOINT("bound");
 
-	// copy bounds along given axis into our arrays
-		for(long i=0; i<2*nBodies; i++){
-			for(int j=0; j<3; j++){
+	// copy bounds along given axis into our arrays 
+	#pragma omp parallel for schedule(guided) num_threads(ompThreads>0 ? min(ompThreads,omp_get_max_threads()) : omp_get_max_threads())
+	for(long i=0; i<2*nBodies; i++){
+// 		const long cacheIter = scene->iter;
+		for(int j=0; j<3; j++){
 				VecBounds& BBj=BB[j];
-				const Body::id_t id=BBj[i].id;
+				Bounds& BBji = BBj[i];
+				const Body::id_t id=BBji.id;
 				const shared_ptr<Body>& b=Body::byId(id,scene);
 				if(b){
 					const shared_ptr<Bound>& bv=b->bound;
 					// coordinate is min/max if has bounding volume, otherwise both are the position. Add periodic shift so that we are inside the cell
 					// watch out for the parentheses around ?: within ?: (there was unwanted conversion of the Reals to bools!)
-					
-					BBj[i].coord=((BBj[i].flags.hasBB=((bool)bv)) ? (BBj[i].flags.isMin ? bv->min[j] : bv->max[j]) : (b->state->pos[j])) - (periodic ? BBj.cellDim*BBj[i].period : 0.);
-					
+					BBji.coord=((BBji.flags.hasBB=((bool)bv)) ? (BBji.flags.isMin ? bv->min[j] : bv->max[j]) : (b->state->pos[j])) - (periodic ? BBj.cellDim*BBji.period : 0.);
+					// if initializing periodic, shift coords & record the period into BBj[i].period
+					if(doInitSort && periodic) BBji.coord=cellWrap(BBji.coord,0,BBj.cellDim,BBji.period);
+					// for each body, copy its minima and maxima, for quick checks of overlaps later
+					//bounds have been all updated when j==0, we can safely copy them here when j==1
+					if (BBji.flags.isMin && j==1 &&bv) {
+						 memcpy(&minima[3*id],&bv->min,3*sizeof(Real)); memcpy(&maxima[3*id],&bv->max,3*sizeof(Real)); 
+					}					
 				} else { BBj[i].flags.hasBB=false; /* for vanished body, keep the coordinate as-is, to minimize inversions. */ }
-				// if initializing periodic, shift coords & record the period into BBj[i].period
-				if(doInitSort && periodic) {
-					BBj[i].coord=cellWrap(BBj[i].coord,0,BBj.cellDim,BBj[i].period);
-				}
-			}	
+			}
 		}
-	// for each body, copy its minima and maxima, for quick checks of overlaps later
-	BOOST_STATIC_ASSERT(sizeof(Vector3r)==3*sizeof(Real));
-	for(Body::id_t id=0; id<nBodies; id++){
-		const shared_ptr<Body>& b=Body::byId(id,scene);
-		if(b){
-			const shared_ptr<Bound>& bv=b->bound;
-			if(bv) { memcpy(&minima[3*id],&bv->min,3*sizeof(Real)); memcpy(&maxima[3*id],&bv->max,3*sizeof(Real)); } // ⇐ faster than 6 assignments 
-			else{ const Vector3r& pos=b->state->pos; memcpy(&minima[3*id],&pos,3*sizeof(Real)); memcpy(&maxima[3*id],&pos,3*sizeof(Real)); }
-		} else { memset(&minima[3*id],0,3*sizeof(Real)); memset(&maxima[3*id],0,3*sizeof(Real)); }
-	}
 
 	ISC_CHECKPOINT("copy");
 
-	// process interactions that the constitutive law asked to be erased
-// 	interactions->erasePending(*this,scene);
+	// remove interactions which have disconnected bounds and are not real (will run parallel if YADE_OPENMP)
 	interactions->conditionalyEraseNonReal(*this,scene);
-	
+
 	ISC_CHECKPOINT("erase");
 
 	// sort
 		// the regular case
 		if(!doInitSort && !sortThenCollide){
-			/* each inversion in insertionSort calls handleBoundInversion, which in turns may add/remove interaction */
-			if(!periodic) for(int i=0; i<3; i++) insertionSort(BB[i],interactions,scene); 
+			/* each inversion in insertionSort calls may add interaction */
+			//1000 bodies is heuristic minimum above which parallel sort is called
+			if(!periodic) for(int i=0; i<3; i++) {
+			#ifdef YADE_OPENMP
+				if (ompThreads<=1 || nBodies<1000) insertionSort(BB[i],interactions,scene);
+				else insertionSortParallel(BB[i],interactions,scene);} 
+			#else
+				insertionSort(BB[i],interactions,scene);} 
+			#endif
 			else for(int i=0; i<3; i++) insertionSortPeri(BB[i],interactions,scene);
 		}
 		// create initial interactions (much slower)
@@ -244,6 +330,7 @@ void InsertionSortCollider::action(){
 			if(doInitSort){
 				// the initial sort is in independent in 3 dimensions, may be run in parallel; it seems that there is no time gain running in parallel, though
 				// important to reset loInx for periodic simulation (!!)
+// 				#pragma omp parallel for schedule(dynamic,1) num_threads(min(ompThreads,3))
 				for(int i=0; i<3; i++) { BB[i].loIdx=0; std::sort(BB[i].vec.begin(),BB[i].vec.end()); }
 				numReinit++;
 			} else { // sortThenCollide
@@ -255,6 +342,12 @@ void InsertionSortCollider::action(){
 			VecBounds& V=BB[sortAxis];
 			// go through potential aabb collisions, create interactions as necessary
 			if(!periodic){
+			#ifdef YADE_OPENMP
+				std::vector<std::vector<std::pair<Body::id_t,Body::id_t> > > newInts;
+				newInts.resize(ompThreads,std::vector<std::pair<Body::id_t,Body::id_t> >());
+				for (int kk=0;  kk<ompThreads; kk++) newInts[kk].reserve(unsigned(10*nBodies/ompThreads));
+				#pragma omp parallel for schedule(guided,200) num_threads(ompThreads)
+			#endif
 				for(long i=0; i<2*nBodies; i++){
 					// start from the lower bound (i.e. skipping upper bounds)
 					// skip bodies without bbox, because they don't collide
@@ -265,11 +358,23 @@ void InsertionSortCollider::action(){
 						const Body::id_t& jid=V[j].id;
 						// take 2 of the same condition (only handle collision [min_i..max_i]+min_j, not [min_i..max_i]+min_i (symmetric)
 						if(!(V[j].flags.isMin && V[j].flags.hasBB)) continue;
-						/* abuse the same function here; since it does spatial overlap check first, it is OK to use it */
-						handleBoundInversion(iid,jid,interactions,scene);
-						assert(j<2*nBodies-1);
+						if (spatialOverlap(iid,jid) && Collider::mayCollide(Body::byId(iid,scene).get(),Body::byId(jid,scene).get()) ){
+						#ifdef YADE_OPENMP
+							unsigned int threadNum = omp_get_thread_num();
+							newInts[threadNum].push_back(std::pair<Body::id_t,Body::id_t>(iid,jid));
+						#else
+							if (!interactions->found(iid,jid))
+							interactions->insert(shared_ptr<Interaction>(new Interaction(iid,jid)));
+						#endif
+						}
 					}
 				}
+				//go through newly created candidates sequentially, duplicates coming from different threads may exist so we check existence with found()
+				#ifdef YADE_OPENMP
+				for (int n=0;n<ompThreads;n++) for (size_t k=0, kend=newInts[n].size();k<kend;k++)
+					if (!interactions->found(newInts[n][k].first,newInts[n][k].second))
+						interactions->insert(shared_ptr<Interaction>(new Interaction(newInts[n][k].first,newInts[n][k].second)));
+				#endif
 			} else { // periodic case: see comments above
 				for(long i=0; i<2*nBodies; i++){
 					if(!(V[i].flags.isMin && V[i].flags.hasBB)) continue;
@@ -354,8 +459,6 @@ void InsertionSortCollider::insertionSortPeri(VecBounds& v, InteractionContainer
 // called by the insertion sort if 2 bodies swapped their bounds
 void InsertionSortCollider::handleBoundInversionPeri(Body::id_t id1, Body::id_t id2, InteractionContainer* interactions, Scene*){
 	assert(periodic);
-	
-	///fast
 	Vector3i periods;
 	bool overlap=spatialOverlapPeri(id1,id2,scene,periods);
 	if (overlap && Collider::mayCollide(Body::byId(id1,scene).get(),Body::byId(id2,scene).get()) && !interactions->found(id1,id2)){
@@ -363,45 +466,6 @@ void InsertionSortCollider::handleBoundInversionPeri(Body::id_t id1, Body::id_t 
 		newI->cellDist=periods;
 		interactions->insert(newI);
 	}
-	
-	///Slow
-	// do bboxes overlap in all 3 dimensions?
-// 	Vector3i periods;
-// 	bool overlap=spatialOverlapPeri(id1,id2,scene,periods);
-// 	// existing interaction?
-// 	const shared_ptr<Interaction>& I=interactions->find(id1,id2);
-// 	bool hasInter=(bool)I;
-// 	#ifdef PISC_DEBUG
-// 		if(watchIds(id1,id2)) LOG_DEBUG("Inversion #"<<id1<<"+#"<<id2<<", overlap=="<<overlap<<", hasInter=="<<hasInter);
-// 	#endif
-// 	// interaction doesn't exist and shouldn't, or it exists and should
-// 	if(likely(!overlap && !hasInter)) return;
-// 	if(overlap && hasInter){  return; }
-// 	// create interaction if not yet existing
-// 	if(overlap && !hasInter){ // second condition only for readability
-// 		#ifdef PISC_DEBUG
-// 			if(watchIds(id1,id2)) LOG_DEBUG("Attemtping collision of #"<<id1<<"+#"<<id2);
-// 		#endif
-// 		if(!Collider::mayCollide(Body::byId(id1,scene).get(),Body::byId(id2,scene).get())) return;
-// 		// LOG_TRACE("Creating new interaction #"<<id1<<"+#"<<id2);
-// 		shared_ptr<Interaction> newI=shared_ptr<Interaction>(new Interaction(id1,id2));
-// 		newI->cellDist=periods;
-// 		#ifdef PISC_DEBUG
-// 			if(watchIds(id1,id2)) LOG_DEBUG("Created intr #"<<id1<<"+#"<<id2<<", periods="<<periods);
-// 		#endif
-// 		interactions->insert(newI);
-// 		return;
-// 	}
-// 	if(!overlap && hasInter){
-// 		if(!I->isReal()) {
-// 			interactions->erase(id1,id2);
-// 			#ifdef PISC_DEBUG
-// 				if(watchIds(id1,id2)) LOG_DEBUG("Erased intr #"<<id1<<"+#"<<id2);
-// 			#endif
-// 		}
-// 		return;
-// 	}
-// 	assert(false); // unreachable
 }
 
 /* Performance hint

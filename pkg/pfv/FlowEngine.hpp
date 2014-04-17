@@ -236,6 +236,7 @@ class TemplateFlowEngine : public PartialEngine
 		YADE_CLASS_PYCLASS_BASE_DOC_ATTRS_DEPREC_INIT_CTOR_PY(TemplateFlowEngine,TEMPLATE_FLOW_NAME,PartialEngine,"An engine to solve flow problem in saturated granular media. Model description can be found in [Chareyre2012a]_ and [Catalano2014a]_. See the example script FluidCouplingPFV/oedometer.py. More documentation to come.\n\n.. note::Multi-threading seems to work fine for Cholesky decomposition, but it fails for the solve phase in which -j1 is the fastest, here we specify thread numbers independently using :yref:`FlowEngine::numFactorizeThreads` and :yref:`FlowEngine::numSolveThreads`. These multhreading settings are only impacting the behaviour of openblas library and are relatively independant of :yref:`FlowEngine::multithread`. However, the settings have to be globally consistent. For instance, :yref:`multithread<FlowEngine::multithread>` =True with  yref:`numFactorizeThreads<FlowEngine::numFactorizeThreads>` = yref:`numSolveThreads<FlowEngine::numSolveThreads>` = 4 implies that openblas will mobilize 8 processors at some point. If the system does not have so many procs. it will hurt performance.",
 		((bool,isActivated,true,,"Activates Flow Engine"))
 		((bool,first,true,,"Controls the initialization/update phases"))
+		((bool,doInterpolate,false,,"Force the interpolation of cell's info while remeshing. By default, interpolation would be done only for compressible fluids. It can be forced with this flag."))
 		((double, fluidBulkModulus, 0.,,"Bulk modulus of fluid (inverse of compressibility) K=-dP*V/dV [Pa]. Flow is compressible if fluidBulkModulus > 0, else incompressible."))
 		((Real, dt, 0,,"timestep [s]"))
 		((bool,permeabilityMap,false,,"Enable/disable stocking of average permeability scalar in cell infos."))
@@ -379,17 +380,17 @@ class FlowCellInfo : public CGT::SimpleCellInfo {
 	std::vector<CVector> cellForce;
 	std::vector<double> rayHydr;
 	std::vector<double> modulePermeability;
-	// Partial surfaces of spheres in the double-tetrahedron linking two voronoi centers. [i][j] is for sphere facet "i" and sphere facetVertices[i][j]. Last component for 1/sum_surfaces in the facet.
+	// Partial surfaces of spheres in the double-tetrahedron linking two voronoi centers. [i][j] is for sphere facet "i" and sphere facetVertices[i][j]. Last component for 1/sum_surfaces in the facet.doInterpolate
 	double solidSurfaces [4][4];
 
 	FlowCellInfo (void)
 	{
 		modulePermeability.resize(4, 0);
-		cellForce.resize(4);
-		facetSurfaces.resize(4);
-		facetFluidSurfacesRatio.resize(4);
-		facetSphereCrossSections.resize(4);
-		unitForceVectors.resize(4);
+		cellForce.resize(4,CGAL::NULL_VECTOR);
+		facetSurfaces.resize(4,CGAL::NULL_VECTOR);
+		facetFluidSurfacesRatio.resize(4,0);
+		facetSphereCrossSections.resize(4,CGAL::NULL_VECTOR);
+		unitForceVectors.resize(4,CGAL::NULL_VECTOR);
 		for (int k=0; k<4;k++) for (int l=0; l<3;l++) solidSurfaces[k][l]=0;
 		rayHydr.resize(4, 0);
 		invSumK=index=volumeSign=s=volumeVariation=pression=invVoidV=fict=0;

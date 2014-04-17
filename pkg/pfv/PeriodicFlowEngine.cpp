@@ -183,7 +183,7 @@ void PeriodicFlowEngine:: action()
 		while (updateTriangulation && !backgroundCompleted) { /*cout<<"sleeping..."<<sleeping++<<endl;*/ 	boost::this_thread::sleep(boost::posix_time::microseconds(1000));}
 		if (updateTriangulation || ellapsedIter>(0.5*meshUpdateInterval)) {
 			if (useSolver==0) LOG_ERROR("background calculations not available for Gauss-Seidel");
-			if (fluidBulkModulus>0) solver->interpolate (solver->T[solver->currentTes], backgroundSolver->T[backgroundSolver->currentTes]);
+			if (fluidBulkModulus>0 || doInterpolate) solver->interpolate (solver->T[solver->currentTes], backgroundSolver->T[backgroundSolver->currentTes]);
 			solver=backgroundSolver;
 			backgroundSolver = shared_ptr<FlowSolver> (new FlowSolver);
 			//Copy imposed pressures/flow from the old solver
@@ -522,7 +522,7 @@ void PeriodicFlowEngine::buildTriangulation ( double pZero, FlowSolver& flow)
 	
         flow.displayStatistics ();
         //FIXME: check interpolate() for the periodic case, at least use the mean pressure from previous step.
-	if ( !first && !multithread && (useSolver==0 || fluidBulkModulus>0)) flow.interpolate ( flow.T[!flow.currentTes], Tes );
+	if ( !first && !multithread && (useSolver==0 || fluidBulkModulus>0 || doInterpolate)) flow.interpolate ( flow.T[!flow.currentTes], Tes );
 // 	if ( !first && (useSolver==0 || fluidBulkModulus>0)) flow.interpolate ( flow.T[!flow.currentTes], flow.T[flow.currentTes] );
 	
         if ( waveAction ) flow.applySinusoidalPressure ( Tes.Triangulation(), sineMagnitude, sineAverage, 30 );

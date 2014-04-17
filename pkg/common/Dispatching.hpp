@@ -81,6 +81,7 @@ class BoundDispatcher: public Dispatcher1D<
 	public:
 		virtual void action();
 		virtual bool isActivated(){ return activated; }
+		void processBody(const shared_ptr<Body>&);
 	DECLARE_LOGGER;
 	YADE_DISPATCHER1D_FUNCTOR_DOC_ATTRS_CTOR_PY(BoundDispatcher,BoundFunctor,/*optional doc*/,
 		/*additional attrs*/

@@ -13,7 +13,7 @@ frictionAngle=radians(35)
 sphereRadius=0.05
 tc = 0.001
 en = 0.3
-es = 0.3
+et = 0.3
 
 
 sphereMat=O.materials.append(ViscElMat(density=Density,frictionAngle=frictionAngle,tc=tc,en=en,et=et))

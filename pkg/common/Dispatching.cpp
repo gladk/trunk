@@ -17,12 +17,21 @@ void BoundDispatcher::action()
 	updateScenePtr();
 	shared_ptr<BodyContainer>& bodies = scene->bodies;
 	const long numBodies=(long)bodies->size();
-	//#pragma omp parallel for
+	#pragma omp parallel for num_threads(ompThreads>0 ? min(ompThreads,omp_get_max_threads()) : omp_get_max_threads())
 	for(int id=0; id<numBodies; id++){
 		if(!bodies->exists(id)) continue; // don't delete this check  - Janek
 		const shared_ptr<Body>& b=(*bodies)[id];
+		processBody(b);
+	}
+// 	With -j4, this update takes more time that the dispatching in itslef, and it is quite useless: commented out
+// 	scene->updateBound();
+}
+
+void BoundDispatcher::processBody(const shared_ptr<Body>& b)
+{
+// 	const shared_ptr<Body>& b=(*bodies)[id];
 		shared_ptr<Shape>& shape=b->shape;
-		if(!shape || !b->isBounded()) continue;
+		if(!b->isBounded() || !shape) return;
 		if(b->bound) {
 			Real& sweepLength = b->bound->sweepLength;
 			if (targetInterv>=0) {
@@ -36,12 +45,12 @@ void BoundDispatcher::action()
 			} else sweepLength=sweepDist;
 		} 
 		#ifdef BV_FUNCTOR_CACHE
-		if(!shape->boundFunctor){ shape->boundFunctor=this->getFunctor1D(shape); if(!shape->boundFunctor) continue; }
+		if(!shape->boundFunctor){ shape->boundFunctor=this->getFunctor1D(shape); if(!shape->boundFunctor) return; }
 		shape->boundFunctor->go(shape,b->bound,b->state->se3,b.get());
 		#else
 		operator()(shape,b->bound,b->state->se3,b.get());
 		#endif
-		if(!b->bound) continue; // the functor did not create new bound
+		if(!b->bound) return; // the functor did not create new bound
 		b->bound->refPos=b->state->pos;
 		b->bound->lastUpdateIter=scene->iter;
 		const Real& sweepLength = b->bound->sweepLength;
@@ -51,8 +60,6 @@ void BoundDispatcher::action()
 			aabb->max+=Vector3r(sweepLength,sweepLength,sweepLength);
 		}
 	}
-	scene->updateBound();
-}
 
 
 /********************************************************************
