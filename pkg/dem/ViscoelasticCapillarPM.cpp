@@ -328,7 +328,7 @@ Real Law2_ScGeom_ViscElCapPhys_Basic::Soulie_f(const ScGeom& geom, ViscElCapPhys
    * Please, use this model only for testing purposes.
    * 
    */
-     
+  
   const Real R = phys.R;
   const Real Gamma = phys.gamma;
   const Real D = -geom.penetrationDepth;
@@ -353,6 +353,7 @@ Real Law2_ScGeom_ViscElCapPhys_Basic::None_f(const ScGeom& geom, ViscElCapPhys& 
 YADE_PLUGIN((LiqControl));
 void LiqControl::action(){
   mapBodyInt bI;
+  mapBodyInt bodyNeedUpdate;
   
   // Calculate, how much new contacts will be at each body
   for (unsigned int i=0; i<scene->addIntrs.size(); i++) {
@@ -364,6 +365,7 @@ void LiqControl::action(){
   for (unsigned int i=0; i<scene->delIntrs.size(); i++) {
     shared_ptr<Body> b = Body::byId(scene->delIntrs[i].id,scene);
     b->Vf += scene->delIntrs[i].Vol;
+    addBodyMapInt(bodyNeedUpdate, scene->delIntrs[i].id);
   }
   scene->delIntrs.clear();
   
@@ -393,13 +395,64 @@ void LiqControl::action(){
     b1->Vf -= Vf1;
     b2->Vf -= Vf2;
     
-    
     bI[id1] -=1;
     bI[id2] -=1;
     Vb->Vb = Vrup;
+    
+    addBodyMapInt(bodyNeedUpdate, id1);
+    addBodyMapInt(bodyNeedUpdate, id2);
   }
   
   scene->addIntrs.clear();
+  
+  
+  for (mapBodyInt::const_iterator it = bodyNeedUpdate.begin(); it != bodyNeedUpdate.end(); ++it) {
+    //it->second.Method();
+  }
+}
+
+void LiqControl::updateLiquid(shared_ptr<Body> b){
+  if (b->Vf<=b->Vmin) {
+    return;
+  } else {
+    // How much liquid can body share
+    const Real LiqCanBeShared = b->Vf - b->Vmin;
+    
+    // Check how much liquid can accept contacts 
+    Real LiqContactsAccept = 0.0;
+    unsigned int contactN = 0;
+    for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
+      if(!((*it).second)) continue;
+      ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
+      if (physT->Vb<physT->Vmax) {
+        LiqContactsAccept+=physT->Vmax-physT->Vb;
+        contactN++;
+      }
+    }
+    if (contactN>0) {
+      //There are some contacts, which can be filled
+      Real FillLevel = 0.0;
+      if (LiqContactsAccept > LiqCanBeShared) {   // Share all available liquid from body to contacts
+        const Real LiquidWillBeShared = b->Vf - b->Vmin;
+        b->Vf = b->Vmin;
+        FillLevel = LiquidWillBeShared/LiqContactsAccept;
+      } else {                                    // Not all available liquid from body can be shared
+        b->Vf -= LiqContactsAccept;
+        FillLevel = 1.0;
+      }
+      
+      for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
+        if(!((*it).second)) continue;
+        ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
+        if (physT->Vb<physT->Vmax) {
+          physT->Vb += (physT->Vb - physT->Vmax)*FillLevel;
+        }
+      }
+      return;
+    } else {
+      return;
+    }
+  }
 }
 
 void LiqControl::addBodyMapInt( mapBodyInt &  m, Body::id_t b  ){
