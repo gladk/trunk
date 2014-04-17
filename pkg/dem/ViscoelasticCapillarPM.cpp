@@ -117,6 +117,12 @@ void Law2_ScGeom_ViscElCapPhys_Basic::go(shared_ptr<IGeom>& _geom, shared_ptr<IP
         VLiqBridg -= phys.Vb;
         NLiqBridg -= 1;
       }
+      #ifdef YADE_LIQCONTROL
+        const intReal B1={id1, phys.Vb/2.0};
+        const intReal B2={id2, phys.Vb/2.0};
+        scene->delIntrs.push_back(B1);
+        scene->delIntrs.push_back(B2);
+      #endif
       scene->interactions->requestErase(I);
       return;
     };
@@ -354,7 +360,14 @@ void LiqControl::action(){
     addBodyMapInt( bI, scene->addIntrs[i]->getId2() );
   }
   
-  // Update volume bridge at each new interaction
+  // Update volume water at each deleted interaction for each body
+  for (unsigned int i=0; i<scene->delIntrs.size(); i++) {
+    shared_ptr<Body> b = Body::byId(scene->delIntrs[i].id,scene);
+    b->Vf += scene->delIntrs[i].Vol;
+  }
+  scene->delIntrs.clear();
+  
+  // Update volume bridge at each new added interaction
   for (unsigned int i=0; i<scene->addIntrs.size(); i++) {
     shared_ptr<Body> b1 = Body::byId(scene->addIntrs[i]->getId1(),scene);
     shared_ptr<Body> b2 = Body::byId(scene->addIntrs[i]->getId2(),scene);
@@ -362,16 +375,25 @@ void LiqControl::action(){
     const id_t id1 = b1->id;
     const id_t id2 = b2->id;
     
-    const Real Vf1 = b1->Vf/bI[id1];
-    const Real Vf2 = b2->Vf/bI[id2];
+    ViscElCapPhys* Vb=dynamic_cast<ViscElCapPhys*>(scene->addIntrs[i]->phys.get());
+    const Real Vmax = vMax(b1, b2);
+    Vb->Vmax = Vmax;
     
-    // std::cerr<<"LIQControl; id1="<<id1<<"; id2="<<id2<<"; Vf1="<<Vf1<<"; Vf2="<<Vf2<<"; bI[id1]="<<bI[id1]<<"; bI[id2]="<<bI[id2]<<std::endl;
+    Real Vf1 = (b1->Vf - b1->Vmin)/bI[id1];
+    Real Vf2 = (b2->Vf - b2->Vmin)/bI[id2];
     
-    const Real Vrup = Vf1+Vf2;
+    Real Vrup = Vf1+Vf2;
+    
+    if (Vrup > Vmax) {
+      Vf1 -= (Vrup - Vmax)/2.0;
+      Vf2 -= (Vrup - Vmax)/2.0;
+      Vrup = Vmax;
+    }
+    
     b1->Vf -= Vf1;
     b2->Vf -= Vf2;
     
-    ViscElCapPhys* Vb=dynamic_cast<ViscElCapPhys*>(scene->addIntrs[i]->phys.get());
+    
     bI[id1] -=1;
     bI[id2] -=1;
     Vb->Vb = Vrup;
@@ -388,5 +410,19 @@ void LiqControl::addBodyMapInt( mapBodyInt &  m, Body::id_t b  ){
   } else {
     m[b] += 1;
   }
+}
+
+Real LiqControl::vMax(shared_ptr<Body> const b1, shared_ptr<Body> const b2) {
+  Sphere* s1=dynamic_cast<Sphere*>(b1->shape.get());
+  Sphere* s2=dynamic_cast<Sphere*>(b2->shape.get());
+  Real minR = 0.0;
+  if (s1 and s2) {
+    minR = std::min (s1->radius, s2->radius);
+  } else if (s1 and not(s2)) {
+    minR = s1->radius;
+  } else {
+    minR = s2->radius;
+  }
+  return 0.03*minR*minR*minR;
 }
 #endif

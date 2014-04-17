@@ -32,6 +32,14 @@ class Bound;
 	class OpenGLRenderer;
 #endif
 
+#ifdef YADE_LIQCONTROL
+struct intReal {
+	public:
+		id_t id;
+		Real Vol;
+};
+#endif
+
 class Scene: public Serializable{
 	public:
 		//! Adds material to Scene::materials. It also sets id of the material accordingly and returns it.
@@ -64,7 +72,7 @@ class Scene: public Serializable{
 
 		#ifdef YADE_LIQCONTROL
 			OpenMPVector<Interaction* > addIntrs;    //Array of added interactions, needed for liquid control.
-			OpenMPVector<Interaction* > delIntrs;    //Array of deleted interactions, needed for liquid control.
+			OpenMPVector<intReal > delIntrs;     //Array of deleted interactions, needed for liquid control.
 		#endif
 
 		#ifdef YADE_OPENGL

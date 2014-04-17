@@ -32,7 +32,11 @@ class ViscElCapPhys : public ViscElPhys{
 		((Real,Vb,NaN,,"Liquid bridge volume [m^3]"))
 		((Real,gamma,NaN,,"Surface tension [N/m]"))
 		((Real,theta,NaN,,"Contact angle [rad]"))
-		((CapType,CapillarType,None_Capillar,,"Different types of capillar interaction: Willett_numeric, Willett_analytic, Weigert, Rabinovich, Lambert, Soulie")),
+		((CapType,CapillarType,None_Capillar,,"Different types of capillar interaction: Willett_numeric, Willett_analytic, Weigert, Rabinovich, Lambert, Soulie"))
+#ifdef YADE_LIQCONTROL
+		((Real,Vmax,NaN,,"Maximal liquid bridge volume [m^3]"))
+#endif
+		,
 		createIndex();
 	)
 	REGISTER_CLASS_INDEX(ViscElCapPhys,ViscElPhys);
@@ -75,11 +79,12 @@ class Law2_ScGeom_ViscElCapPhys_Basic: public LawFunctor {
 REGISTER_SERIALIZABLE(Law2_ScGeom_ViscElCapPhys_Basic);
 
 #ifdef YADE_LIQCONTROL
+typedef boost::unordered_map<unsigned int, int> mapBodyInt;
 class LiqControl: public PartialEngine{
-	typedef boost::unordered_map<unsigned int, int> mapBodyInt;
 	public:
 		virtual void action();
 		void addBodyMapInt( mapBodyInt & m, Body::id_t b );
+		Real vMax(shared_ptr<Body> b1, shared_ptr<Body> b2);
 	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"Apply given torque (momentum) value at every subscribed particle, at every step. ",
 		((int, mask,-1,, "Bitmask for particles."))
   );
