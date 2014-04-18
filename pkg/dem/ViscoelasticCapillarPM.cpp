@@ -365,11 +365,13 @@ void LiqControl::action(){
   for (unsigned int i=0; i<scene->delIntrs.size(); i++) {
     shared_ptr<Body> b = Body::byId(scene->delIntrs[i].id,scene);
     b->Vf += scene->delIntrs[i].Vol;
+    //std::cerr<<"!!!!!!!!!!!!!!!!!!!!!"<<b->id<<": "<<b->Vf<< " "<<scene->delIntrs[i].Vol <<std::endl;
     addBodyMapInt(bodyNeedUpdate, scene->delIntrs[i].id);
   }
   scene->delIntrs.clear();
   
   // Update volume bridge at each new added interaction
+  mapBodyReal bodyUpdateLiquid;
   for (unsigned int i=0; i<scene->addIntrs.size(); i++) {
     shared_ptr<Body> b1 = Body::byId(scene->addIntrs[i]->getId1(),scene);
     shared_ptr<Body> b2 = Body::byId(scene->addIntrs[i]->getId2(),scene);
@@ -386,29 +388,40 @@ void LiqControl::action(){
     
     Real Vrup = Vf1+Vf2;
     
+    std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
+    std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
+    std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl;
+    
     if (Vrup > Vmax) {
-      Vf1 -= (Vrup - Vmax)/2.0;
-      Vf2 -= (Vrup - Vmax)/2.0;
-      Vrup = Vmax;
+      Vf1 *= Vmax/Vrup;
+      Vf2 *= Vmax/Vrup;
+      Vrup = Vf1 + Vf2;
     }
     
-    b1->Vf -= Vf1;
-    b2->Vf -= Vf2;
+    std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
+    std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
     
-    bI[id1] -=1;
-    bI[id2] -=1;
+    std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl<<std::endl;
+    
+    addBodyMapReal(bodyUpdateLiquid, id1, -Vf1);
+    addBodyMapReal(bodyUpdateLiquid, id2, -Vf2);
+    
     Vb->Vb = Vrup;
-    
-    addBodyMapInt(bodyNeedUpdate, id1);
-    addBodyMapInt(bodyNeedUpdate, id2);
   }
   
   scene->addIntrs.clear();
   
-  
-  for (mapBodyInt::const_iterator it = bodyNeedUpdate.begin(); it != bodyNeedUpdate.end(); ++it) {
-    //it->second.Method();
+  // Update water volume in body
+  for (mapBodyReal::const_iterator it = bodyUpdateLiquid.begin(); it != bodyUpdateLiquid.end(); ++it) {
+    Body::byId(it->first)->Vf += it->second;
   }
+  
+  // Update contacts around body
+  /*
+  for (mapBodyInt::const_iterator it = bodyNeedUpdate.begin(); it != bodyNeedUpdate.end(); ++it) {
+    updateLiquid(Body::byId(it->first));
+  }*/
+  
 }
 
 void LiqControl::updateLiquid(shared_ptr<Body> b){
@@ -462,6 +475,16 @@ void LiqControl::addBodyMapInt( mapBodyInt &  m, Body::id_t b  ){
     m.insert (mapBodyInt::value_type(b,1));
   } else {
     m[b] += 1;
+  }
+}
+
+void LiqControl::addBodyMapReal( mapBodyReal & m, Body::id_t b, Real addV ) {
+  mapBodyReal::const_iterator got;
+  got = m.find (b);
+  if ( got == m.end() ) {
+    m.insert (mapBodyReal::value_type(b, addV));
+  } else {
+    m[b] += addV;
   }
 }
 

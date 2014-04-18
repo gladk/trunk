@@ -80,10 +80,12 @@ REGISTER_SERIALIZABLE(Law2_ScGeom_ViscElCapPhys_Basic);
 
 #ifdef YADE_LIQCONTROL
 typedef boost::unordered_map<Body::id_t, int> mapBodyInt;
+typedef boost::unordered_map<Body::id_t, Real> mapBodyReal;
 class LiqControl: public PartialEngine{
 	public:
 		virtual void action();
 		void addBodyMapInt( mapBodyInt & m, Body::id_t b );
+		void addBodyMapReal( mapBodyReal & m, Body::id_t b, Real addV );
 		Real vMax(shared_ptr<Body> b1, shared_ptr<Body> b2);
 		void updateLiquid(shared_ptr<Body> b);
 	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"Apply given torque (momentum) value at every subscribed particle, at every step. ",
