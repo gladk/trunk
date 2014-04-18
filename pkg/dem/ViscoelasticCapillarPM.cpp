@@ -417,10 +417,9 @@ void LiqControl::action(){
   }
   
   // Update contacts around body
-  /*
   for (mapBodyInt::const_iterator it = bodyNeedUpdate.begin(); it != bodyNeedUpdate.end(); ++it) {
     updateLiquid(Body::byId(it->first));
-  }*/
+  }
   
 }
 
@@ -435,7 +434,7 @@ void LiqControl::updateLiquid(shared_ptr<Body> b){
     Real LiqContactsAccept = 0.0;
     unsigned int contactN = 0;
     for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
-      if(!((*it).second)) continue;
+      if(!((*it).second) or !(((*it).second)->isReal()))  continue;
       ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
       if (physT->Vb<physT->Vmax) {
         LiqContactsAccept+=physT->Vmax-physT->Vb;
@@ -455,7 +454,7 @@ void LiqControl::updateLiquid(shared_ptr<Body> b){
       }
       
       for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
-        if(!((*it).second)) continue;
+        if(!((*it).second) or !(((*it).second)->isReal()))  continue;
         ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
         if (physT->Vb<physT->Vmax) {
           physT->Vb += (physT->Vb - physT->Vmax)*FillLevel;
