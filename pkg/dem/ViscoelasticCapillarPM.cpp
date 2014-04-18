@@ -388,9 +388,9 @@ void LiqControl::action(){
     
     Real Vrup = Vf1+Vf2;
     
-    std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
-    std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
-    std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl;
+    // std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
+    // std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
+    // std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl;
     
     if (Vrup > Vmax) {
       Vf1 *= Vmax/Vrup;
@@ -398,10 +398,9 @@ void LiqControl::action(){
       Vrup = Vf1 + Vf2;
     }
     
-    std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
-    std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
-    
-    std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl<<std::endl;
+    // std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
+    // std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
+    // std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl<<std::endl;
     
     addBodyMapReal(bodyUpdateLiquid, id1, -Vf1);
     addBodyMapReal(bodyUpdateLiquid, id2, -Vf2);
