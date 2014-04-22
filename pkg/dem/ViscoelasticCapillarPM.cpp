@@ -388,19 +388,11 @@ void LiqControl::action(){
     
     Real Vrup = Vf1+Vf2;
     
-    // std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
-    // std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
-    // std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl;
-    
     if (Vrup > Vmax) {
       Vf1 *= Vmax/Vrup;
       Vf2 *= Vmax/Vrup;
       Vrup = Vf1 + Vf2;
     }
-    
-    // std::cerr<<"id1="<<id1<<"; cont="<<bI[id1]<<" Vf1="<<Vf1<<std::endl;
-    // std::cerr<<"id2="<<id2<<"; cont="<<bI[id2]<<" Vf2="<<Vf2<<std::endl;
-    // std::cerr<<"Vmax="<<Vmax<<"; Vrup="<<Vrup<<std::endl<<std::endl;
     
     addBodyMapReal(bodyUpdateLiquid, id1, -Vf1);
     addBodyMapReal(bodyUpdateLiquid, id2, -Vf2);
@@ -440,6 +432,7 @@ void LiqControl::updateLiquid(shared_ptr<Body> b){
         contactN++;
       }
     }
+    
     if (contactN>0) {
       //There are some contacts, which can be filled
       Real FillLevel = 0.0;
@@ -452,17 +445,19 @@ void LiqControl::updateLiquid(shared_ptr<Body> b){
         FillLevel = 1.0;
       }
       
+      
       for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
         if(!((*it).second) or !(((*it).second)->isReal()))  continue;
         ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
         if (physT->Vb<physT->Vmax) {
-          physT->Vb += (physT->Vb - physT->Vmax)*FillLevel;
+          physT->Vb += (physT->Vmax - physT->Vb)*FillLevel;
         }
       }
       return;
     } else {
       return;
     }
+    
   }
 }
 
