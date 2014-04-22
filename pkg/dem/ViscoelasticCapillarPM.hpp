@@ -89,7 +89,7 @@ class LiqControl: public PartialEngine{
 		Real vMax(shared_ptr<Body> b1, shared_ptr<Body> b2);
 		void updateLiquid(shared_ptr<Body> b);
 	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"Apply given torque (momentum) value at every subscribed particle, at every step. ",
-		((int, mask,-1,, "Bitmask for particles."))
+		((int,mask,0,, "Bitmask for liquid  creation."))
   );
 };
 

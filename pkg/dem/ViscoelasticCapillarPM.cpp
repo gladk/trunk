@@ -386,7 +386,11 @@ void LiqControl::action(){
     
     Real Vrup = Vf1+Vf2;
     
-    if (Vrup > Vmax) {
+    if(mask!=0 && ((b1->groupMask & b2->groupMask & mask)==0)) {
+      Vf1 = 0;
+      Vf2 = 0;
+      Vrup = 0;
+    } else if (Vrup > Vmax) {
       Vf1 *= Vmax/Vrup;
       Vf2 *= Vmax/Vrup;
       Vrup = Vf1 + Vf2;
