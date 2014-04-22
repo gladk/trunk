@@ -11,7 +11,7 @@
 
 class VTKRecorder: public PeriodicEngine {
 	public:
-  enum {REC_SPHERES=0,REC_FACETS,REC_BOXES,REC_COLORS,REC_MASS,REC_CPM,REC_INTR,REC_VELOCITY,REC_ID,REC_CLUMPID,REC_SENTINEL,REC_MATERIALID,REC_STRESS,REC_MASK,REC_RPM,REC_JCFPM,REC_CRACKS,REC_WPM,REC_PERICELL};
+  enum {REC_SPHERES=0,REC_FACETS,REC_BOXES,REC_COLORS,REC_MASS,REC_CPM,REC_INTR,REC_VELOCITY,REC_ID,REC_CLUMPID,REC_SENTINEL,REC_MATERIALID,REC_STRESS,REC_MASK,REC_RPM,REC_JCFPM,REC_CRACKS,REC_WPM,REC_PERICELL,REC_LIQ};
 		virtual void action();
 		void addWallVTK (vtkSmartPointer<vtkQuad>& boxes, vtkSmartPointer<vtkPoints>& boxesPos, Vector3r& W1, Vector3r& W2, Vector3r& W3, Vector3r& W4);
 	YADE_CLASS_BASE_DOC_ATTRS_CTOR(VTKRecorder,PeriodicEngine,"Engine recording snapshots of simulation into series of \\*.vtu files, readable by VTK-based postprocessing programs such as Paraview. Both bodies (spheres and facets) and interactions can be recorded, with various vector/scalar quantities that are defined on them.\n\n:yref:`PeriodicEngine.initRun` is initialized to ``True`` automatically.",

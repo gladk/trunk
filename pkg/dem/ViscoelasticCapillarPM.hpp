@@ -34,7 +34,7 @@ class ViscElCapPhys : public ViscElPhys{
 		((Real,theta,NaN,,"Contact angle [rad]"))
 		((CapType,CapillarType,None_Capillar,,"Different types of capillar interaction: Willett_numeric, Willett_analytic, Weigert, Rabinovich, Lambert, Soulie"))
 #ifdef YADE_LIQCONTROL
-		((Real,Vmax,NaN,,"Maximal liquid bridge volume [m^3]"))
+		((Real,Vmax,-1,,"Maximal liquid bridge volume [m^3]"))
 #endif
 		,
 		createIndex();

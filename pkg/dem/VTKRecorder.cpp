@@ -30,7 +30,9 @@
 #include<yade/pkg/dem/WirePM.hpp>
 #include<yade/pkg/dem/JointedCohesiveFrictionalPM.hpp>
 #include<yade/pkg/dem/Shop.hpp>
-
+#ifdef YADE_LIQCONTROL
+	#include<yade/pkg/dem/ViscoelasticCapillarPM.hpp>
+#endif
 
 YADE_PLUGIN((VTKRecorder));
 CREATE_LOGGER(VTKRecorder);
@@ -70,6 +72,7 @@ void VTKRecorder::action(){
 		else if(rec=="jcfpm") recActive[REC_JCFPM]=true;
 		else if(rec=="cracks") recActive[REC_CRACKS]=true;
 		else if(rec=="pericell" && scene->isPeriodic) recActive[REC_PERICELL]=true;
+		else if(rec=="liquidcontrol") recActive[REC_LIQ]=true;
 		else LOG_ERROR("Unknown recorder named `"<<rec<<"' (supported are: all, spheres, velocity, facets, boxes, color, stress, cpm, wpm, intr, id, clumpId, materialId, jcfpm, cracks, pericell). Ignored.");
 	}
 	// cpm needs interactions
@@ -80,7 +83,10 @@ void VTKRecorder::action(){
 
 	// wpm needs interactions
 	if(recActive[REC_WPM]) recActive[REC_INTR]=true;
-	
+
+	// liquid control needs interactions
+	if(recActive[REC_LIQ]) recActive[REC_INTR]=true;
+
 
 	// spheres
 	vtkSmartPointer<vtkPoints> spheresPos = vtkSmartPointer<vtkPoints>::New();
@@ -114,6 +120,12 @@ void VTKRecorder::action(){
 	vtkSmartPointer<vtkFloatArray> spheresCoordNumbSPH = vtkSmartPointer<vtkFloatArray>::New();
 	spheresCoordNumbSPH->SetNumberOfComponents(1);
 	spheresCoordNumbSPH->SetName("SPH_Neigh");
+#endif
+
+#ifdef YADE_LIQCONTROL
+	vtkSmartPointer<vtkFloatArray> spheresLiqVol = vtkSmartPointer<vtkFloatArray>::New();
+	spheresLiqVol->SetNumberOfComponents(1);
+	spheresLiqVol->SetName("Liq_Vol");
 #endif
 
 	vtkSmartPointer<vtkFloatArray> spheresMask = vtkSmartPointer<vtkFloatArray>::New();
@@ -258,7 +270,16 @@ void VTKRecorder::action(){
 	vtkSmartPointer<vtkFloatArray> crackNorm = vtkSmartPointer<vtkFloatArray>::New();
 	crackNorm->SetNumberOfComponents(3);
 	crackNorm->SetName("crackNorm");
-
+	
+#ifdef YADE_LIQCONTROL
+	vtkSmartPointer<vtkFloatArray> liqVol = vtkSmartPointer<vtkFloatArray>::New();
+	liqVol->SetNumberOfComponents(1);
+	liqVol->SetName("liqVol");
+	
+	vtkSmartPointer<vtkFloatArray> liqVolNorm = vtkSmartPointer<vtkFloatArray>::New();
+	liqVolNorm->SetNumberOfComponents(1);
+	liqVolNorm->SetName("liqVolNorm");
+#endif
 	// the same for newly created cracks
 // 	vtkSmartPointer<vtkPoints> crackPosNew = vtkSmartPointer<vtkPoints>::New();
 // 	vtkSmartPointer<vtkCellArray> crackCellsNew = vtkSmartPointer<vtkCellArray>::New();
@@ -365,11 +386,16 @@ void VTKRecorder::action(){
 					intrIsCohesive->InsertNextValue(jcfpmphys->isCohesive);
 					intrIsOnJoint->InsertNextValue(jcfpmphys->isOnJoint);
 					intrForceN->InsertNextValue(fn);
-				}
-
-				else {
+				} else {
 					intrForceN->InsertNextValue(fn);
 				}
+#ifdef YADE_LIQCONTROL
+				if (recActive[REC_LIQ]) {
+					const ViscElCapPhys* capphys = YADE_CAST<ViscElCapPhys*>(I->phys.get());
+					liqVol->InsertNextValue(capphys->Vb);
+					liqVolNorm->InsertNextValue(capphys->Vb/capphys->Vmax);
+				}
+#endif
 			}
 		}
 	}
@@ -437,6 +463,9 @@ void VTKRecorder::action(){
 				spheresRhoSPH->InsertNextValue(b->rho); 
 				spheresPressSPH->InsertNextValue(b->press); 
 				spheresCoordNumbSPH->InsertNextValue(b->coordNumber()); 
+#endif
+#ifdef YADE_LIQCONTROL
+				spheresLiqVol->InsertNextValue(b->Vf); 
 #endif
 				if (recActive[REC_MATERIALID]) spheresMaterialId->InsertNextValue(b->material->id);
 				continue;
@@ -579,6 +608,9 @@ void VTKRecorder::action(){
 		spheresUg->GetPointData()->AddArray(spheresPressSPH);
 		spheresUg->GetPointData()->AddArray(spheresCoordNumbSPH);
 #endif
+#ifdef YADE_LIQCONTROL
+		spheresUg->GetPointData()->AddArray(spheresLiqVol);
+#endif
 		if (recActive[REC_STRESS]){
 			spheresUg->GetPointData()->AddArray(spheresNormalStressVec);
 			spheresUg->GetPointData()->AddArray(spheresShearStressVec);
@@ -592,6 +624,7 @@ void VTKRecorder::action(){
 		if (recActive[REC_JCFPM]) {
 			spheresUg->GetPointData()->AddArray(damage);
 		}
+
 		if (recActive[REC_MATERIALID]) spheresUg->GetPointData()->AddArray(spheresMaterialId);
 
 		#ifdef YADE_VTK_MULTIBLOCK
@@ -673,6 +706,12 @@ void VTKRecorder::action(){
 		intrPd->SetLines(intrCells);
 		intrPd->GetCellData()->AddArray(intrForceN);
 		intrPd->GetCellData()->AddArray(intrAbsForceT);
+#ifdef YADE_LIQCONTROL
+		if (recActive[REC_LIQ]) { 
+			intrPd->GetCellData()->AddArray(liqVol);
+			intrPd->GetCellData()->AddArray(liqVolNorm);
+		}
+#endif
 		if (recActive[REC_JCFPM]) { 
 			intrPd->GetCellData()->AddArray(intrIsCohesive);
 			intrPd->GetCellData()->AddArray(intrIsOnJoint);

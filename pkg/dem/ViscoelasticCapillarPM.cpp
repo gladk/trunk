@@ -335,7 +335,6 @@ Real Law2_ScGeom_ViscElCapPhys_Basic::Soulie_f(const ScGeom& geom, ViscElCapPhys
   const Real V = phys.Vb;
   const Real Theta = phys.theta;
   
-  
   const Real a = -1.1*pow((V/(R*R*R)), -0.53);
   const Real b = (-0.148*log(V/(R*R*R)) - 0.96)*Theta*Theta -0.0082*log(V/(R*R*R)) + 0.48;
   const Real c = 0.0018*log(V/(R*R*R)) + 0.078;
@@ -365,7 +364,6 @@ void LiqControl::action(){
   for (unsigned int i=0; i<scene->delIntrs.size(); i++) {
     shared_ptr<Body> b = Body::byId(scene->delIntrs[i].id,scene);
     b->Vf += scene->delIntrs[i].Vol;
-    //std::cerr<<"!!!!!!!!!!!!!!!!!!!!!"<<b->id<<": "<<b->Vf<< " "<<scene->delIntrs[i].Vol <<std::endl;
     addBodyMapInt(bodyNeedUpdate, scene->delIntrs[i].id);
   }
   scene->delIntrs.clear();
@@ -445,7 +443,6 @@ void LiqControl::updateLiquid(shared_ptr<Body> b){
         FillLevel = 1.0;
       }
       
-      
       for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
         if(!((*it).second) or !(((*it).second)->isReal()))  continue;
         ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
@@ -457,7 +454,6 @@ void LiqControl::updateLiquid(shared_ptr<Body> b){
     } else {
       return;
     }
-    
   }
 }
 
