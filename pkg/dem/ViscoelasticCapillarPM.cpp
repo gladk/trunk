@@ -381,8 +381,16 @@ void LiqControl::action(){
     const Real Vmax = vMax(b1, b2);
     Vb->Vmax = Vmax;
     
-    Real Vf1 = (b1->Vf - b1->Vmin)/bI[id1];
-    Real Vf2 = (b2->Vf - b2->Vmin)/bI[id2];
+    Real Vf1 = 0.0;
+    Real Vf2 = 0.0;
+    
+    if ((b1->Vmin)<b1->Vf) {
+      Vf1 = (b1->Vf - b1->Vmin)/bI[id1];
+    }
+
+    if ((b2->Vmin)<b2->Vf) {
+      Vf2 = (b2->Vf - b2->Vmin)/bI[id2];
+    }
     
     Real Vrup = Vf1+Vf2;
     
