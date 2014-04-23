@@ -145,7 +145,7 @@ should have root privileges
 		libgts-dev python-pygraphviz libvtk5-dev python-scientific libeigen3-dev \
 		python-xlib python-qt4 pyqt4-dev-tools gtk2-engines-pixbuf python-argparse \
 		libqglviewer-dev python-imaging libjs-jquery python-sphinx python-git python-bibtex \
-		libxmu-dev libxi-dev libcgal-dev help2man libbz2-dev zlib1g-dev \
+		libxmu-dev libxi-dev libcgal-dev help2man libbz2-dev zlib1g-dev
 		
 
 Some of packages (for example, cmake, eigen3) are mandatory, some of them
@@ -155,12 +155,12 @@ some of Yade features will be disabled (see the messages at the end of configura
 		
 Additional packages, which can become mandatory later::
 
-		sudo apt-get install python-gts python-minieigen \
+		sudo apt-get install python-gts python-minieigen
 		
 For effective usage of direct solvers in the PFV-type fluid coupling, the following libraries are recommended, together with eigen>=3.1: blas, lapack, suitesparse, and metis.
-All four of them are available in many different versions. Different combinations are possible and not all of them will work. The following was found to be effective on recent deb-based systems. On ubuntu 12.04, better compile openblas with USE_OPENMP=1, else yade will run on a single core.
+All four of them are available in many different versions. Different combinations are possible and not all of them will work. The following was found to be effective on recent deb-based systems. On ubuntu 12.04, better compile openblas with USE_OPENMP=1, else yade will run on a single core::
 
-		sudo apt-get install libopenblas-dev libsuitesparse-metis-dev \
+		sudo apt-get install libopenblas-dev libsuitesparse-metis-dev
 
 Some packages listed here are relatively new and they can be absent
 in your distribution (for example, libmetis-dev or python-gts). They can be 
@@ -170,10 +170,6 @@ or just ignored. In this case some features can be disabled.
 If you are using other distribution, than Debian or its derivatives, you should
 install the softwares listed above. Their names can differ from the 
 names of Debian-packages.
-
-
-
-
 
 
 Compilation

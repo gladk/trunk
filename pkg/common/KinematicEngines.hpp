@@ -99,6 +99,7 @@ struct ServoPIDController: public TranslationEngine{
     ((Real,maxVelocity,0.0,,"Velocity [m/s]"))
     ((Vector3r,axis,Vector3r::Zero(),,"Unit vector along which apply the velocity [-]"))
     ((Real,target,0.0,,"Target value for the controller [N]"))
+    ((Vector3r,current,Vector3r::Zero(),,"Current value for the controller [N]"))
     ((Real,kP,0.0,,"Proportional gain/coefficient for the PID-controller [-]"))
     ((Real,kI,0.0,,"Integral gain/coefficient for the PID-controller [-]"))
     ((Real,kD,0.0,,"Derivative gain/coefficient for the PID-controller [-]"))

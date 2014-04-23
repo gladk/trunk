@@ -174,6 +174,7 @@ void ServoPIDController::apply(const vector<Body::id_t>& ids){
     }
     
     iterPrevStart = scene->iter;
+    current = tmpForce;
   }
   
   translationAxis = axis;
