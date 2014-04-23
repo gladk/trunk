@@ -88,7 +88,7 @@ class LiqControl: public PartialEngine{
 		void addBodyMapReal( mapBodyReal & m, Body::id_t b, Real addV );
 		Real vMax(shared_ptr<Body> b1, shared_ptr<Body> b2);
 		void updateLiquid(shared_ptr<Body> b);
-	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"Apply given torque (momentum) value at every subscribed particle, at every step. ",
+	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"This engine implements liquid migration model, introduced here [Mani2013]_ . ",
 		((int,mask,0,, "Bitmask for liquid  creation."))
   );
 };

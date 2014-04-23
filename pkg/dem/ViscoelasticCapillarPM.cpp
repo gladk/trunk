@@ -351,6 +351,7 @@ Real Law2_ScGeom_ViscElCapPhys_Basic::None_f(const ScGeom& geom, ViscElCapPhys& 
 #ifdef YADE_LIQCONTROL
 YADE_PLUGIN((LiqControl));
 void LiqControl::action(){
+  // This function implements liquid migration model, introduced here [Mani2013]
   mapBodyInt bI;
   mapBodyInt bodyNeedUpdate;
   
