@@ -366,6 +366,7 @@ void LiqControl::action(){
     shared_ptr<Body> b = Body::byId(scene->delIntrs[i].id,scene);
     b->Vf += scene->delIntrs[i].Vol;
     addBodyMapInt(bodyNeedUpdate, scene->delIntrs[i].id);
+    liqVolRup += scene->delIntrs[i].Vol;
   }
   scene->delIntrs.clear();
   
@@ -405,6 +406,7 @@ void LiqControl::action(){
       Vrup = Vf1 + Vf2;
     }
     
+    liqVolShr += Vrup;
     addBodyMapReal(bodyUpdateLiquid, id1, -Vf1);
     addBodyMapReal(bodyUpdateLiquid, id2, -Vf2);
     
@@ -460,6 +462,7 @@ void LiqControl::updateLiquid(shared_ptr<Body> b){
         if(!((*it).second) or !(((*it).second)->isReal()))  continue;
         ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
         if (physT->Vb<physT->Vmax) {
+          liqVolShr += (physT->Vmax - physT->Vb)*FillLevel;
           physT->Vb += (physT->Vmax - physT->Vb)*FillLevel;
         }
       }

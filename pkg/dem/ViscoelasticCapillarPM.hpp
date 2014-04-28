@@ -90,6 +90,8 @@ class LiqControl: public PartialEngine{
 		void updateLiquid(shared_ptr<Body> b);
 	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"This engine implements liquid migration model, introduced here [Mani2013]_ . ",
 		((int,mask,0,, "Bitmask for liquid  creation."))
+		((Real,liqVolRup,0.,, "Liquid volume (integral value), which has been freed after rupture occured, [m^3]."))
+		((Real,liqVolShr,0.,, "Liquid volume (integral value), which has been shared among of contacts, [m^3]."))
   );
 };
 
