@@ -506,4 +506,14 @@ Real LiqControl::vMax(shared_ptr<Body> const b1, shared_ptr<Body> const b2) {
   }
   return 0.03*minR*minR*minR;
 }
+
+Real liqVolIterBody (shared_ptr<Body> b) {
+  Real LiqVol = 0.0;
+  for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
+    if(!((*it).second) or !(((*it).second)->isReal()))  continue;
+    ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
+    LiqVol += physT->Vb/2.0;
+  }
+  return LiqVol;
+}
 #endif

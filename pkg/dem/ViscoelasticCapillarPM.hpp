@@ -95,5 +95,6 @@ class LiqControl: public PartialEngine{
   );
 };
 
+Real liqVolIterBody (shared_ptr<Body> b);
 REGISTER_SERIALIZABLE(LiqControl);
 #endif

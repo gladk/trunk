@@ -126,6 +126,14 @@ void VTKRecorder::action(){
 	vtkSmartPointer<vtkFloatArray> spheresLiqVol = vtkSmartPointer<vtkFloatArray>::New();
 	spheresLiqVol->SetNumberOfComponents(1);
 	spheresLiqVol->SetName("Liq_Vol");
+	
+	vtkSmartPointer<vtkFloatArray> spheresLiqVolIter = vtkSmartPointer<vtkFloatArray>::New();
+	spheresLiqVolIter->SetNumberOfComponents(1);
+	spheresLiqVolIter->SetName("Liq_VolIter");
+	
+	vtkSmartPointer<vtkFloatArray> spheresLiqVolTotal = vtkSmartPointer<vtkFloatArray>::New();
+	spheresLiqVolTotal->SetNumberOfComponents(1);
+	spheresLiqVolTotal->SetName("Liq_VolTotal");
 #endif
 
 	vtkSmartPointer<vtkFloatArray> spheresMask = vtkSmartPointer<vtkFloatArray>::New();
@@ -465,7 +473,10 @@ void VTKRecorder::action(){
 				spheresCoordNumbSPH->InsertNextValue(b->coordNumber()); 
 #endif
 #ifdef YADE_LIQCONTROL
-				spheresLiqVol->InsertNextValue(b->Vf); 
+				spheresLiqVol->InsertNextValue(b->Vf);
+				const Real tmpVolIter = liqVolIterBody(b);
+				spheresLiqVolIter->InsertNextValue(tmpVolIter);
+				spheresLiqVolTotal->InsertNextValue(tmpVolIter + b->Vf);
 #endif
 				if (recActive[REC_MATERIALID]) spheresMaterialId->InsertNextValue(b->material->id);
 				continue;
@@ -610,6 +621,8 @@ void VTKRecorder::action(){
 #endif
 #ifdef YADE_LIQCONTROL
 		spheresUg->GetPointData()->AddArray(spheresLiqVol);
+		spheresUg->GetPointData()->AddArray(spheresLiqVolIter);
+		spheresUg->GetPointData()->AddArray(spheresLiqVolTotal);
 #endif
 		if (recActive[REC_STRESS]){
 			spheresUg->GetPointData()->AddArray(spheresNormalStressVec);
