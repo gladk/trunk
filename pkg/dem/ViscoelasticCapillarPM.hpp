@@ -93,6 +93,7 @@ class LiqControl: public PartialEngine{
 		((int,mask,0,, "Bitmask for liquid  creation."))
 		((Real,liqVolRup,0.,, "Liquid volume (integral value), which has been freed after rupture occured, [m^3]."))
 		((Real,liqVolShr,0.,, "Liquid volume (integral value), which has been shared among of contacts, [m^3]."))
+		((Real,vMaxCoef,0.03,, "Coefficient for vMax, [-]."))
 		,/* ctor */
 		,/* py */
 		.def("totalLiq",&LiqControl::totalLiqVol,(python::arg("mask")=0),"Return relative angular velocity of the interaction.")

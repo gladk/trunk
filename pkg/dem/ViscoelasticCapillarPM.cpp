@@ -504,7 +504,7 @@ Real LiqControl::vMax(shared_ptr<Body> const b1, shared_ptr<Body> const b2) {
   } else {
     minR = s2->radius;
   }
-  return 0.03*minR*minR*minR;
+  return vMaxCoef*minR*minR*minR;
 }
 
 Real liqVolIterBody (shared_ptr<Body> b) {
