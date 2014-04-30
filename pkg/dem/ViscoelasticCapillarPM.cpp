@@ -512,8 +512,21 @@ Real liqVolIterBody (shared_ptr<Body> b) {
   for(Body::MapId2IntrT::iterator it=b->intrs.begin(),end=b->intrs.end(); it!=end; ++it) {
     if(!((*it).second) or !(((*it).second)->isReal()))  continue;
     ViscElCapPhys* physT=dynamic_cast<ViscElCapPhys*>(((*it).second)->phys.get());
-    LiqVol += physT->Vb/2.0;
+    if (physT->Vb>0) {
+      LiqVol += physT->Vb/2.0;
+    }
   }
   return LiqVol;
+}
+
+Real LiqControl::totalLiqVol(int mask=0) const{
+  Scene* scene=Omega::instance().getScene().get();
+  Real totalLiqVol = 0.0;
+  FOREACH(const shared_ptr<Body>& b, *scene->bodies){
+    if((mask>0 && (b->groupMask & mask)==0) or (!b)) continue;
+    totalLiqVol += liqVolIterBody(b);
+    if (b->Vf > 0) {totalLiqVol +=b->Vf;}
+  }
+  return totalLiqVol;
 }
 #endif

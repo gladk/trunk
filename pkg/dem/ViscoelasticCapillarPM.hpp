@@ -87,11 +87,15 @@ class LiqControl: public PartialEngine{
 		void addBodyMapInt( mapBodyInt & m, Body::id_t b );
 		void addBodyMapReal( mapBodyReal & m, Body::id_t b, Real addV );
 		Real vMax(shared_ptr<Body> b1, shared_ptr<Body> b2);
+		Real totalLiqVol(int mask) const;
 		void updateLiquid(shared_ptr<Body> b);
-	YADE_CLASS_BASE_DOC_ATTRS(LiqControl,PartialEngine,"This engine implements liquid migration model, introduced here [Mani2013]_ . ",
+	YADE_CLASS_BASE_DOC_ATTRS_CTOR_PY(LiqControl,PartialEngine,"This engine implements liquid migration model, introduced here [Mani2013]_ . ",
 		((int,mask,0,, "Bitmask for liquid  creation."))
 		((Real,liqVolRup,0.,, "Liquid volume (integral value), which has been freed after rupture occured, [m^3]."))
 		((Real,liqVolShr,0.,, "Liquid volume (integral value), which has been shared among of contacts, [m^3]."))
+		,/* ctor */
+		,/* py */
+		.def("totalLiq",&LiqControl::totalLiqVol,(python::arg("mask")=0),"Return relative angular velocity of the interaction.")
   );
 };
 
