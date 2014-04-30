@@ -52,6 +52,8 @@ class FlowBoundingSphere : public Network<_Tesselation>
 		vector<CellHandle> IPCells;
 		vector<pair<Point,Real> > imposedF;
 		vector<CellHandle> IFCells;
+		//Pointers to vectors used for user defined boundary pressure
+		vector<Real> *pxpos, *ppval;
 		
 		void initNewTri () {noCache=true; /*isLinearSystemSet=false; areCellsOrdered=false;*/}//set flags after retriangulation
 		bool permeabilityMap;
@@ -146,6 +148,7 @@ class FlowBoundingSphere : public Network<_Tesselation>
 		virtual void averageRelativeCellVelocity();
 		void averageFluidVelocity();
 		void applySinusoidalPressure(RTriangulation& Tri, double amplitude, double averagePressure, double loadIntervals);
+		void applyUserDefinedPressure(RTriangulation& Tri, vector<Real>& xpos, vector<Real>& pval);
 		bool isOnSolid  (double X, double Y, double Z);
 		double getPorePressure (double X, double Y, double Z);
 		void measurePressureProfile(double WallUpy, double WallDowny);

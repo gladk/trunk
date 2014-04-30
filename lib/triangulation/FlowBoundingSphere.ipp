@@ -86,6 +86,7 @@ FlowBoundingSphere<Tesselation>::FlowBoundingSphere()
 	maxKdivKmean=100.;
 	ompThreads=1;
 	errorCode=0;
+	pxpos=ppval=NULL;
 }
 
 template <class Tesselation> 
@@ -397,6 +398,29 @@ void FlowBoundingSphere<Tesselation>::applySinusoidalPressure(RTriangulation& Tr
 	  }
 	}
 }
+
+template <class Tesselation> 
+void FlowBoundingSphere<Tesselation>::applyUserDefinedPressure(RTriangulation& Tri, vector<Real>& xpos, vector<Real>& pval)
+{
+	if (!(xpos.size() && xpos.size()==pval.size())) {cerr << "Wrong definition of boundary pressure, check input" <<endl; return;}
+	pxpos=&xpos; ppval=&pval;
+	Real dx = xpos[1] - xpos[0]; Real xinit=xpos[0]; Real xlast=xpos.back();
+	VectorCell tmpCells; tmpCells.resize(10000);
+	VCellIterator cellsEnd = Tri.incident_cells(T[currentTes].vertexHandles[yMaxId],tmpCells.begin());
+	for (VCellIterator it = tmpCells.begin(); it != cellsEnd; it++)
+	{
+		if(Tri.is_infinite(*it)) continue;
+		Point& p1 = (*it)->info();
+		CellHandle& cell = *it;
+		if (p1.x()<xinit || p1.x()>xlast) cerr<<"udef pressure: cell out of range"<<endl;
+		else {
+			Real frac, intg;
+			frac=modf((p1.x()-xinit)/dx,&intg);
+			cell->info().p() = pval[intg]*(1-frac) + pval[intg+1]*frac;
+		}
+	}
+}
+
 template <class Tesselation> 
 void FlowBoundingSphere<Tesselation>::interpolate(Tesselation& Tes, Tesselation& NewTes)
 {
@@ -725,6 +749,8 @@ void FlowBoundingSphere<Tesselation>::initializePressure( double pZero )
 			}
                 }
         }
+        if (ppval && pxpos) applyUserDefinedPressure(Tri,*pxpos,*ppval);
+        
         IPCells.clear();
         for (unsigned int n=0; n<imposedP.size();n++) {
 		CellHandle cell=Tri.locate(imposedP[n].first);
@@ -763,6 +789,7 @@ bool FlowBoundingSphere<Tesselation>::reApplyBoundaryConditions()
 			}
                 }
         }
+        if (ppval && pxpos) applyUserDefinedPressure(T[currentTes].Triangulation(),*pxpos,*ppval);
         for (unsigned int n=0; n<imposedP.size();n++) {
 		IPCells[n]->info().p()=imposedP[n].second;
 		IPCells[n]->info().Pcondition=true;}

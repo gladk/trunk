@@ -292,6 +292,8 @@ class TemplateFlowEngine : public PartialEngine
 		((int, numSolveThreads, 1,,"number of openblas threads in the solve phase."))
 		((int, numFactorizeThreads, 1,,"number of openblas threads in the factorization phase"))
 		#endif
+		((vector<Real>, boundaryPressure,vector<Real>(),,"values defining pressure along x-axis for the top surface. See also :yref:`TEMPLATE_FLOW_NAME::boundaryXPos`"))
+		((vector<Real>, boundaryXPos,vector<Real>(),,"values of the x-coordinate for which pressure is defined. See also :yref:`TEMPLATE_FLOW_NAME::boundaryPressure`"))
 		,
 		/*deprec*/
 		((meanK_opt,clampKValues,"the name changed"))

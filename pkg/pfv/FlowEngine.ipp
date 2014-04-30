@@ -278,6 +278,7 @@ void TemplateFlowEngine<_CellInfo,_VertexInfo,_Tesselation,solverT>::buildTriang
 	
         if ( !first && !multithread && (useSolver==0 || fluidBulkModulus>0 || doInterpolate)) flow.interpolate ( flow.T[!flow.currentTes], flow.T[flow.currentTes] );
         if ( waveAction ) flow.applySinusoidalPressure ( flow.T[flow.currentTes].Triangulation(), sineMagnitude, sineAverage, 30 );
+	else if (boundaryPressure.size()!=0) flow.applyUserDefinedPressure ( flow.T[flow.currentTes].Triangulation(), boundaryXPos , boundaryPressure);
         if (normalLubrication || shearLubrication || viscousShear) flow.computeEdgesSurfaces();
 }
 template< class _CellInfo, class _VertexInfo, class _Tesselation, class solverT >
