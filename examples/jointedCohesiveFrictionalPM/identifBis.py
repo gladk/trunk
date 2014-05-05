@@ -5,27 +5,19 @@
 # The sample (spheres + facets) has to exist already, with their JCFpmMat
 
 
-############################ engines definition
-interactionRadius=1.;
-O.engines=[
+### engines definition, according to our only goal that is to detect spheres concerned by joint surfaces
 
-	ForceResetter(),
-	InsertionSortCollider([Bo1_Sphere_Aabb(aabbEnlargeFactor=interactionRadius,label='is2aabb'),Bo1_Facet_Aabb()]),
+O.engines=[
+	InsertionSortCollider([Bo1_Sphere_Aabb(),Bo1_Facet_Aabb()],verletDist=0), #verletDist=0 to avoid introducing NewtonIntegrator in engines list
 	InteractionLoop(
-		[Ig2_Sphere_Sphere_ScGeom(interactionDetectionFactor=interactionRadius,label='ss2d3dg'),Ig2_Facet_Sphere_ScGeom()],
+		[Ig2_Sphere_Sphere_ScGeom(),Ig2_Facet_Sphere_ScGeom()],
 		[Ip2_JCFpmMat_JCFpmMat_JCFpmPhys(cohesiveTresholdIteration=1,label='interactionPhys')],
 		[Law2_ScGeom_JCFpmPhys_JointedCohesiveFrictionalPM(smoothJoint=True,label='interactionLaw')]
-	),
-	NewtonIntegrator(damping=1)
-
+	)
 ]
 
-############################ timestep + opening yade windows
-O.dt=0.001*utils.PWaveTimeStep()
+O.dt=1 # whatever value is ok
 
-# from yade import qt
-# v=qt.Controller()
-# v=qt.View()
 
 ############################ Identification spheres on joint
 #### color set for particles on joint
@@ -35,9 +27,10 @@ jointcolor3=(0,0,1)
 jointcolor4=(1,1,1)
 jointcolor5=(0,0,0)
 
-#### first step-> find spheres on facet
-O.step();
 
+O.step(); # one step to know interactions
+
+#### first step-> find spheres on facet
 for i in O.interactions:
     ##if not i.isReal : continue
     ### Rk: facet are only stored in id1 
@@ -125,36 +118,17 @@ for j in O.interactions:
 		    elif facetSphereDir.dot(jointNormalRef)<0:
 			O.bodies[othSph].state.jointNormal1=-jointNormalRef
 
-#### for visualization:
-#bj=0
-#vert=(0.,1.,0.)
-#hor=(0.,1.,1.)
-#for o in O.bodies:
-    #if o.state.onJoint==True : # or o.shape.name=='Facet':
-	##if  o.shape.name=='Facet':
-	    ##o.shape.wire=True
-	##o.state.pos+=(0,50,0)
-	##bj+=1
-	#if o.state.jointNormal1.dot(hor)>0 :
-	    ##o.state.pos+=(0,50,0)
-	    #o.shape.color=jointcolor1
-	#elif o.state.jointNormal1.dot(hor)<0 :
-	    ##o.state.pos+=(0,55,0)
-	    #o.shape.color=jointcolor2
-	#if o.mat.type>2 :
-	    #bj+=1
-	    #o.shape.color=jointcolor5
-	    ##print o.state.jointNormal.dot(vert)
 
 
-##### to delete facets (should be OK to start the simulation after that!
+##### to delete facets
 for b in O.bodies:
     if isinstance(b.shape,Facet):
 	O.bodies.erase(b.id)
 
 O.resetTime()
 O.interactions.clear()
-print '\n IdentificationSpheresOnJoint executed ! Spheres onJoint (and so on...) detected, facets deleted\n\n'
+
+print '\nIdentificationSpheresOnJoint executed ! Spheres onJoint (and so on...) detected, facets deleted, simulation may go on.\n\n'
 
 
 

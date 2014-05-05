@@ -29,6 +29,8 @@ If you have another distribution, not Ubuntu Precise (Version 12.04), be sure to
 correct name in the first line (for instance, jessie, trusty or wheezy).
 
 After that you can normally start Yade using "yadedaily" or "yadedaily-batch" command.
+yadedaily on older distributions can have some disabled features due to older library
+versions, shipped with particular distribution. 
 
 Git-repository for packaging stuff is available on `GitHub <https://github.com/yade/yadedaily/>`_. 
 Each branch corresponds to one distribution e.g. precise, jessie etc.

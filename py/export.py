@@ -640,16 +640,21 @@ class VTKExporter:
 		outFile.close()
 		self.intrsSnapCount += 1
 
-	def exportContactPoints(self,ids='all',what=[],comment="comment",numLabel=None):
+	def exportContactPoints(self,ids='all',what=[],useRef={},comment="comment",numLabel=None):
 		"""exports constact points and defined properties.
 		
 		:param [(int,int)] ids: see exportInteractions
 		:param [tuple(2)] what: what to export. parameter is list of couple (name,command). Name is string under which it is save to vtk, command is string to evaluate. Note that the CPs are labeled as i in this function (sccording to their interaction). Scalar, vector and tensor variables are supported. For example, to export stiffness difference from certain value (1e9) (named as dStiff) you should write: ... what=[('dStiff','i.phys.kn-1e9'), ...
+		:param {Interaction:Vector3} useRef: if not specified, current position used. Otherwise use position from dict using interactions as keys. Interactions not in dict are not exported
 		:param string comment: comment to add to vtk file
 		:param int numLabel: number of file (e.g. time step), if unspecified, the last used value + 1 will be used
 		"""
 		# get list of interactions to export
-		intrs = self._getInteractions(ids)
+		if useRef:
+			useRef = dict(((i.id1,i.id2),v) for i,v in useRef.iteritems())
+			intrs = useRef.keys()
+		else:
+			intrs = self._getInteractions(ids) 
 		if not intrs:
 			return
 		nIntrs = len(intrs)
@@ -660,8 +665,11 @@ class VTKExporter:
 		outFile.write("# vtk DataFile Version 3.0.\n%s\nASCII\n\nDATASET POLYDATA\nPOINTS %d double\n"%(comment,nIntrs))
 		# write coords of contact points
 		for ii,jj in intrs:
-			i = O.interactions[ii,jj]
-			pos = i.geom.contactPoint 
+			if useRef:
+				pos = useRef[(ii,jj)]
+			else:
+				i = O.interactions[ii,jj]
+				pos = i.geom.contactPoint 
 			outFile.write("%g %g %g\n"%(pos[0],pos[1],pos[2]))
 		# see exportSpheres for explanation of this code block
 		if what:
@@ -673,20 +681,30 @@ class VTKExporter:
 			if isinstance(test,Matrix3):
 				outFile.write("\nTENSORS %s double\n"%(name))
 				for ii,jj in intrs:
-					i = O.interactions[ii,jj]
-					t = eval(command)
+					try:
+						i = O.interactions[ii,jj]
+						t = eval(command)
+					except IndexError:
+						t = Matrix3.Zero # TODO?
 					outFile.write("%g %g %g\n%g %g %g\n%g %g %g\n\n"%(t[0,0],t[0,1],t[0,2],t[1,0],t[1,1],t[1,2],t[2,0],t[2,1],t[2,2]))
 			elif isinstance(test,Vector3):
 				outFile.write("\nVECTORS %s double\n"%(name))
 				for ii,jj in intrs:
-					i = O.interactions[ii,jj]
-					v = eval(command)
+					try:
+						i = O.interactions[ii,jj]
+						v = eval(command)
+					except IndexError:
+						v = Vector3.Zero # TODO?
 					outFile.write("%g %g %g\n"%(v[0],v[1],v[2]))
 			elif isinstance(test,(int,float)):
 				outFile.write("\nSCALARS %s double 1\nLOOKUP_TABLE default\n"%(name))
 				for ii,jj in intrs:
-					i = O.interactions[ii,jj]
-					outFile.write("%g\n"%(eval(command)))
+					try:
+						i = O.interactions[ii,jj]
+						f = eval(command)
+					except IndexError:
+						f = 0. # TODO?
+					outFile.write("%g\n"%(f))
 			else:
 				self._warn("exportContacPoints: wrong 'what' parameter, vtk output might be corrupted'")
 		outFile.close()

@@ -18,7 +18,7 @@ nSpheres = 3000.0
 poros=0.13
 rMeanSpheres = dimModele * pow(3.0/4.0*(1-poros)/(pi*nSpheres),1.0/3.0)
 print ''
-print 'Creating a cubic sample of spheres (may take some time)'
+print 'Creating a cubic sample of spheres (may take some time and cause warnings)'
 print ''
 sp = pack.randomDensePack(pred,radius=rMeanSpheres,rRelFuzz=0.3,memoizeDb='/tmp/gts-triax-packings.sqlite',returnSpherePack=True)
 sp.toSimulation(color=(0.9,0.8,0.6),wire=False,material=mat)
@@ -99,20 +99,20 @@ O.engines=[
 
 #### dataCollector
 from yade import plot
-plot.plots={'iterations':('v',)}
-#plot.plots={'x':('z',)}
+plot.plots={'iterations':'v','x':'z'}
+
 def dataCollector():
 	R=O.bodies[refPoint]
 	plot.addData(v=R.state.vel[2],z=R.state.pos[2],x=R.state.pos[0],iterations=O.iter,t=O.realtime)
 
 #### joint strength degradation
-stableIter=2000
+stableIter=1000
 stableVel=0.001
 degrade=True
 def jointStrengthDegradation():
     global degrade
     if degrade and O.iter>=stableIter and abs(O.bodies[refPoint].state.vel[2])<stableVel :
-	print '!joint cohesion total degradation!', ' | iteration=', O.iter
+	print 'Equilibrium reached \nJoint cohesion canceled now !', ' | iteration=', O.iter
 	degrade=False
 	for i in O.interactions:
 	    if i.phys.isOnJoint : 
@@ -121,9 +121,7 @@ def jointStrengthDegradation():
 		  i.phys.FnMax=0.
 		  i.phys.FsMax=0.
 
-O.step()
-
 print 'Seeking after an initial equilibrium state'
 print ''
 O.run(10000)
-plot.plot()# note the straight line (during sliding step, before free fall) despite the discretization of joint plane with spheres
+plot.plot()# note the straight trajectory (z(x) plot)during sliding step (before free fall) despite the discretization of joint plane with spheres

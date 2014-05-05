@@ -28,7 +28,7 @@ class Bound: public Serializable, public Indexable{
 		((Real,sweepLength,0, Attr::readonly,"The length used to increase the bounding boxe size, can be adjusted on the basis of previous displacement if :yref:`BoundDispatcher::targetInterv`>0. |yupdate|"))
 		((Vector3r,color,Vector3r(1,1,1),,"Color for rendering this object"))
 		((Vector3r,min,Vector3r(NaN,NaN,NaN),(Attr::noSave | Attr::readonly),"Lower corner of box containing this bound (and the :yref:`Body` as well)"))
-		((Vector3r,max,Vector3r(NaN,NaN,NaN),(Attr::noSave | Attr::readonly),"Lower corner of box containing this bound (and the :yref:`Body` as well)"))
+		((Vector3r,max,Vector3r(NaN,NaN,NaN),(Attr::noSave | Attr::readonly),"Upper corner of box containing this bound (and the :yref:`Body` as well)"))
 		,
 		/*deprec*/,
 		/* init */,
