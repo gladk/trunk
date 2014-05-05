@@ -519,6 +519,19 @@ Real liqVolIterBody (shared_ptr<Body> b) {
   return LiqVol;
 }
 
+Real LiqControl::liqVolBody (id_t id) const {
+  Scene* scene=Omega::instance().getScene().get();
+  const BodyContainer& bodies = *scene->bodies;
+  if (id >=0 and bodies[id]) {
+    if (bodies[id]->Vf > 0) {
+      return bodies[id]->Vf + liqVolIterBody(bodies[id]);
+    } else {
+      return liqVolIterBody(bodies[id]);
+    }
+  }
+  else return -1;
+}
+
 Real LiqControl::totalLiqVol(int mask=0) const{
   Scene* scene=Omega::instance().getScene().get();
   Real totalLiqVol = 0.0;
