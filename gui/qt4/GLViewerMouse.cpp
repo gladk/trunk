@@ -25,7 +25,7 @@
 #include<boost/algorithm/string/case_conv.hpp>
 #include<yade/lib/serialization/ObjectIO.hpp>
 #include<yade/lib/pyutil/gil.hpp>
-
+#include<QGLViewer/manipulatedCameraFrame.h>
 
 #include<QtGui/qevent.h>
 
@@ -38,22 +38,21 @@ using namespace boost;
 void GLViewer::mouseMovesCamera(){
   setWheelBinding(Qt::ShiftModifier , FRAME, ZOOM);
   setWheelBinding(Qt::NoModifier, CAMERA, ZOOM);
+  camera()->frame()->setWheelSensitivity(-1.0f);
 
 #if QGLVIEWER_VERSION>=0x020500
-    setMouseBinding(Qt::ShiftModifier, Qt::LeftButton, SELECT);
-    
-    setMouseBinding(Qt::ShiftModifier, Qt::LeftButton, FRAME, ZOOM);
-    setMouseBinding(Qt::ShiftModifier, Qt::RightButton, FRAME, ZOOM);
-    setMouseBinding(Qt::ShiftModifier, Qt::MidButton, FRAME, TRANSLATE);
-    setMouseBinding(Qt::ShiftModifier, Qt::RightButton, FRAME, ROTATE);
-      
-    setMouseBinding(Qt::NoModifier, Qt::RightButton, CAMERA, ZOOM);
-    setMouseBinding(Qt::NoModifier, Qt::MidButton, CAMERA, ZOOM);
-    setMouseBinding(Qt::NoModifier, Qt::LeftButton, CAMERA, ROTATE);
-    setMouseBinding(Qt::NoModifier, Qt::RightButton, CAMERA, TRANSLATE);
-#else
-  camera()->frame()->setWheelSensitivity(-1.0f);
+  setMouseBinding(Qt::ShiftModifier, Qt::LeftButton, SELECT);
   
+  setMouseBinding(Qt::ShiftModifier, Qt::LeftButton, FRAME, ZOOM);
+  setMouseBinding(Qt::ShiftModifier, Qt::RightButton, FRAME, ZOOM);
+  setMouseBinding(Qt::ShiftModifier, Qt::MidButton, FRAME, TRANSLATE);
+  setMouseBinding(Qt::ShiftModifier, Qt::RightButton, FRAME, ROTATE);
+    
+  setMouseBinding(Qt::NoModifier, Qt::RightButton, CAMERA, ZOOM);
+  setMouseBinding(Qt::NoModifier, Qt::MidButton, CAMERA, ZOOM);
+  setMouseBinding(Qt::NoModifier, Qt::LeftButton, CAMERA, ROTATE);
+  setMouseBinding(Qt::NoModifier, Qt::RightButton, CAMERA, TRANSLATE);
+#else
   setMouseBinding(Qt::SHIFT + Qt::LeftButton, SELECT);
   setMouseBinding(Qt::SHIFT + Qt::LeftButton + Qt::RightButton, FRAME, ZOOM);
   setMouseBinding(Qt::SHIFT + Qt::MidButton, FRAME, TRANSLATE);

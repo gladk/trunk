@@ -75,9 +75,7 @@ GLViewer::GLViewer(int _viewId, const shared_ptr<OpenGLRenderer>& _renderer, QGL
 
 	xyPlaneConstraint=shared_ptr<qglviewer::LocalConstraint>(new qglviewer::LocalConstraint());
 	manipulatedFrame()->setConstraint(NULL);
-#if QGLVIEWER_VERSION>=0x020500
-  manipulatedFrame()->setWheelSensitivity(-1.0f);
-#endif
+
 	setKeyDescription(Qt::Key_Return,"Run simulation.");
 	setKeyDescription(Qt::Key_A,"Toggle visibility of global axes.");
 	setKeyDescription(Qt::Key_C,"Set scene center so that all bodies are visible; if a body is selected, center around this body.");
