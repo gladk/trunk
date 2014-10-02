@@ -12,7 +12,7 @@ void SPHEngine::action(){
     YADE_PARALLEL_FOREACH_BODY_BEGIN(const shared_ptr<Body>& b, scene->bodies){
       if(mask>0 && (b->groupMask & mask)==0) continue;
       this->calculateSPHRho(b);
-      b->press=k*(b->rho - b->rho0);
+      b->press=std::max(0.0, k*(b->rho - b->rho0));
     } YADE_PARALLEL_FOREACH_BODY_END();
   }
   /*
@@ -55,7 +55,7 @@ void SPHEngine::calculateSPHRho(const shared_ptr<Body>& b) {
       rho += b2->state->mass*kernelFunctionCurDensity(SmoothDist, phys.h);
     }
     // [Mueller2003], (3), we need to consider the density of the current body (?)
-    rho += b->state->mass*kernelFunctionCurDensity(0.0, s->radius);
+    // rho += b->state->mass*kernelFunctionCurDensity(0.0, s->radius);
   }
   b->rho = rho;
 }
@@ -93,172 +93,133 @@ void SPHEngine::calculateSPHCs(const shared_ptr<Body>& b) {
   b->Cs = Cs;
 }
 
-Real smoothkernelPoly6(const double & rr, const double & hh) {
-  if (rr<=hh) {
-    const Real h = 1; const Real r = rr/hh;
-    //return 315/(64*M_PI*pow(h,9))*pow((h*h - r*r), 3);
-    return 315/(64*M_PI)*pow((h - r*r), 3);
+Real smoothkernelPoly6(const double & r, const double & h) {
+  if (r<=h) {
+    return 315/(64*M_PI*pow(h,9))*pow((h*h - r*r), 3);
   } else {
     return 0;
   }
 }
 
-Real smoothkernelPoly6Grad(const double & rr, const double & hh) {
-  if (rr<=hh) {
-    const Real h = 1; const Real r = rr/hh;
-    //return -315/(64*M_PI*pow(h,9))*(-6*r*pow((h*h-r*r), 2));
-    return -315/(64*M_PI)*(-6*r*pow((h-r*r), 2));
+Real smoothkernelPoly6Grad(const double & r, const double & h) {
+  if (r<=h) {
+    return -315/(64*M_PI*pow(h,9))*(-6*r*pow((h*h-r*r), 2));
   } else {
     return 0;
   }
 }
 
-Real smoothkernelPoly6Lapl(const double & rr, const double & hh) {
-  if (rr<=hh) {
-    const Real h = 1; const Real r = rr/hh;
-    //return 315/(64*M_PI*pow(h,9))*(-6*(h*h-r*r)*(h*h - 5*r*r));
-    return 315/(64*M_PI)*(-6*(h*h-r*r)*(h*h - 5*r*r));
+Real smoothkernelPoly6Lapl(const double & r, const double & h) {
+  if (r<=h) {
+    return 315/(64*M_PI*pow(h,9))*(-6*(h*h-r*r)*(h*h - 5*r*r));
   } else {
     return 0;
   }
 }
 
-Real smoothkernelSpiky(const double & rr, const double & hh) {
-  if (rr<=hh) {
-    const Real h = 1; const Real r = rr/hh;
-    //return 15/(M_PI*pow(h,6))*(pow((h-r), 3));             // [Mueller2003], (21)
-    return 15/(M_PI)*(pow((h-r), 3));             // [Mueller2003], (21)
+Real smoothkernelSpiky(const double & r, const double & h) {
+  if (r<=h) {
+    return 15/(M_PI*pow(h,6))*(pow((h-r), 3));             // [Mueller2003], (21)
   } else {
     return 0;
   }
 }
 
-Real smoothkernelSpikyGrad(const double & rr, const double & hh) {
-  if (rr<=hh) {
-    const Real h = 1; const Real r = rr/hh;
-    //return -15/(M_PI*pow(h,6))*(-3*pow((h-r),2));
-    return -15/(M_PI)*(-3*pow((h-r),2));
+Real smoothkernelSpikyGrad(const double & r, const double & h) {
+  if (r<=h) {
+    return -15/(M_PI*pow(h,6))*(-3*pow((h-r),2));
   } else {
     return 0;
   }
 }
 
-Real smoothkernelSpikyLapl(const double & rr, const double & hh) {
-  if (rr<=hh) {
-    const Real h = 1; const Real r = rr/hh;
-    //return 15/(M_PI*pow(h,6))*(6*(h-r));
-    return 15/(M_PI)*(6*(h-r));
+Real smoothkernelSpikyLapl(const double & r, const double & h) {
+  if (r<=h) {
+    return 15/(M_PI*pow(h,6))*(6*(h-r));
   } else {
     return 0;
   }
 }
 
-Real smoothkernelVisco(const double & rr, const double & hh) {
-  if (rr<=hh and rr!=0 and hh!=0) {
-    const Real h = 1; const Real r = rr/hh;
-    //return 15/(2*M_PI*pow(h,3))*(-r*r*r/(2*h*h*h) + r*r/(h*h) + h/(2*r) -1);   // [Mueller2003], (21)
-    return 15/(2*M_PI)*(-r*r*r/(2) + r*r + h/(2*r) -1);   // [Mueller2003], (21)
+Real smoothkernelVisco(const double & r, const double & h) {
+  if (r<=h and r!=0 and h!=0) {
+    return 15/(2*M_PI*pow(h,3))*(-r*r*r/(2*h*h*h) + r*r/(h*h) + h/(2*r) -1);   // [Mueller2003], (21)
   } else {
     return 0;
   }
 }
 
-Real smoothkernelViscoGrad(const double & rr, const double & hh) {
-  if (rr<=hh and rr!=0 and hh!=0) {
-    const Real h = 1; const Real r = rr/hh;
-    //return -15/(2*M_PI*pow(h,3))*(-3*r*r/(2*h*h*h) + 2*r/(h*h) - h/(2*r*r));
-    return -15/(2*M_PI)*(-3*r*r/(2) + 2*r - h/(2*r*r));
+Real smoothkernelViscoGrad(const double & r, const double & h) {
+  if (r<=h and r!=0 and h!=0) {
+    return -15/(2*M_PI*pow(h,3))*(-3*r*r/(2*h*h*h) + 2*r/(h*h) - h/(2*r*r));
   } else {
     return 0;
   }
 }
 
-Real smoothkernelViscoLapl(const double & rr, const double & hh) {
-  if (rr<=hh and rr!=0 and hh!=0) {
-    const Real h = 1; const Real r = rr/hh;
-    //return 45/(M_PI*pow(h,6))*(h - rrj);                     // [Mueller2003], (22+)
-    //return 15/(2*M_PI*pow(h,3))*(-3*r*r/(2*h*h*h) + 2*r/(h*h) - h/(2*r*r));
-    return 15/(2*M_PI)*(-3*r*r/(2) + 2*r - h/(2*r*r));
+Real smoothkernelViscoLapl(const double & r, const double & h) {
+  if (r<=h and r!=0 and h!=0) {
+    return 45/(M_PI*pow(h,6))*(h - r);                     // [Mueller2003], (22+)
   } else {
     return 0;
   }
 }
 
-Real smoothkernelLucy(const double & rr, const double & hh) {
-  if (rr<=hh and rr!=0 and hh!=0) {
-    //const Real h = 1; 
-    //return 5/(9*M_PI*pow(h,2))*(1+3*r/h)*pow((1-r/h),3);
-    const Real r = rr/hh;
+Real smoothkernelLucy(const double & r, const double & h) {
+  if (r<=h and r!=0 and h!=0) {
     return 5/(9*M_PI)*(1+3*r)*pow((1-r),3);
   } else {
     return 0;
   }
 }
 
-Real smoothkernelLucyGrad(const double & rr, const double & hh) {
-  if (rr<=hh and rr!=0 and hh!=0) {
-    //const Real h = 1; 
-    //return -5/(9*M_PI*pow(h,2))*(-12*r/(h*h))*pow((1-r/h),2);
-    const Real r = rr/hh;
-    return -5/(9*M_PI)*(-12*r)*pow((1-r),2);
+Real smoothkernelLucyGrad(const double & r, const double & h) {
+  if (r<=h and r!=0 and h!=0) {
+    return -5/(9*M_PI*pow(h,2))*(-12*r/(h*h))*pow((1-r/h),2);
   } else {
     return 0;
   }
 }
 
-Real smoothkernelLucyLapl(const double & rr, const double & hh) {
-  if (rr<=hh and rr!=0 and hh!=0) {
-    //const Real h = 1; 
-    //return  5/(9*M_PI*pow(h,2))*(-12/(h*h))*(1-r/h)*(1-3*r/h);
-    const Real r = rr/hh;
-    return  5/(9*M_PI)*(-12)*(1-r)*(1-3*r);
+Real smoothkernelLucyLapl(const double & r, const double & h) {
+  if (r<=h and r!=0 and h!=0) {
+    return  5/(9*M_PI*pow(h,2))*(-12/(h*h))*(1-r/h)*(1-3*r/h);
   } else {
     return 0;
   }
 }
 
-Real smoothkernelMonaghan(const double & rr, const double & hh) {
+Real smoothkernelMonaghan(const double & r, const double & h) {
   Real ret = 0.0;
-  if (hh!=0) {
-    //const Real h = 1; 
-    const Real r = rr/hh;
-    if (rr/hh<0.5) {
-      //ret = 40/(7*M_PI*h*h)*(1 - 6*pow((r/h),2) + 6*pow((r/h),3));
-      ret = 40/(7*M_PI)*(1 - 6*pow((r),2) + 6*pow((r),3));
+  if (h!=0) {
+    if (r/h<0.5) {
+      ret = 40/(7*M_PI*h*h)*(1 - 6*pow((r/h),2) + 6*pow((r/h),3));
     } else {
-      //ret = 80/(7*M_PI*h*h)*pow((1 - (r/h)), 3);
-      ret = 80/(7*M_PI)*pow((1 - (r)), 3);
+      ret = 80/(7*M_PI*h*h)*pow((1 - (r/h)), 3);
     }
   }
   return ret;
 }
 
-Real smoothkernelMonaghanGrad(const double & rr, const double & hh) {
+Real smoothkernelMonaghanGrad(const double & r, const double & h) {
   Real ret = 0.0;
-  if (hh!=0) {
-    const Real h = 1; const Real r = rr/hh;
-    if (rr/hh<0.5) {
-      //ret = -40/(7*M_PI*h*h)*( - 6*r/(h*h))*(2 - 3 * r/(h*h*h));
-      ret = -40/(7*M_PI)*( - 6*r)*(2 - 3 * r);
+  if (h!=0) {
+    if (r/h<0.5) {
+      ret = -40/(7*M_PI*h*h)*( - 6*r/(h*h))*(2 - 3 * r/(h*h*h));
     } else {
-      //ret = -80/(7*M_PI*h*h)*( -3/h)*pow((1 -r/h), 2);
-      ret = -80/(7*M_PI)*( -3/h)*pow((1 -r), 2);
+      ret = -80/(7*M_PI*h*h)*( -3/h)*pow((1 -r/h), 2);
     }
   }
   return ret;
 }
 
-Real smoothkernelMonaghanLapl(const double & rr, const double & hh) {
+Real smoothkernelMonaghanLapl(const double & r, const double & h) {
   Real ret = 0.0;
-  if (hh!=0) {
-    //const Real h = 1; 
-    const Real r = rr/hh;
-    if (rr/hh<0.5) {
-      //ret = 40/(7*M_PI*h*h)*( - 12/(h*h))*(1 - 3 * r/(h*h*h*h*h));
-      ret = 40/(7*M_PI)*( - 12)*(1 - 3 * r);
+  if (h!=0) {
+    if (r/h<0.5) {
+      ret = 40/(7*M_PI*h*h)*( - 12/(h*h))*(1 - 3 * r/(h*h*h*h*h));
     } else {
-      //ret = 80/(7*M_PI*h*h)*( 6/(h*h))*(1 -r/h);
-      ret = 80/(7*M_PI)*( 6)*(1 -r);
+      ret = 80/(7*M_PI*h*h)*( 6/(h*h))*(1 -r/h);
     }
   }
   return ret;
