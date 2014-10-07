@@ -256,6 +256,7 @@ void Ip2_ViscElMat_ViscElMat_ViscElPhys::Calculate_ViscElMat_ViscElMat_ViscElPhy
 	if (mat1->SPHmode and mat2->SPHmode)  {
 		phys->SPHmode=true;
 		phys->mu=(mat1->mu+mat2->mu)/2.0;
+		phys->h=(mat1->h+mat2->h)/2.0;
 	}
 	
 	phys->kernelFunctionCurrentPressure = returnKernelFunction (mat1->KernFunctionPressure, mat2->KernFunctionPressure, Grad);
