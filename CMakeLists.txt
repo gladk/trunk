@@ -81,6 +81,7 @@ ELSE (DEBUG)
   ADD_DEFINITIONS(${CMAKE_CXX_FLAGS_RELEASE})
 ENDIF (DEBUG)
 
+ADD_DEFINITIONS("-DYADE_DEFORM")
 #===========================================================
 # Add possibility to use local boost installation (e.g. -DLocalBoost=1.46.1)
 

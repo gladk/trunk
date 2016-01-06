@@ -64,6 +64,9 @@ class State: public Serializable, public Indexable{
 		((Real,Vf, 0.0,,   "Individual amount of liquid"))
 		((Real,Vmin, 0.0,, "Minimal amount of liquid"))
 #endif
+#ifdef YADE_DEFORM
+		((Real,dR, 0.0,,   "Sphere deformation"))
+#endif
 		,
 		/* additional initializers */
 			((pos,se3.position))

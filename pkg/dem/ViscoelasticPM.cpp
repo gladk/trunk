@@ -66,14 +66,19 @@ bool computeForceTorqueViscEl(shared_ptr<IGeom>& _geom, shared_ptr<IPhys>& _phys
 
 	const int id1 = I->getId1();
 	const int id2 = I->getId2();
+
+  Real addDR = 0.;
+#ifdef YADE_DEFORM
+  const BodyContainer& bodies = *scene->bodies;
+
+  const State& de1= *static_cast<State*>(bodies[id1]->state.get());
+  const State& de2= *static_cast<State*>(bodies[id2]->state.get());
+  addDR = de1.dR + de2.dR;
+#endif
 	
-	if (geom.penetrationDepth<0) {
+	if ((geom.penetrationDepth + addDR)<0) {
 		return false;
 	} else {
-		const BodyContainer& bodies = *scene->bodies;
-	
-		const State& de1 = *static_cast<State*>(bodies[id1]->state.get());
-		const State& de2 = *static_cast<State*>(bodies[id2]->state.get());
 	
 		Vector3r& shearForce = phys.shearForce;
 		if (I->isFresh(scene)) shearForce=Vector3r(0,0,0);
@@ -101,7 +106,7 @@ bool computeForceTorqueViscEl(shared_ptr<IGeom>& _geom, shared_ptr<IPhys>& _phys
 		// Prevent appearing of attraction forces due to a viscous component
 		// [Radjai2011], page 3, equation [1.7]
 		// [Schwager2007]
-		phys.Fn = phys.kn * geom.penetrationDepth;
+		phys.Fn = phys.kn * (geom.penetrationDepth + addDR);
 		phys.Fv = phys.cn * normalVelocity;
 		const Real normForceReal = phys.Fn + phys.Fv;
 		if (normForceReal < 0) {
