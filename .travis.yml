@@ -1,5 +1,10 @@
 language: cpp
 dist: trusty
+branches:
+  only:
+    - newMaster
+python:
+  - "2.7"
 compiler:
   - gcc
 virtualenv:
