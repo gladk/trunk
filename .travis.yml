@@ -9,8 +9,6 @@ compiler:
   - gcc
 virtualenv:
     system_site_packages: true
-before_install:
-  - pip install -U pip
 notifications:
   email:
     recipients:
@@ -34,3 +32,8 @@ script:
   - make install
   - ./../inst/bin/yade-trunk --test
   - ./../inst/bin/yade-trunk --check
+cache:
+  - apt
+  - directories:
+    - $HOME/.cache/pip
+    - $HOME/.theano
