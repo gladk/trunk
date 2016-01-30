@@ -1,4 +1,4 @@
-language: cpp
+language: python, cpp
 dist: trusty
 branches:
   only:
@@ -7,8 +7,6 @@ python:
   - "2.7"
 compiler:
   - gcc
-virtualenv:
-    system_site_packages: true
 notifications:
   email:
     recipients:
@@ -16,11 +14,9 @@ notifications:
     on_success: change
     on_failure: always
 before_script:
-  - wget http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  - conda install --yes numpy=1.8
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas statsmodels
+  - pip uninstall numpy -y
+  - pip install -I numpy==1.8.2
+  - python -c 'import numpy; print numpy.version.version'
   - sudo bash -c 'echo "deb http://www.yade-dem.org/packages/ trusty/" >> /etc/apt/sources.list'
   - wget -O - http://www.yade-dem.org/packages/yadedev_pub.gpg | sudo apt-key add -
   - sudo apt-get update -qq
