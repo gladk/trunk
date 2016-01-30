@@ -12,18 +12,22 @@ virtualenv:
 notifications:
   email:
     recipients:
-      - yade-dev@lists.launchpad.net
       - gladk@debian.org
     on_success: change
     on_failure: always
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
 install:
-  - travis_wait travis_retry pip install numpy
-  - travis_retry python setup.py dev
-before_script:
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas statsmodels
   - sudo bash -c 'echo "deb http://www.yade-dem.org/packages/ trusty/" >> /etc/apt/sources.list'
   - wget -O - http://www.yade-dem.org/packages/yadedev_pub.gpg | sudo apt-key add -
   - sudo apt-get update -qq
   - sudo apt-get install -y cmake debhelper freeglut3-dev help2man ipython python-numpy libboost-all-dev libbz2-dev libcgal-dev libeigen3-dev libgl1-mesa-dev  python-argparse python-gts python-imaging python-matplotlib python-minieigen python-qt4 python-support python-tk python-xlib python-bibtex python-sphinx libgts-dev libloki-dev libmetis-dev libopenblas-dev libqglviewer-dev libsuitesparse-dev libvtk5-dev libxi-dev libxmu-dev pyqt4-dev-tools python-all-dev  zlib1g-dev dvipng graphviz libjs-jquery lmodern texlive-fonts-recommended texlive-latex-extra texlive-latex-recommended texlive-pictures texlive-xetex tipa
+before_script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_INSTALL_PREFIX=./../inst -DSUFFIX=-trunk ..
