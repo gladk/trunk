@@ -14,7 +14,6 @@ notifications:
     on_success: change
     on_failure: always
 before_script:
-  - pip uninstall numpy -y
   - pip install -I numpy==1.8.2
   - python -c 'import numpy; print numpy.version.version'
   - sudo bash -c 'echo "deb http://www.yade-dem.org/packages/ trusty/" >> /etc/apt/sources.list'
